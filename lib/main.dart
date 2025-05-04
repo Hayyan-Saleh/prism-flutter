@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
-  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: MyApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -9,25 +13,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Center(child: Text('firebase_core', style: TextStyle(fontSize: 22))),
-          Center(child: Text('firebase_auth', style: TextStyle(fontSize: 22))),
-          Center(
-            child: Text('cloud_firestore', style: TextStyle(fontSize: 22)),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Text(
+            "Firebase with flutter & laravel",
+            style: TextStyle(fontSize: 26),
           ),
-          Center(child: Text('flutter_bloc', style: TextStyle(fontSize: 22))),
-          Center(child: Text('equatable', style: TextStyle(fontSize: 22))),
-          Center(child: Text('get_it', style: TextStyle(fontSize: 22))),
-          Center(child: Text('dartz', style: TextStyle(fontSize: 22))),
-          Center(
-            child: Text('injectable_generator', style: TextStyle(fontSize: 22)),
-          ),
-          Center(child: Text('build_runner', style: TextStyle(fontSize: 22))),
-        ],
+        ),
       ),
     );
   }
