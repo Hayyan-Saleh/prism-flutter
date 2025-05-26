@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:realmo/features/preferences/domain/entities/preferences_enums.dart';
+import 'package:prism/features/preferences/domain/entities/preferences_enums.dart';
 
 class PreferencesEntity extends Equatable {
   final Themes appTheme;

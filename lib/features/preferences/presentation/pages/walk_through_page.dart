@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:realmo/core/util/functions/functions.dart';
-import 'package:realmo/core/util/widgets/app_button.dart';
-import 'package:realmo/core/util/widgets/app_text_button.dart';
-import 'package:realmo/features/preferences/domain/entities/preferences_entity.dart';
-import 'package:realmo/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
-import 'package:realmo/singin_page.dart';
-import 'package:realmo/features/preferences/presentation/widgets/walk_through_widget.dart';
+import 'package:prism/core/util/functions/functions.dart';
+import 'package:prism/core/util/widgets/app_button.dart';
+import 'package:prism/core/util/widgets/app_text_button.dart';
+import 'package:prism/features/preferences/domain/entities/preferences_entity.dart';
+import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
+import 'package:prism/singin_page.dart';
+import 'package:prism/features/preferences/presentation/widgets/walk_through_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:realmo/features/preferences/domain/entities/preferences_enums.dart';
+import 'package:prism/features/preferences/domain/entities/preferences_enums.dart';
 
 class WalkThroughPage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;

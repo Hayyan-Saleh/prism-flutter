@@ -1,5 +1,5 @@
-import 'package:realmo/features/preferences/domain/entities/preferences_entity.dart';
-import 'package:realmo/features/preferences/domain/entities/preferences_enums.dart';
+import 'package:prism/features/preferences/domain/entities/preferences_entity.dart';
+import 'package:prism/features/preferences/domain/entities/preferences_enums.dart';
 
 class PreferencesModel extends PreferencesEntity {
   PreferencesModel({required super.appTheme, required super.appLocal});

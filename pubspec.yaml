@@ -1,7 +1,7 @@
-name: realmo
+name: prism
 description: "A Flutter Social Media Project."
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
@@ -14,15 +14,15 @@ dependencies:
 
   #! preferences feature
   flutter_localizations:
-    sdk: flutter        
-  intl: ^0.19.0         
+    sdk: flutter
+  intl: ^0.19.0
 
   cupertino_icons: ^1.0.8
-  
+
   #! firebase
-  firebase_core: ^3.13.0
-  firebase_auth: ^5.5.2
-  cloud_firestore: ^5.6.6
+  # firebase_core: ^3.13.0
+  # firebase_auth: ^5.5.2
+  # cloud_firestore: ^5.6.6
 
   #! clean architecture
   flutter_bloc: ^9.1.0
@@ -31,25 +31,21 @@ dependencies:
   dartz: ^0.10.1
 
   #! preferences feature
-  flex_color_scheme: ^8.2.0 
+  flex_color_scheme: ^8.2.0
   shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
   flutter_lints: ^5.0.0
   injectable_generator: ^2.7.0
   build_runner: ^2.4.15
 
-
 flutter:
   generate: true #* to generate l10n localization files
 
-
   uses-material-design: true
-
 
   assets:
     - assets/images/
@@ -66,4 +62,3 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
-

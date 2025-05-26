@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:realmo/core/errors/exceptions/preferences_exception.dart';
-import 'package:realmo/core/errors/failures/preferences_failure.dart';
-import 'package:realmo/features/preferences/data/data_soucres/preferences_local_data_source.dart';
-import 'package:realmo/features/preferences/domain/entities/preferences_entity.dart';
-import 'package:realmo/features/preferences/domain/repositories/preferences_repository.dart';
-import 'package:realmo/features/preferences/data/models/preferences_model.dart';
+import 'package:prism/core/errors/exceptions/preferences_exception.dart';
+import 'package:prism/core/errors/failures/preferences_failure.dart';
+import 'package:prism/features/preferences/data/data_soucres/preferences_local_data_source.dart';
+import 'package:prism/features/preferences/domain/entities/preferences_entity.dart';
+import 'package:prism/features/preferences/domain/repositories/preferences_repository.dart';
+import 'package:prism/features/preferences/data/models/preferences_model.dart';
 
 class PreferencesRepositoryImpl implements PreferencesRepository {
   final PreferencesLocalDataSource localDataSource;

@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:realmo/core/errors/exceptions/preferences_exception.dart';
-import 'package:realmo/core/util/constants/strings.dart';
+import 'package:prism/core/errors/exceptions/preferences_exception.dart';
+import 'package:prism/core/util/constants/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:realmo/features/preferences/data/models/preferences_model.dart';
+import 'package:prism/features/preferences/data/models/preferences_model.dart';
 
 abstract class PreferencesLocalDataSource {
   Future<void> storePreferences(PreferencesModel model);

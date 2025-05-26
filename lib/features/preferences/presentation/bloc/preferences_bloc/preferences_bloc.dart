@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:realmo/core/errors/failures/preferences_failure.dart';
-import 'package:realmo/features/preferences/domain/entities/preferences_entity.dart';
-import 'package:realmo/features/preferences/domain/use_cases/store_preferences_use_case.dart';
+import 'package:prism/core/errors/failures/preferences_failure.dart';
+import 'package:prism/features/preferences/domain/entities/preferences_entity.dart';
+import 'package:prism/features/preferences/domain/use_cases/store_preferences_use_case.dart';
 
 part 'preferences_event.dart';
 part 'preferences_state.dart';

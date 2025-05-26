@@ -1,17 +1,14 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:realmo/core/di/injection_container.dart';
-import 'package:realmo/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
-import 'package:realmo/features/preferences/presentation/pages/walk_through_page.dart';
+import 'package:prism/core/di/injection_container.dart';
+import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
+import 'package:prism/features/preferences/presentation/pages/walk_through_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:realmo/firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await init();
   runApp(
     MultiBlocProvider(
