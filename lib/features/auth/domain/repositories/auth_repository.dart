@@ -1,19 +1,59 @@
 import 'package:dartz/dartz.dart';
-import 'package:realmo/core/failures/auth_failure.dart';
-import 'package:realmo/features/auth/domain/entities/user.dart';
+import 'package:realmo/core/errors/failures/app_failure.dart';
+import 'package:realmo/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthRepository {
-  Future<Either<AuthFailure, Unit>> signUp(String firebaseIdToken);
-  Future<Either<AuthFailure, UserEntity>> passwordLogin(String firebaseIdToken);
-  Future<Either<AuthFailure, UserEntity>> googleLogin(String firebaseIdToken);
-  Future<Either<AuthFailure, String>> verifyEmail(
+  Future<Either<AppFailure, Unit>> registerUser({
+    required String email,
+    required String password,
+  });
+  /*========================================================*/
+
+  Future<Either<AppFailure, Unit>> verifyEmail({
+    required String email,
+    required String code,
+  });
+  /*========================================================*/
+  Future<Either<AppFailure, User>> signInWithGoogle();
+  /*========================================================*/
+  Future<Either<AppFailure, User>> loginWithEmail({
+    required String email,
+    required String password,
+  });
+  /*========================================================*/
+  Future<Either<AppFailure, Unit>> logout();
+  /*========================================================*/
+
+  Future<Either<AppFailure, String?>> loadToken();
+  /*========================================================*/
+
+  Future<Either<AppFailure, User>> loadUser();
+  /*========================================================*/
+
+  Future<Either<AppFailure, Unit>> sendResetCodeToEmail(String email);
+  /*========================================================*/
+
+  Future<Either<AppFailure, Unit>> verifyResetCode(
     String email,
-  ); // returns 4-digit num
-  Future<Either<AuthFailure, String>> forgetPassword(
-    String email,
-  ); // returns 4-digit num
-  Future<Either<AuthFailure, Unit>> resetPassword(
-    String email,
+    String code,
     String newPassword,
   );
+
+  /*========================================================*/
+
+  Future<Either<AppFailure, Unit>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
+
+  /*========================================================*/
+
+  Future<Either<AppFailure, Unit>> requestChangeEmailCode();
+
+  /*========================================================*/
+
+  Future<Either<AppFailure, Unit>> verifyChangeEmailCode({
+    required String code,
+    required String newEmail,
+  });
 }
