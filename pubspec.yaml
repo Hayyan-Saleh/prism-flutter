@@ -33,6 +33,12 @@ dependencies:
   #! preferences feature
   flex_color_scheme: ^8.2.0
   shared_preferences: ^2.5.3
+  http: ^1.4.0
+  google_sign_in: ^6.3.0
+  flutter_dotenv: ^5.2.1
+  flutter_secure_storage: ^9.2.4
+  pinput: ^5.0.1
+  flutter_svg: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -50,7 +56,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/walk_through/
-
+    - assets/images/auth/
+    - .env
   # fonts:
   #   - family: Schyler
   #     fonts:

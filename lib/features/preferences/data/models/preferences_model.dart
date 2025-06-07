@@ -2,7 +2,7 @@ import 'package:prism/features/preferences/domain/entities/preferences_entity.da
 import 'package:prism/features/preferences/domain/entities/preferences_enums.dart';
 
 class PreferencesModel extends PreferencesEntity {
-  PreferencesModel({required super.appTheme, required super.appLocal});
+  const PreferencesModel({required super.appTheme, required super.appLocal});
 
   factory PreferencesModel.fromJson(Map<String, dynamic> json) {
     return PreferencesModel(

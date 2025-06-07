@@ -6,15 +6,37 @@ import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/pr
 import 'package:prism/features/preferences/presentation/pages/walk_through_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:prism/core/util/general/app_routes.dart';
+import 'package:prism/core/util/pages/settings_page.dart';
+import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
+import 'package:prism/features/auth/presentation/pages/auth_middle_point.dart';
+import 'package:prism/features/auth/presentation/pages/change_email_page.dart';
+import 'package:prism/features/auth/presentation/pages/change_password_page.dart';
+import 'package:prism/features/auth/presentation/pages/reset_password_page.dart';
+import 'package:prism/features/auth/presentation/pages/signin_page.dart';
+import 'package:prism/features/auth/presentation/pages/signup_page.dart';
+import 'package:prism/features/auth/presentation/pages/verification_page.dart';
+import 'package:prism/features/preferences/domain/entities/preferences_entity.dart';
+import 'package:prism/features/preferences/presentation/pages/preferences_middle_point_page.dart';
+import 'package:prism/home_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await init();
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider<PreferencesBloc>(
-          create: (context) => sl<PreferencesBloc>(),
+          create:
+              (context) =>
+                  sl<PreferencesBloc>()
+                    ..add(DefinePreferencesCurrentStateEvent()),
+        ),
+        BlocProvider<AuthBloc>(
+          create:
+              (context) => sl<AuthBloc>()..add(DefineAuthCurrentStateEvent()),
         ),
       ],
       child: const MyApp(),
@@ -45,35 +67,78 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _assignPreferences(PreferencesEntity preferences) {
+    _locale = preferences.appLocal.locale;
+    _themeMode = preferences.appTheme.themeMode;
+  }
+
+  Map<String, WidgetBuilder> _getRoutes() {
+    return {
+      AppRoutes.prefMiddlePoint:
+          (context) => PreferencesMiddlePointPage(
+            onLocaleChanged: _changeLocale,
+            onThemeChanged: _changeThemeMode,
+          ),
+      AppRoutes.walkthrough:
+          (context) => WalkThroughPage(
+            onLocaleChanged: _changeLocale,
+            onThemeChanged: _changeThemeMode,
+          ),
+      AppRoutes.authMiddlePoint: (context) => AuthMiddlePointPage(),
+      AppRoutes.signin: (context) => SignInPage(),
+      AppRoutes.signup: (context) => SignUpPage(),
+      AppRoutes.verification: (context) => VerificationPage(),
+      AppRoutes.reset: (context) => ResetPasswordPage(),
+      AppRoutes.changeEmail: (context) => ChangeEmailPage(),
+      AppRoutes.changePassword: (context) => ChangePasswordPage(),
+      AppRoutes.home: (context) => HomePage(),
+      AppRoutes.myApp: (context) => MyApp(),
+      AppRoutes.settings:
+          (context) => SettingsPage(
+            onLocaleChanged: _changeLocale,
+            onThemeChanged: _changeThemeMode,
+          ),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en'), Locale('ar')],
-      locale: _locale,
-      debugShowCheckedModeBanner: false,
-      theme: FlexThemeData.light(
-        scheme: FlexScheme.greenM3,
-        primary: Colors.white,
-        useMaterial3: true,
-        fontFamily: 'sans-serif',
-      ),
-      darkTheme: FlexThemeData.dark(
-        scheme: FlexScheme.green,
-        primary: Colors.black,
-        useMaterial3: true,
-        fontFamily: 'sans-serif',
-      ),
-      themeMode: _themeMode,
-      home: WalkThroughPage(
-        onThemeChanged: _changeThemeMode,
-        onLocaleChanged: _changeLocale,
-      ),
+    return BlocBuilder<PreferencesBloc, PreferencesState>(
+      builder: (context, state) {
+        if (state is LoadedPreferencesState) {
+          _assignPreferences(state.preferences);
+        } else if (state is DoneStorePreferencesState) {
+          _assignPreferences(state.preferences);
+        }
+        return MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('ar')],
+          locale: _locale,
+          debugShowCheckedModeBanner: false,
+          theme: FlexThemeData.light(
+            scheme: FlexScheme.green,
+            primary: Colors.grey[100],
+            onPrimary: Colors.grey[900],
+            useMaterial3: true,
+            fontFamily: 'sans-serif',
+          ),
+          darkTheme: FlexThemeData.dark(
+            scheme: FlexScheme.greenM3,
+            primary: Colors.grey[900],
+            onPrimary: Colors.grey[100],
+            useMaterial3: true,
+            fontFamily: 'sans-serif',
+          ),
+          themeMode: _themeMode,
+          routes: _getRoutes(),
+          initialRoute: AppRoutes.prefMiddlePoint,
+        );
+      },
     );
   }
 }
