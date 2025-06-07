@@ -30,7 +30,7 @@ abstract class AuthRepository {
   Future<Either<AppFailure, User>> loadUser();
   /*========================================================*/
 
-  Future<Either<AppFailure, Unit>> sendResetCodeToEmail(String email);
+  Future<Either<AppFailure, Unit>> sendEmailCode(String email, bool isReset);
   /*========================================================*/
 
   Future<Either<AppFailure, Unit>> verifyResetCode(

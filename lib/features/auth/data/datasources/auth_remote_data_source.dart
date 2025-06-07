@@ -3,11 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:realmo/core/util/constants/strings.dart';
 
 import '../../../../core/errors/exceptions/auth_exception.dart';
 import '../../../../core/errors/exceptions/network_exception.dart';
 import '../../../../core/errors/exceptions/server_exception.dart';
-import '../../../../core/util/api-endpoints/api_endpoints.dart';
+import '../../../../core/util/general/api_endpoints.dart';
 import '../models/user_model.dart';
 import 'google_auth_datasource.dart';
 
@@ -24,14 +25,9 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
 
-  Future<String> verifyEmail({
-    required String email,
-    required String code,
-  });
+  Future<String> verifyEmail({required String email, required String code});
 
   Future<void> logout(String token);
-
-  Future<void> sendResetCodeToEmail(String email);
 
   Future<void> verifyResetCode(String email, String code, String newPassword);
 
@@ -42,7 +38,6 @@ abstract class AuthRemoteDataSource {
     required String token,
   });
 
-  
   Future<void> requestChangeEmailCode(String token);
   Future<void> verifyChangeEmailCode({
     required String code,
@@ -50,12 +45,13 @@ abstract class AuthRemoteDataSource {
     required String token,
   });
 
+  Future<void> sendEmailCode(String email, bool isReset);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final GoogleAuthDatasource googleAuthDatasource;
 
-  AuthRemoteDataSourceImpl(this.googleAuthDatasource);
+  const AuthRemoteDataSourceImpl({required this.googleAuthDatasource});
 
   Future<Map<String, dynamic>> _post(
     String url,
@@ -77,28 +73,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         "Response from $url: ${response.body} (status: ${response.statusCode})",
       );
 
-      final Map<String, dynamic> data = response.body.isNotEmpty
-          ? jsonDecode(response.body) as Map<String, dynamic>
-          : {};
+      final Map<String, dynamic> data =
+          response.body.isNotEmpty
+              ? jsonDecode(response.body) as Map<String, dynamic>
+              : {};
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return data;
       }
 
       final message = data['message'] as String? ?? 'Request failed';
+      switch (message) {
+        case AuthErrorMessages.emailNotVerified:
+          throw EmailNotVerifiedAuthException(message);
+        case AuthErrorMessages.wrongEmailOrPassword:
+          throw WrongEmailOrPasswordAuthException(message);
+        case AuthErrorMessages.expiredCode:
+          throw ExpiredCodeAuthException(message);
+      }
       throw ServerException(message);
     } on SocketException {
       throw NetworkException("No internet connection");
     } on FormatException {
       throw ServerException("Invalid JSON format in response");
     }
-  }
-
-  @override
-  Future<void> sendResetCodeToEmail(String email) async {
-    await _post(ApiEndpoints.requestResetCode, {
-      'email': email,
-    });
   }
 
   @override
@@ -123,7 +121,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     );
   }
 
-
   @override
   Future<void> requestChangeEmailCode(String token) async {
     await _post(
@@ -132,7 +129,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       headers: {'Authorization': 'Bearer $token'},
     );
   }
-  
 
   @override
   Future<void> verifyChangeEmailCode({
@@ -142,30 +138,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     await _post(
       ApiEndpoints.verifyChangeEmailCode,
-      {
-        'code': code,
-        'new_email': newEmail,
-      },
+      {'code': code, 'new_email': newEmail},
       headers: {'Authorization': 'Bearer $token'},
     );
   }
 
-@override
-Future<void> changePassword({
-  required String oldPassword,
-  required String newPassword,
-  required String token,
-}) async {
-  await _post(
-    ApiEndpoints.changePassword,
-    {
-      'current_password': oldPassword,
-      'new_password': newPassword,
-      'new_password_confirmation': newPassword, 
-    },
-    headers: {'Authorization': 'Bearer $token'},
-  );
-}
+  @override
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String token,
+  }) async {
+    await _post(
+      ApiEndpoints.changePassword,
+      {
+        'current_password': oldPassword,
+        'new_password': newPassword,
+        'new_password_confirmation': newPassword,
+      },
+      headers: {'Authorization': 'Bearer $token'},
+    );
+  }
 
   @override
   Future<UserModel> registerUser({
@@ -177,7 +170,11 @@ Future<void> changePassword({
       'password': password,
     });
 
-    return UserModel.fromJson(jsonData['user'], authType: 'email');
+    return UserModel.fromJson(
+      jsonData['user'],
+      authType: 'email',
+      isEmailVerified: false,
+    );
   }
 
   @override
@@ -190,11 +187,9 @@ Future<void> changePassword({
     });
 
     return UserModel.fromJson(
-      {
-        ...jsonData['user'],
-        'token': jsonData['token'],
-      },
+      {...jsonData['user'], 'token': jsonData['token']},
       authType: 'google',
+      isEmailVerified: true,
     );
   }
 
@@ -226,11 +221,17 @@ Future<void> changePassword({
     });
 
     return UserModel.fromJson(
-      {
-        ...jsonData['user'],
-        'token': jsonData['token'],
-      },
+      {...jsonData['user'], 'token': jsonData['token']},
       authType: 'email',
+      isEmailVerified: true,
     );
+  }
+
+  @override
+  Future<void> sendEmailCode(String email, bool isReset) async {
+    await _post(ApiEndpoints.sendVerificationCode, {
+      'email': email,
+      isReset ? 'reset_password' : 'verify_email': true,
+    });
   }
 }

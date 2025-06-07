@@ -7,6 +7,8 @@ sealed class PreferencesEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class DefinePreferencesCurrentStateEvent extends PreferencesEvent {}
+
 final class StorePreferencesEvent extends PreferencesEvent {
   final PreferencesEntity preferences;
 

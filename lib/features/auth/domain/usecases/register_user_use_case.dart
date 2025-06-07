@@ -5,15 +5,12 @@ import '../repositories/auth_repository.dart';
 class RegisterUserUseCase {
   final AuthRepository repository;
 
-  RegisterUserUseCase(this.repository);
+  const RegisterUserUseCase({required this.repository});
 
-  Future<Either<AppFailure, Unit>> call({ 
+  Future<Either<AppFailure, Unit>> call({
     required String email,
     required String password,
   }) async {
-    return repository.registerUser(
-      email: email,
-      password: password,
-    );
+    return repository.registerUser(email: email, password: password);
   }
 }

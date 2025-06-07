@@ -9,9 +9,27 @@ sealed class PreferencesState extends Equatable {
 
 final class PreferencesInitial extends PreferencesState {}
 
+final class LoadedPreferencesState extends PreferencesState {
+  final PreferencesEntity preferences;
+
+  const LoadedPreferencesState({required this.preferences});
+
+  @override
+  List<Object> get props => [preferences];
+}
+
+final class StartingWalkthroughState extends PreferencesState {}
+
 final class LoadingStorePreferencesState extends PreferencesState {}
 
-final class DoneStorePreferencesState extends PreferencesState {}
+final class DoneStorePreferencesState extends PreferencesState {
+  final PreferencesEntity preferences;
+
+  const DoneStorePreferencesState({required this.preferences});
+
+  @override
+  List<Object> get props => [preferences];
+}
 
 final class FailedStorePreferencesState extends PreferencesState {
   final PreferencesFailure failure;

@@ -8,15 +8,20 @@ class UserModel extends User {
     required super.email,
     required super.authType,
     this.token,
+    required super.isEmailVerified,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json,
-      {required String authType}) {
+  factory UserModel.fromJson(
+    Map<String, dynamic> json, {
+    required String authType,
+    required bool isEmailVerified,
+  }) {
     return UserModel(
       id: json['id'],
       email: json['email'],
       authType: authType,
       token: json['token'],
+      isEmailVerified: isEmailVerified,
     );
   }
 
@@ -26,6 +31,7 @@ class UserModel extends User {
       'email': email,
       'authType': authType,
       if (token != null) 'token': token,
+      'is_email_verified': isEmailVerified,
     };
   }
 }

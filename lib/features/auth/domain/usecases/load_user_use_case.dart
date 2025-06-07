@@ -7,7 +7,7 @@ import '../repositories/auth_repository.dart';
 class LoadUserUseCase {
   final AuthRepository repository;
 
-  LoadUserUseCase(this.repository);
+  const LoadUserUseCase({required this.repository});
 
   Future<Either<AppFailure, User>> call() {
     return repository.loadUser();

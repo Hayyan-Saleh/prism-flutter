@@ -22,11 +22,11 @@ class AuthRepositoryImpl implements AuthRepository {
   final UserLocalDataSource localDataSource;
   final GoogleAuthDatasource googleAuth;
 
-  AuthRepositoryImpl(
-    this.remoteDataSource,
-    this.localDataSource,
-    this.googleAuth,
-  );
+  const AuthRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+    required this.googleAuth,
+  });
   @override
   Future<Either<AppFailure, Unit>> registerUser({
     required String email,
@@ -40,10 +40,12 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     return await _handleErrors<Unit>(() async {
-      await remoteDataSource.registerUser(
+      final UserModel user = await remoteDataSource.registerUser(
         email: email,
         password: password,
       );
+
+      await localDataSource.cacheUser(user);
       return unit;
     });
   }
@@ -64,10 +66,8 @@ class AuthRepositoryImpl implements AuthRepository {
     required String code,
   }) async {
     return await _handleErrors<Unit>(() async {
-      await remoteDataSource.verifyEmail(
-        email: email,
-        code: code,
-      );
+      await remoteDataSource.verifyEmail(email: email, code: code);
+      await localDataSource.cacheUserAsVerified();
       return unit;
     });
   }
@@ -95,49 +95,51 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<AppFailure, Unit>> logout() async {
     final tokenResult = await localDataSource.loadToken();
 
-    return await tokenResult.fold(
-      (failure) async => Left(failure),
-      (token) async {
-        if (token == null) {
-          return Left(CacheFailure("No token found"));
-        }
+    return await tokenResult.fold((failure) async => Left(failure), (
+      token,
+    ) async {
+      if (token == null) {
+        return Left(CacheFailure("No token found"));
+      }
 
-        return await _handleErrors<Unit>(() async {
-          await remoteDataSource.logout(token);
+      return await _handleErrors<Unit>(() async {
+        await remoteDataSource.logout(token);
 
-          final userResult = await localDataSource.loadUser();
+        final userResult = await localDataSource.loadUser();
 
-          await userResult.fold(
-            (failure) async {},
-            (user) async {
-              if (user?.authType == 'google') {
-                await googleAuth.signOut();
-              }
-            },
-          );
-
-          await localDataSource.clearSession();
-
-          return unit;
+        await userResult.fold((failure) async {}, (user) async {
+          if (user?.authType == 'google') {
+            await googleAuth.signOut();
+          }
         });
-      },
-    );
+
+        await localDataSource.clearSession();
+
+        return unit;
+      });
+    });
   }
 
   @override
-  Future<Either<AppFailure, Unit>> sendResetCodeToEmail(String email) async {
+  Future<Either<AppFailure, Unit>> sendEmailCode(
+    String email,
+    bool isReset,
+  ) async {
     if (!EmailValidator.isValid(email)) {
       return Left(AuthFailure("Invalid email format"));
     }
     return await _handleErrors<Unit>(() async {
-      await remoteDataSource.sendResetCodeToEmail(email);
+      await remoteDataSource.sendEmailCode(email, isReset);
       return unit;
     });
   }
 
   @override
   Future<Either<AppFailure, Unit>> verifyResetCode(
-      String email, String code, String newPassword) async {
+    String email,
+    String code,
+    String newPassword,
+  ) async {
     if (!EmailValidator.isValid(email)) {
       return Left(AuthFailure("Invalid email format"));
     }
@@ -162,32 +164,28 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<AppFailure, User>> loadUser() async {
     final result = await localDataSource.loadUser();
-    return result.fold(
-      (failure) => Left(failure),
-      (userModel) {
-        if (userModel == null) return Left(CacheFailure('No user stored'));
-        return Right(userModel.toEntity());
-      },
-    );
+    return result.fold((failure) => Left(failure), (userModel) {
+      if (userModel == null) return Left(CacheFailure('No user stored'));
+      return Right(userModel.toEntity());
+    });
   }
 
   @override
   Future<Either<AppFailure, Unit>> requestChangeEmailCode() async {
     final tokenResult = await localDataSource.loadToken();
 
-    return await tokenResult.fold(
-      (failure) async => Left(failure),
-      (token) async {
-        if (token == null) {
-          return Left(CacheFailure("No token found"));
-        }
+    return await tokenResult.fold((failure) async => Left(failure), (
+      token,
+    ) async {
+      if (token == null) {
+        return Left(CacheFailure("No token found"));
+      }
 
-        return await _handleErrors<Unit>(() async {
-          await remoteDataSource.requestChangeEmailCode(token);
-          return unit;
-        });
-      },
-    );
+      return await _handleErrors<Unit>(() async {
+        await remoteDataSource.requestChangeEmailCode(token);
+        return unit;
+      });
+    });
   }
 
   @override
@@ -204,41 +202,38 @@ class AuthRepositoryImpl implements AuthRepository {
 
     final tokenResult = await localDataSource.loadToken();
 
-    return await tokenResult.fold(
-      (failure) async => Left(failure),
-      (token) async {
-        if (token == null) {
-          return Left(CacheFailure("No token found"));
-        }
+    return await tokenResult.fold((failure) async => Left(failure), (
+      token,
+    ) async {
+      if (token == null) {
+        return Left(CacheFailure("No token found"));
+      }
 
-        return await _handleErrors<Unit>(() async {
-          await remoteDataSource.verifyChangeEmailCode(
-            code: code,
-            newEmail: newEmail,
-            token: token,
-          );
+      return await _handleErrors<Unit>(() async {
+        await remoteDataSource.verifyChangeEmailCode(
+          code: code,
+          newEmail: newEmail,
+          token: token,
+        );
 
-          final localUserResult = await localDataSource.loadUser();
-          await localUserResult.fold(
-            (failure) async {},
-            (user) async {
-              if (user != null) {
-                final updatedUser = UserModel(
-                  id: user.id,
-                  email: newEmail,
-                  authType: user.authType,
-                  token: user.token,
-                );
+        final localUserResult = await localDataSource.loadUser();
+        await localUserResult.fold((failure) async {}, (user) async {
+          if (user != null) {
+            final updatedUser = UserModel(
+              id: user.id,
+              email: newEmail,
+              authType: user.authType,
+              token: user.token,
+              isEmailVerified: false,
+            );
 
-                await localDataSource.cacheUser(updatedUser);
-              }
-            },
-          );
-
-          return unit;
+            await localDataSource.cacheUser(updatedUser);
+          }
         });
-      },
-    );
+
+        return unit;
+      });
+    });
   }
 
   @override
@@ -252,34 +247,40 @@ class AuthRepositoryImpl implements AuthRepository {
 
     final tokenResult = await localDataSource.loadToken();
 
-    return await tokenResult.fold(
-      (failure) async => Left(failure),
-      (token) async {
-        if (token == null) {
-          return Left(CacheFailure("No token found"));
-        }
+    return await tokenResult.fold((failure) async => Left(failure), (
+      token,
+    ) async {
+      if (token == null) {
+        return Left(CacheFailure("No token found"));
+      }
 
-        return await _handleErrors<Unit>(() async {
-          await remoteDataSource.changePassword(
-            oldPassword: oldPassword,
-            newPassword: newPassword,
-            token: token,
-          );
-          return unit;
-        });
-      },
-    );
+      return await _handleErrors<Unit>(() async {
+        await remoteDataSource.changePassword(
+          oldPassword: oldPassword,
+          newPassword: newPassword,
+          token: token,
+        );
+        return unit;
+      });
+    });
   }
 
   Future<Either<AppFailure, T>> _handleErrors<T>(
-      Future<T> Function() action) async {
+    Future<T> Function() action,
+  ) async {
     try {
       final result = await action();
       return Right(result);
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
     } on AuthException catch (e) {
-      return Left(AuthFailure(e.message));
+      if (AuthException is EmailNotVerifiedAuthException) {
+        return Left(EmailNotVerifiedAuthFailure(e.message));
+      } else if (AuthException is WrongEmailOrPasswordAuthException) {
+        return Left(WrongEmailOrPasswordAuthFailure(e.message));
+      } else {
+        return Left(AuthFailure(e.message));
+      }
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } on CacheException catch (e) {
@@ -302,6 +303,7 @@ extension UserModelMapper on UserModel {
       id: this.id,
       email: email,
       authType: authType,
+      isEmailVerified: isEmailVerified,
     );
   }
 }

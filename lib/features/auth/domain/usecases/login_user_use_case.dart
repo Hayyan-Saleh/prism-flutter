@@ -8,7 +8,7 @@ import '../repositories/auth_repository.dart';
 class LoginUserUseCase {
   final AuthRepository repository;
 
-  LoginUserUseCase(this.repository);
+  const LoginUserUseCase({required this.repository});
 
   Future<Either<AppFailure, User>> call({
     required String email,

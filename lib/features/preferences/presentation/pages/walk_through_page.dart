@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realmo/core/util/functions/functions.dart';
+import 'package:realmo/core/util/general/app_routes.dart';
+import 'package:realmo/core/util/general/assets.dart';
 import 'package:realmo/core/util/widgets/app_button.dart';
 import 'package:realmo/core/util/widgets/app_text_button.dart';
 import 'package:realmo/features/preferences/domain/entities/preferences_entity.dart';
 import 'package:realmo/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
-import 'package:realmo/singin_page.dart';
 import 'package:realmo/features/preferences/presentation/widgets/walk_through_widget.dart';
 import 'package:realmo/features/preferences/domain/entities/preferences_enums.dart';
-
-import '../../../../core/localization/l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WalkThroughPage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;
@@ -46,6 +46,7 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
       duration: Duration(seconds: 1),
       curve: Curves.easeInOut,
     );
+    setState(() {});
   }
 
   @override
@@ -54,8 +55,9 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
     return BlocListener<PreferencesBloc, PreferencesState>(
       listener: (context, state) {
         if (state is DoneStorePreferencesState) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => SinginPage()),
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.authMiddlePoint,
             (_) => false,
           );
         }
@@ -93,7 +95,7 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
 
   Widget _buildContent1() {
     return WalkThroughWidget(
-      imagePath: "assets/images/walk_through/1.png",
+      imagePath: Assets.walkThrough1,
       title: AppLocalizations.of(context)!.welcomeToPrism,
       customWidget: AppTextButton(
         onPressed: () {
@@ -108,21 +110,21 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
 
   Widget _buildContent2() {
     return WalkThroughWidget(
-      imagePath: "assets/images/walk_through/2.png",
+      imagePath: Assets.walkThrough2,
       title: AppLocalizations.of(context)!.letsCreatePosts,
     );
   }
 
   Widget _buildContent3() {
     return WalkThroughWidget(
-      imagePath: "assets/images/walk_through/3.png",
+      imagePath: Assets.walkThrough3,
       title: AppLocalizations.of(context)!.joinGroups,
     );
   }
 
   Widget _buildContent4() {
     return WalkThroughWidget(
-      imagePath: "assets/images/walk_through/4.png",
+      imagePath: Assets.walkThrough4,
       title: AppLocalizations.of(context)!.linkWithOthers,
     );
   }
@@ -134,7 +136,8 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
         children: [
           SizedBox(height: 0.1 * height),
           AppButton(
-            color: Theme.of(context).colorScheme.onPrimary,
+            bgColor: Theme.of(context).colorScheme.onPrimary,
+            fgColor: Theme.of(context).colorScheme.primary,
             onPressed: () {
               BlocProvider.of<PreferencesBloc>(context).add(
                 StorePreferencesEvent(
@@ -147,8 +150,7 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
             },
             child: Text(
               AppLocalizations.of(context)!.continueToApp,
-              style: TextStyle(
-                fontSize: 22,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
@@ -175,21 +177,23 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
           _currentPage == 0
               ? SizedBox()
               : AppButton(
-                color: Colors.transparent,
+                bgColor: Colors.transparent,
+                fgColor: Theme.of(context).colorScheme.onPrimary,
                 onPressed: _moveBack,
                 child: Text(
                   "< ${AppLocalizations.of(context)!.back}",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
           _currentPage == 4
               ? SizedBox()
               : AppButton(
-                color: Theme.of(context).colorScheme.primary,
+                bgColor: Colors.transparent,
+                fgColor: Theme.of(context).colorScheme.onPrimary,
                 onPressed: _moveNext,
                 child: Text(
                   "${AppLocalizations.of(context)!.next} >",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
         ],

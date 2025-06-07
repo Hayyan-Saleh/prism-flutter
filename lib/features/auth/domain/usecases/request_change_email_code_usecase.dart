@@ -5,7 +5,7 @@ import '../repositories/auth_repository.dart';
 class RequestChangeEmailCodeUseCase {
   final AuthRepository repository;
 
-  RequestChangeEmailCodeUseCase(this.repository);
+  const RequestChangeEmailCodeUseCase({required this.repository});
 
   Future<Either<AppFailure, Unit>> call() async {
     return repository.requestChangeEmailCode();

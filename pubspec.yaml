@@ -37,6 +37,8 @@ dependencies:
   google_sign_in: ^6.3.0
   flutter_dotenv: ^5.2.1
   flutter_secure_storage: ^9.2.4
+  pinput: ^5.0.1
+  flutter_svg: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +56,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/walk_through/
+    - assets/images/auth/
+    - assets/images/auth/login.svg
     - .env
   # fonts:
   #   - family: Schyler
