@@ -1,0 +1,11 @@
+{
+    "id": 1,
+    "text": "first  comment",
+    "likes_count": 0,
+    "user": {
+        "id": 2,
+        "name": "Hamza",
+        "avatar": "http://localhost:8000/storage/avatars/A7ll0u5HMBIBe1yhSTSkAbjqhaMZE0al8DZTJiLQ.jpg"
+    },
+    "created_at": "2025-05-26T09:57:59.000000Z"
+}

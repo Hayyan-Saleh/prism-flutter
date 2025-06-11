@@ -2,6 +2,9 @@ class ApiEndpoints {
   //TODO: change this line to your own vm
   // static const String baseUrl = 'http://192.168.235.11:8000/api';
   static const String baseUrl = 'http://10.0.2.2:8000/api';
+
+  //! auth
+
   static const String register = '$baseUrl/register';
   static const String login = '$baseUrl/login';
   static const String googleLogin = '$baseUrl/auth/google/token';
@@ -14,4 +17,11 @@ class ApiEndpoints {
       "$baseUrl/user/request-change-email-code";
   static const String verifyChangeEmailCode =
       "$baseUrl/user/verify-change-email-code";
+
+  //! account
+
+  // ! personal
+  static const String checkUserName = "$baseUrl/user/check-username";
+  static const String fetchUserAccount = "$baseUrl/user/";
+  static const String updatePersonalAccount = "$baseUrl/user/update";
 }

@@ -16,6 +16,7 @@ class OtherAccountEntity extends PersonalAccountEntity {
     required super.personalInfoValues,
     required super.hasStatus,
     required this.isFollowing,
+    required super.followingCount,
   });
 
   @override

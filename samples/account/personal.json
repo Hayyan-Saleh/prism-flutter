@@ -1,0 +1,24 @@
+{
+    "id": 2,
+    "name": "Hamza",
+    "Email": "hamzatarek204@gmail.com",
+    "username": "HamzaTf82",
+    "avatar": "http://localhost:8000/storage/avatars/A7110u5HM8I8e1yhST5kAbjqhaMZE0a180ZTJ1l0.jpg",
+    "bio": "ITE Eng",
+    "is_private": 0,
+    "created_at": "2025-05-25T09:38:33.000000Z",
+    "personal_info": {
+        "workplaces": [
+            "London",
+            "Dubai"
+        ],
+        "studyplaces": [
+            "JAKE elemintary school",
+            "MI Downtown High School"
+        ],
+        "Hobbies": [
+            "Football",
+            "Tennis"
+        ]
+    }
+}

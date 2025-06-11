@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 
 class AccountEntity extends Equatable {
-  final String id;
+  final int id;
   final String fullName;
-  final String accountName;
-  final String picUrl;
+  final String? picUrl;
   final int postsCount;
   final int followersCount;
   final String bio;
@@ -13,7 +12,6 @@ class AccountEntity extends Equatable {
   const AccountEntity({
     required this.id,
     required this.fullName,
-    required this.accountName,
     required this.picUrl,
     required this.postsCount,
     required this.followersCount,
@@ -22,14 +20,8 @@ class AccountEntity extends Equatable {
   });
 
   @override
-  List<Object> get props => [
-    id,
-    fullName,
-    accountName,
-    picUrl,
-    postsCount,
-    followersCount,
-    bio,
-    isPrivate,
-  ];
+  List<Object> get props =>
+      picUrl == null
+          ? [id, fullName, postsCount, followersCount, bio, isPrivate]
+          : [id, fullName, picUrl!, postsCount, followersCount, bio, isPrivate];
 }
