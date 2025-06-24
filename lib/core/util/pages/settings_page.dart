@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:prism/core/util/general/app_routes.dart';
+import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
 import 'package:prism/features/preferences/domain/entities/preferences_entity.dart';
 import 'package:prism/features/preferences/domain/entities/preferences_enums.dart';

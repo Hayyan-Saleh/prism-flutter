@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
 
+enum MediaType { image, video }
+
 class MediaEntity extends Equatable {
   final int id;
-  final String type;
+  final MediaType type;
   final String url;
 
   const MediaEntity({required this.id, required this.type, required this.url});

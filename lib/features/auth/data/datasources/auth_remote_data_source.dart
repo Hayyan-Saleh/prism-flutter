@@ -8,7 +8,7 @@ import 'package:prism/core/util/constants/strings.dart';
 import '../../../../core/errors/exceptions/auth_exception.dart';
 import '../../../../core/errors/exceptions/network_exception.dart';
 import '../../../../core/errors/exceptions/server_exception.dart';
-import '../../../../core/util/general/api_endpoints.dart';
+import '../../../../core/util/sevices/api_endpoints.dart';
 import '../models/user_model.dart';
 import 'google_auth_datasource.dart';
 

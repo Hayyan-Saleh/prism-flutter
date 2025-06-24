@@ -25,6 +25,8 @@ abstract class AuthRepository {
   /*========================================================*/
 
   Future<Either<AppFailure, String?>> loadToken();
+  Future<Either<AppFailure, Unit>> deleteToken();
+  Future<Either<AppFailure, Unit>> storeToken(String newToken);
   /*========================================================*/
 
   Future<Either<AppFailure, User>> loadUser();

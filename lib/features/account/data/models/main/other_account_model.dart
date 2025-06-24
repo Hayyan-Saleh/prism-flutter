@@ -11,19 +11,16 @@ class OtherAccountModel extends OtherAccountEntity {
     required super.followersCount,
     required super.bio,
     required super.isPrivate,
-    required super.personalInfoKeys,
-    required super.personalInfoValues,
+    required super.personalInfos,
     required super.hasStatus,
     required super.isFollowing,
     required super.followingCount,
   });
 
   factory OtherAccountModel.fromJson(Map<String, dynamic> json) {
-    // Reuse PersonalAccountModel's parsing for inherited fields
     final personalAccount = PersonalAccountModel.fromJson(json);
 
     return OtherAccountModel(
-      // Fields from AccountEntity
       id: personalAccount.id,
       fullName: personalAccount.fullName,
       picUrl: personalAccount.picUrl,
@@ -31,16 +28,35 @@ class OtherAccountModel extends OtherAccountEntity {
       followersCount: personalAccount.followersCount,
       bio: personalAccount.bio,
       isPrivate: personalAccount.isPrivate,
-      // Fields from PersonalAccountEntity
-      personalInfoKeys: personalAccount.personalInfoKeys,
-      personalInfoValues: personalAccount.personalInfoValues,
+      personalInfos: personalAccount.personalInfos,
       accountName: personalAccount.accountName,
       followingCount: personalAccount.followingCount,
       hasStatus: personalAccount.hasStatus,
-      // OtherAccountEntity-specific field
-      isFollowing: (json['is_following'] as bool?) ?? false,
+      isFollowing:
+          json['is_following'] is bool
+              ? json['is_following']
+              : json['is_following'] == 'owner',
     );
   }
+
+  factory OtherAccountModel.fromEntity(OtherAccountEntity entity) {
+    return OtherAccountModel(
+      id: entity.id,
+      fullName: entity.fullName,
+      accountName: entity.accountName,
+      picUrl: entity.picUrl,
+      postsCount: entity.postsCount,
+      followersCount: entity.followersCount,
+      bio: entity.bio,
+      isPrivate: entity.isPrivate,
+      personalInfos: entity.personalInfos,
+      hasStatus: entity.hasStatus,
+      isFollowing: entity.isFollowing,
+      followingCount: entity.followingCount,
+    );
+  }
+
+  OtherAccountEntity toEntity() => this;
 
   Map<String, dynamic> toJson() {
     final personalAccountJson =
@@ -52,16 +68,12 @@ class OtherAccountModel extends OtherAccountEntity {
           followersCount: followersCount,
           bio: bio,
           isPrivate: isPrivate,
-          personalInfoKeys: personalInfoKeys,
-          personalInfoValues: personalInfoValues,
+          personalInfos: personalInfos,
           accountName: accountName,
           followingCount: followingCount,
           hasStatus: hasStatus,
         ).toJson();
 
-    return {
-      ...personalAccountJson, // Spread inherited fields
-      'is_following': isFollowing, // Add unique field
-    };
+    return {...personalAccountJson, 'is_following': isFollowing};
   }
 }

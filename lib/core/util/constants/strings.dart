@@ -17,3 +17,10 @@ class AuthErrorMessages {
   static const String wrongEmailOrPassword = "Invalid credentials";
   static const String expiredCode = "Invalid or expired code";
 }
+
+// ! account feature
+const String STORE_ACCOUNT_KEY = "20439la13s";
+
+class AccountErrorMessages {
+  static const String accountNotFound = "Not Found";
+}

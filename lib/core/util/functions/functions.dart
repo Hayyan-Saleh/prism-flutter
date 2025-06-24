@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 double getHeight(BuildContext context) {
   return MediaQuery.of(context).size.height;
@@ -8,20 +11,39 @@ double getWidth(BuildContext context) {
   return MediaQuery.of(context).size.width;
 }
 
-// FOR Account Feature ....
-/*
-Future<File?> getImage() async {
+Future<File?> pickCamVideo() async {
+  final ImagePicker picker = ImagePicker();
+  final XFile? video = await picker.pickVideo(source: ImageSource.camera);
+  return video != null ? File(video.path) : null;
+}
+
+Future<File?> getCamImage() async {
   File? file;
   final ImagePicker picker = ImagePicker();
-  final XFile? image =
-      await picker.pickImage(source: ImageSource.gallery); //pic from gallery
+  final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
   if (image != null) {
     file = File(image.path);
   }
   return file;
 }
- */
+
+Future<File?> pickGalleryVideo() async {
+  final ImagePicker picker = ImagePicker();
+  final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
+  return video != null ? File(video.path) : null;
+}
+
+Future<File?> getGalleryImage() async {
+  File? file;
+  final ImagePicker picker = ImagePicker();
+  final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  if (image != null) {
+    file = File(image.path);
+  }
+  return file;
+}
+
 void showCustomAboutDialog(
   BuildContext context,
   String title,

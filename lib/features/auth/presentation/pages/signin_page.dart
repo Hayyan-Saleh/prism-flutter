@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:prism/core/util/functions/functions.dart';
-import 'package:prism/core/util/general/app_routes.dart';
-import 'package:prism/core/util/general/assets.dart';
+import 'package:prism/core/util/sevices/app_routes.dart';
+import 'package:prism/core/util/sevices/assets.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/app_text_button.dart';
 import 'package:prism/core/util/widgets/custom_text_form_field.dart';
-import 'package:prism/features/auth/domain/validators/email_validator.dart';
-import 'package:prism/features/auth/domain/validators/password_validator.dart';
+import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
+import 'package:prism/core/util/validators/email_validator.dart';
+import 'package:prism/core/util/validators/password_validator.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -219,8 +220,10 @@ class _SignInPageState extends State<SignInPage> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is LoggedInAuthState) {
-          // TODO: take to account middle point page
-          Navigator.pushReplacementNamed(context, AppRoutes.home);
+          BlocProvider.of<PAccountBloc>(
+            context,
+          ).add(DefinePAccountCurrentStateEvent());
+          Navigator.pushReplacementNamed(context, AppRoutes.accMiddlePoint);
         } else if (state is FailedAuthState) {
           showCustomAboutDialog(
             context,

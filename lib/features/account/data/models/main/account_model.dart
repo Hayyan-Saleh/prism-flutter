@@ -18,7 +18,11 @@ class AccountModel extends AccountEntity {
     postsCount: json['posts_count'] ?? 0,
     followersCount: json['followers_count'] ?? 0,
     bio: json['bio'] ?? '',
-    isPrivate: (json['is_private'] as int?) == 1,
+    isPrivate:
+        (json['is_private'] is int
+            ? json['is_private']
+            : int.parse(json['is_private'])) ==
+        1,
   );
 
   Map<String, dynamic> toJson() => {

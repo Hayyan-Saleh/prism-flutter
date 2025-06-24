@@ -10,12 +10,12 @@ import '../../../../core/errors/failures/network_failure.dart';
 import '../../../../core/errors/failures/server_failure.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../../domain/validators/password_validator.dart';
+import '../../../../core/util/validators/password_validator.dart';
 import '../datasources/auth_remote_data_source.dart';
 import '../datasources/google_auth_datasource.dart';
 import '../datasources/user_local_data_source.dart';
 import '../models/user_model.dart';
-import '../../domain/validators/email_validator.dart';
+import '../../../../core/util/validators/email_validator.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -159,6 +159,16 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<AppFailure, String?>> loadToken() async {
     return await localDataSource.loadToken();
+  }
+
+  @override
+  Future<Either<AppFailure, Unit>> deleteToken() async {
+    return await localDataSource.deleteToken();
+  }
+
+  @override
+  Future<Either<AppFailure, Unit>> storeToken(String newToken) async {
+    return await localDataSource.cacheToken(newToken);
   }
 
   @override

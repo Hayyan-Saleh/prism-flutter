@@ -14,6 +14,7 @@ abstract class UserLocalDataSource {
   Future<Either<AppFailure, UserModel?>> loadUser();
   Future<Either<AppFailure, Unit>> cacheToken(String token);
   Future<Either<AppFailure, String?>> loadToken();
+  Future<Either<AppFailure, Unit>> deleteToken();
   Future<Either<AppFailure, Unit>> clearSession();
 }
 
@@ -109,6 +110,17 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       return const Right(unit);
     } catch (e) {
       return Left(CacheFailure('Failed to delete user data: $e'));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, Unit>> deleteToken() async {
+    try {
+      await secureStorage.delete(key: TOKEN_LOCAL_KEY);
+      _token = null; // Clear in-memory token
+      return const Right(unit);
+    } catch (e) {
+      return Left(CacheFailure('Failed to delete token: $e'));
     }
   }
 }

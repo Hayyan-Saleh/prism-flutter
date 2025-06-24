@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:prism/core/util/functions/functions.dart';
-import 'package:prism/core/util/general/assets.dart';
+import 'package:prism/core/util/sevices/assets.dart';
 
 class LoadingPage extends StatelessWidget {
   const LoadingPage({super.key});

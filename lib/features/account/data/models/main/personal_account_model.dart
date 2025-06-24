@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:prism/features/account/data/models/main/account_model.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 
@@ -10,38 +12,76 @@ class PersonalAccountModel extends PersonalAccountEntity {
     required super.followersCount,
     required super.bio,
     required super.isPrivate,
-    required super.personalInfoKeys,
-    required super.personalInfoValues,
+    required super.personalInfos,
     required super.accountName,
     required super.followingCount,
     required super.hasStatus,
   });
 
   factory PersonalAccountModel.fromJson(Map<String, dynamic> json) {
-    // Reuse AccountModel's parsing for base fields
     final accountModel = AccountModel.fromJson(json);
-    final personalInfo = json['personal_info'] as Map<String, dynamic>? ?? {};
+    // Safely cast personal_info
+    final personalInfo = <String, List<String>>{};
+    if (json['personal_info'] != null) {
+      if (json['personal_info'] is Map) {
+        (json['personal_info'] as Map).forEach((key, value) {
+          if (key is String && value is List) {
+            personalInfo[key] =
+                value
+                    .where((item) => item != null)
+                    .map((item) => item.toString())
+                    .toList();
+          }
+        });
+      } else {
+        final Map<String, dynamic> decodedInfos = jsonDecode(
+          json['personal_info'],
+        );
+        (decodedInfos as Map).forEach((key, value) {
+          if (key is String && value is List) {
+            personalInfo[key] =
+                value
+                    .where((item) => item != null)
+                    .map((item) => item.toString())
+                    .toList();
+          }
+        });
+      }
+    }
 
     return PersonalAccountModel(
-      // Inherited from AccountEntity via AccountModel
       id: accountModel.id,
       fullName: accountModel.fullName,
-      picUrl: accountModel.picUrl,
+      picUrl: accountModel.picUrl ?? '',
       postsCount: accountModel.postsCount,
       followersCount: accountModel.followersCount,
       bio: accountModel.bio,
       isPrivate: accountModel.isPrivate,
-      // PersonalAccountEntity-specific fields
-      personalInfoKeys: personalInfo.keys.toList(),
-      personalInfoValues:
-          personalInfo.values
-              .map((v) => v is List ? v.join(', ') : v.toString())
-              .toList(),
+      personalInfos: personalInfo,
       accountName: json['username'] ?? '',
       followingCount: json['following_count'] ?? 0,
-      hasStatus: json['has_status'] ?? '',
+      // TODO: check wrong json
+      hasStatus: json['is_following'] ?? 'false',
     );
   }
+
+  factory PersonalAccountModel.fromEntity(PersonalAccountEntity entity) {
+    return PersonalAccountModel(
+      id: entity.id,
+      fullName: entity.fullName,
+      picUrl: entity.picUrl,
+      postsCount: entity.postsCount,
+      followersCount: entity.followersCount,
+      bio: entity.bio,
+      isPrivate: entity.isPrivate,
+      personalInfos: entity.personalInfos,
+      accountName: entity.accountName,
+      followingCount: entity.followingCount,
+      hasStatus: entity.hasStatus,
+    );
+  }
+
+  PersonalAccountEntity toEntity() => this;
 
   Map<String, dynamic> toJson() {
     final baseJson =
@@ -56,19 +96,11 @@ class PersonalAccountModel extends PersonalAccountEntity {
         ).toJson();
 
     return {
-      ...baseJson, // Spread base fields
+      ...baseJson,
       'username': accountName,
       'following_count': followingCount,
-      'has_status': hasStatus,
-      'personal_info': _buildPersonalInfoJson(),
+      'is_following': hasStatus,
+      'personal_info': personalInfos,
     };
-  }
-
-  Map<String, dynamic> _buildPersonalInfoJson() {
-    final Map<String, dynamic> result = {};
-    for (int i = 0; i < personalInfoKeys.length; i++) {
-      result[personalInfoKeys[i]] = personalInfoValues[i].split(', ');
-    }
-    return result;
   }
 }

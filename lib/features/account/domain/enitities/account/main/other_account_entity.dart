@@ -6,17 +6,16 @@ class OtherAccountEntity extends PersonalAccountEntity {
   const OtherAccountEntity({
     required super.id,
     required super.fullName,
-    required super.accountName,
     required super.picUrl,
     required super.postsCount,
     required super.followersCount,
     required super.bio,
     required super.isPrivate,
-    required super.personalInfoKeys,
-    required super.personalInfoValues,
     required super.hasStatus,
-    required this.isFollowing,
+    required super.accountName,
+    required super.personalInfos,
     required super.followingCount,
+    required this.isFollowing,
   });
 
   @override

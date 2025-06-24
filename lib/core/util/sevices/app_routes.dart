@@ -11,7 +11,9 @@ class AppRoutes {
   static String changeEmail = "/change-email";
   static String changePassword = "/change-password";
   //! account
-  static String home = "/home-page";
+  static String accMiddlePoint = "/account-middle-point";
+  static String updateAccount = "/update-account";
+  static String home = "/home";
 
   //! core
   static String myApp = "/my-app";

@@ -2,11 +2,15 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prism/core/di/injection_container.dart';
+import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
+import 'package:prism/features/account/presentation/pages/account/account_middle_point_page.dart';
+import 'package:prism/features/account/presentation/pages/account/update_account_page.dart';
 import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
 import 'package:prism/features/preferences/presentation/pages/walk_through_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:prism/core/util/general/app_routes.dart';
+import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/pages/settings_page.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
 import 'package:prism/features/auth/presentation/pages/auth_middle_point.dart';
@@ -37,6 +41,14 @@ main() async {
         BlocProvider<AuthBloc>(
           create:
               (context) => sl<AuthBloc>()..add(DefineAuthCurrentStateEvent()),
+        ),
+        BlocProvider<PAccountBloc>(
+          create:
+              (context) =>
+                  sl<PAccountBloc>()..add(DefinePAccountCurrentStateEvent()),
+        ),
+        BlocProvider<AccountNameBloc>(
+          create: (context) => sl<AccountNameBloc>(),
         ),
       ],
       child: const MyApp(),
@@ -91,6 +103,8 @@ class _MyAppState extends State<MyApp> {
       AppRoutes.reset: (context) => ResetPasswordPage(),
       AppRoutes.changeEmail: (context) => ChangeEmailPage(),
       AppRoutes.changePassword: (context) => ChangePasswordPage(),
+      AppRoutes.accMiddlePoint: (context) => AccountMiddlePointPage(),
+      AppRoutes.updateAccount: (context) => UpdateAccountPage(),
       AppRoutes.home: (context) => HomePage(),
       AppRoutes.myApp: (context) => MyApp(),
       AppRoutes.settings:
@@ -126,14 +140,32 @@ class _MyAppState extends State<MyApp> {
             onPrimary: Colors.grey[900],
             useMaterial3: true,
             fontFamily: 'sans-serif',
+          ).copyWith(
+            textSelectionTheme: TextSelectionThemeData(
+              cursorColor: Theme.of(context).colorScheme.secondary,
+              selectionColor: Theme.of(
+                context,
+              ).colorScheme.secondary.withAlpha(200),
+              selectionHandleColor: Theme.of(context).colorScheme.secondary,
+            ),
           ),
           darkTheme: FlexThemeData.dark(
             scheme: FlexScheme.greenM3,
-            primary: Colors.grey[900],
+            primary: const Color.fromARGB(255, 24, 24, 24),
             onPrimary: Colors.grey[100],
+            primaryLightRef: Colors.grey[100],
             useMaterial3: true,
             fontFamily: 'sans-serif',
+          ).copyWith(
+            textSelectionTheme: TextSelectionThemeData(
+              cursorColor: Theme.of(context).colorScheme.secondary,
+              selectionColor: Theme.of(
+                context,
+              ).colorScheme.secondary.withAlpha(200),
+              selectionHandleColor: Theme.of(context).colorScheme.secondary,
+            ),
           ),
+
           themeMode: _themeMode,
           routes: _getRoutes(),
           initialRoute: AppRoutes.prefMiddlePoint,
