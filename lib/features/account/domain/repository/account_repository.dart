@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:prism/core/errors/failures/account_failure.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
+import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
+import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/other_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
@@ -21,7 +23,7 @@ abstract class AccountRepository {
   /// 1- edit the personal account
   /// 2- save it locally
   ///
-  Future<Either<AccountFailure, Unit>> updatePersonalAccount({
+  Future<Either<AccountFailure, PersonalAccountEntity>> updatePersonalAccount({
     required File? profilePic,
     required PersonalAccountEntity personalAccount,
   });
@@ -36,20 +38,15 @@ abstract class AccountRepository {
   Future<Either<AppFailure, PersonalAccountEntity>> getRemotePersonalAccount();
 
   Future<Either<AccountFailure, OtherAccountEntity>> getOtherAccount({
-    required String id,
+    required int id,
   });
 
-  ///
-  /// the following method needs to:
-  /// 1- update the following status
-  /// 2- get personal account and then return it
-  ///
-  Future<Either<AccountFailure, OtherAccountEntity>> updateFollowingStatus({
+  Future<Either<AppFailure, FollowStatus>> updateFollowingStatus({
     required int targetId,
     required bool newStatus,
   });
 
-  Future<Either<AccountFailure, Unit>> deleteAccount({required String id});
+  Future<Either<AccountFailure, Unit>> deleteAccount();
 
   Future<Either<AccountFailure, List<StatusEntity>>> getStatuses({
     required int accountId,
@@ -60,10 +57,23 @@ abstract class AccountRepository {
     File? media,
   });
 
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>>
+  getFollowingStatuses();
+
   Future<Either<AccountFailure, Unit>> deleteStatus({required int statusId});
 
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getFollowers({
+    required int accountId,
+  });
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getFollowing({
+    required int accountId,
+  });
   //? phase 2 methods:
 
   Future<Either<AccountFailure, PaginatedSimplifiedAccountEntity>>
   searchAccounts({required String query, required int pageNum});
+
+  Future<Either<AccountFailure, Unit>> blockUser({required int targetId});
+
+  Future<Either<AccountFailure, Unit>> unblockUser({required int targetId});
 }

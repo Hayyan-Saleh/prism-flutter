@@ -169,6 +169,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       builder: (context, state) {
         final bool isLoading = state is LoadingAuthState;
         return Scaffold(
+          backgroundColor: Theme.of(context).primaryColor,
           appBar: AppBar(
             title: Text(
               AppLocalizations.of(context)!.changePassword,

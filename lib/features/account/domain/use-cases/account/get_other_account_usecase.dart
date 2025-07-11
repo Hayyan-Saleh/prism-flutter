@@ -8,9 +8,7 @@ class GetOtherAccountUsecase {
 
   GetOtherAccountUsecase({required this.repository});
 
-  Future<Either<AppFailure, OtherAccountEntity>> call({
-    required String id,
-  }) async {
+  Future<Either<AppFailure, OtherAccountEntity>> call({required int id}) async {
     return await repository.getOtherAccount(id: id);
   }
 }

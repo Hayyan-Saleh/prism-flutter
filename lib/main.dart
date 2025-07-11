@@ -2,9 +2,24 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prism/core/di/injection_container.dart';
+import 'package:prism/core/util/functions/functions.dart';
+import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
+import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
+import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/other_account_bloc/other_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/notification/notification_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/account_middle_point_page.dart';
+import 'package:prism/features/account/presentation/pages/account/accounts_page.dart';
+import 'package:prism/features/account/presentation/pages/account/add_status_page.dart';
+import 'package:prism/features/account/presentation/pages/account/block_account_page.dart';
+import 'package:prism/features/account/presentation/pages/account/delete_account_page.dart';
+import 'package:prism/features/account/presentation/pages/account/following_statuses_page.dart';
+import 'package:prism/features/account/presentation/pages/account/other_account_page.dart';
+import 'package:prism/features/account/presentation/pages/account/show_status_page.dart';
 import 'package:prism/features/account/presentation/pages/account/update_account_page.dart';
 import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
 import 'package:prism/features/preferences/presentation/pages/walk_through_page.dart';
@@ -49,6 +64,10 @@ main() async {
         ),
         BlocProvider<AccountNameBloc>(
           create: (context) => sl<AccountNameBloc>(),
+        ),
+        BlocProvider<StatusBloc>(create: (context) => sl<StatusBloc>()),
+        BlocProvider<NotificationBloc>(
+          create: (context) => sl<NotificationBloc>(),
         ),
       ],
       child: const MyApp(),
@@ -104,15 +123,100 @@ class _MyAppState extends State<MyApp> {
       AppRoutes.changeEmail: (context) => ChangeEmailPage(),
       AppRoutes.changePassword: (context) => ChangePasswordPage(),
       AppRoutes.accMiddlePoint: (context) => AccountMiddlePointPage(),
-      AppRoutes.updateAccount: (context) => UpdateAccountPage(),
+      AppRoutes.updateAccount: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final personalAccount =
+            args?['personalAccount'] as PersonalAccountEntity?;
+        return UpdateAccountPage(pAccount: personalAccount);
+      },
       AppRoutes.home: (context) => HomePage(),
+      AppRoutes.deleteAccount: (context) => DeleteAccountPage(),
+      AppRoutes.blocAccPage: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final fullName = args?['fullName'] as String?;
+        final otherAccountId = args?['otherAccountId'] as int?;
+        return BlocProvider<OAccountBloc>(
+          create: (context) => sl<OAccountBloc>(),
+          child: BlockAccountPage(
+            fullName: fullName ?? '',
+            otherAccountId: otherAccountId ?? 0,
+          ),
+        );
+      },
+      AppRoutes.otherAccPage: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final personalAccountId = args?['personalAccountId'] as int?;
+        final otherAccountId = args?['otherAccountId'] as int?;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<OAccountBloc>(create: (context) => sl<OAccountBloc>()),
+            BlocProvider<FollowBloc>(create: (context) => sl<FollowBloc>()),
+          ],
+          child: OtherAccountPage(
+            otherAccountId: otherAccountId ?? 0,
+            personalAccountId: personalAccountId ?? 0,
+          ),
+        );
+      },
+      AppRoutes.accounts: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final personalAccount =
+            args?['personalAccount'] as PersonalAccountEntity?;
+        final following = args?['following'] as bool?;
+        return BlocProvider<AccountsBloc>(
+          create: (context) => sl<AccountsBloc>(),
+          child: AccountsPage(
+            personalAccount: personalAccount,
+            following: following ?? false,
+          ),
+        );
+      },
+      AppRoutes.followingStatusesPage: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final initialUserIndex = args?['initialUserIndex'] as int?;
+        final userIds = args?['userIds'] as List<int>?;
+        return FollowingStatusesPage(
+          initialUserIndex: initialUserIndex ?? 0,
+          userIds: userIds ?? [],
+        );
+      },
+      AppRoutes.showStatusPage: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final userId = args?['userId'] as int?;
+        final personalStatuses = args?['personalStatuses'] as bool? ?? false;
+
+        final followStatus = args?['followStatus'] as FollowStatus?;
+        return BlocProvider<StatusBloc>(
+          create: (context) => sl<StatusBloc>(),
+          child: ShowStatusPage(
+            userId: userId ?? 0,
+            personalStatuses: personalStatuses,
+            followStatus: followStatus ?? FollowStatus.following,
+          ),
+        );
+      },
+
+      AppRoutes.addStatusPage:
+          (context) => BlocProvider<StatusBloc>(
+            create: (context) => sl<StatusBloc>(),
+            child: AddStatusPage(),
+          ),
       AppRoutes.myApp: (context) => MyApp(),
       AppRoutes.settings:
           (context) => SettingsPage(
             onLocaleChanged: _changeLocale,
             onThemeChanged: _changeThemeMode,
           ),
-    };
+    }.map(
+      (key, value) =>
+          MapEntry(key, (context) => fixDirection(child: value(context))),
+    );
   }
 
   @override
@@ -153,6 +257,7 @@ class _MyAppState extends State<MyApp> {
             scheme: FlexScheme.greenM3,
             primary: const Color.fromARGB(255, 24, 24, 24),
             onPrimary: Colors.grey[100],
+            secondary: const Color.fromARGB(255, 10, 90, 10),
             primaryLightRef: Colors.grey[100],
             useMaterial3: true,
             fontFamily: 'sans-serif',

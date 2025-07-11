@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
@@ -8,8 +7,10 @@ import 'package:prism/core/errors/failures/app_failure.dart';
 import 'package:prism/core/util/sevices/token_service.dart';
 import 'package:prism/features/account/data/data-sources/account_remote_data_source.dart';
 import 'package:prism/features/account/data/data-sources/personal_account_local_data_source.dart';
-import 'package:prism/features/account/data/models/main/personal_account_model.dart';
-import 'package:prism/features/account/data/models/status/status_model.dart';
+import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
+import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
+import 'package:prism/features/account/data/models/account/status/status_model.dart';
+import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/other_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
@@ -73,7 +74,7 @@ class AccountRepositoryImpl implements AccountRepository {
   }
 
   @override
-  Future<Either<AccountFailure, Unit>> updatePersonalAccount({
+  Future<Either<AccountFailure, PersonalAccountEntity>> updatePersonalAccount({
     required File? profilePic,
     required PersonalAccountEntity personalAccount,
   }) async {
@@ -91,16 +92,8 @@ class AccountRepositoryImpl implements AccountRepository {
         final PersonalAccountModel backendModel = PersonalAccountModel.fromJson(
           result['user'],
         );
-
-        log(
-          '====================================================================',
-        );
-        log('new token: $newToken}');
-        log(
-          '====================================================================',
-        );
         await localDataSource.storeAccount(backendModel);
-        return const Right(unit);
+        return Right(backendModel.toEntity());
       });
     });
   }
@@ -146,12 +139,12 @@ class AccountRepositoryImpl implements AccountRepository {
 
   @override
   Future<Either<AccountFailure, OtherAccountEntity>> getOtherAccount({
-    required String id,
+    required int id,
   }) async {
     return _withToken((token) async {
       final result = await remoteDataSource.getOtherAccount(
         token: token,
-        id: int.parse(id),
+        id: id,
       );
       return result.fold(
         (failure) => Left(AccountFailure(failure.message)),
@@ -161,19 +154,21 @@ class AccountRepositoryImpl implements AccountRepository {
   }
 
   @override
-  Future<Either<AccountFailure, OtherAccountEntity>> updateFollowingStatus({
+  Future<Either<AppFailure, FollowStatus>> updateFollowingStatus({
     required int targetId,
     required bool newStatus,
   }) async {
     return _withToken((token) async {
-      await remoteDataSource.updateAccountFollowingStatus(
-        token: token,
-        targetId: targetId,
-        newStatus: newStatus,
-      );
-
-      // TODO : fetch the other user and then return it
-      throw UnimplementedError();
+      try {
+        final result = await remoteDataSource.updateAccountFollowingStatus(
+          token: token,
+          targetId: targetId,
+          newStatus: newStatus,
+        );
+        return Right(result);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      }
     });
   }
 
@@ -184,13 +179,19 @@ class AccountRepositoryImpl implements AccountRepository {
     File? media,
   }) async {
     return _withToken((token) async {
-      await remoteDataSource.createStatus(
-        token: token,
-        privacy: privacy,
-        media: media,
-        text: text,
-      );
-      return Right(unit);
+      try {
+        await remoteDataSource.createStatus(
+          token: token,
+          privacy: privacy,
+          media: media,
+          text: text,
+        );
+        return Right(unit);
+      } on AccountException catch (e) {
+        return left(AccountFailure(e.message));
+      } catch (e) {
+        return left(AccountFailure(e.toString()));
+      }
     });
   }
 
@@ -218,19 +219,103 @@ class AccountRepositoryImpl implements AccountRepository {
   }
 
   @override
-  Future<Either<AccountFailure, Unit>> deleteAccount({
-    required String id,
-  }) async {
+  Future<Either<AccountFailure, Unit>> deleteAccount() async {
     return _withToken((token) async {
-      await remoteDataSource.deleteAccount(token: token, id: int.parse(id));
-      return const Right(unit);
+      try {
+        await remoteDataSource.deleteAccount(token: token);
+        await localDataSource.clearAccount();
+        await tokenService.deleteUserToken();
+        return const Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
     });
   }
 
   @override
   Future<Either<AccountFailure, PaginatedSimplifiedAccountEntity>>
   searchAccounts({required String query, required int pageNum}) {
-    // TODO: implement phase 2 method
     throw UnimplementedError();
+  }
+
+  @override
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getFollowers({
+    required int accountId,
+  }) {
+    return _withToken((token) async {
+      try {
+        final List<SimplifiedAccountModel> followers = await remoteDataSource
+            .getFollowers(token: token, accountId: accountId);
+        return Right(followers.toList());
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getFollowing({
+    required int accountId,
+  }) {
+    return _withToken((token) async {
+      try {
+        final List<SimplifiedAccountModel> following = await remoteDataSource
+            .getFollowings(token: token, accountId: accountId);
+        return Right(following);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>>
+  getFollowingStatuses() async {
+    return _withToken((token) async {
+      try {
+        final accounts = await remoteDataSource.getFollowingStatuses(
+          token: token,
+        );
+        return Right(accounts);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> blockUser({required int targetId}) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.blockUser(token: token, targetId: targetId);
+        return Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> unblockUser({required int targetId}) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.unblockUser(token: token, targetId: targetId);
+        return Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
   }
 }

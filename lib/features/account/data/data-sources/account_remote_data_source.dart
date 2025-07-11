@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
@@ -10,10 +9,11 @@ import 'package:prism/core/errors/failures/account_failure.dart';
 import 'package:prism/core/network/api_client.dart';
 import 'package:prism/core/util/constants/strings.dart';
 import 'package:prism/core/util/sevices/api_endpoints.dart';
-import 'package:prism/features/account/data/models/main/other_account_model.dart';
-import 'package:prism/features/account/data/models/main/personal_account_model.dart';
-import 'package:prism/features/account/data/models/simplified/simplified_account_model.dart';
-import 'package:prism/features/account/data/models/status/status_model.dart';
+import 'package:prism/features/account/data/models/account/main/other_account_model.dart';
+import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
+import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
+import 'package:prism/features/account/data/models/account/status/status_model.dart';
+import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 
 abstract class AccountRemoteDataSource {
   Future<bool> checkAccountName({
@@ -32,19 +32,6 @@ abstract class AccountRemoteDataSource {
     required int id,
   });
 
-  // TODO : ===================================================================
-
-  Future<Either<AccountFailure, OtherAccountModel>> getOtherAccount({
-    required String token,
-    required int id,
-  });
-
-  Future<void> updateAccountFollowingStatus({
-    required String token,
-    required int targetId,
-    required bool newStatus,
-  });
-
   Future<List<SimplifiedAccountModel>> getFollowers({
     required String token,
     required int accountId,
@@ -55,21 +42,40 @@ abstract class AccountRemoteDataSource {
     required int accountId,
   });
 
-  Future<List<StatusModel>> getStatuses({
-    required String token,
-    required int accountId,
-  });
-  Future<StatusModel> createStatus({
+  Future<void> createStatus({
     required String token,
     required String privacy,
     String? text,
     File? media,
   });
 
+  Future<Either<AccountFailure, OtherAccountModel>> getOtherAccount({
+    required String token,
+    required int id,
+  });
+
+  Future<FollowStatus> updateAccountFollowingStatus({
+    required String token,
+    required int targetId,
+    required bool newStatus,
+  });
+
+  Future<List<StatusModel>> getStatuses({
+    required String token,
+    required int accountId,
+  });
+
+  Future<List<SimplifiedAccountModel>> getFollowingStatuses({
+    required String token,
+  });
+
   Future<void> deleteStatus({required String token, required int statusId});
-  // ? future =================================================================
-  Future<void> deleteAccount({required String token, required int id});
+
+  Future<void> deleteAccount({required String token});
+
   Future<void> blockUser({required String token, required int targetId});
+
+  Future<void> unblockUser({required String token, required int targetId});
 }
 
 class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
@@ -106,7 +112,6 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         request.headers.addAll({
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
-          'Content-Type': 'multipart/form-data',
         });
 
         final fields =
@@ -153,10 +158,18 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         return ApiClient.handleResponse(responseBody);
       } else {
         final data =
-            personalAccount.toJson()..removeWhere(
-              (key, value) =>
-                  value == null || (value is String && value.isEmpty),
-            );
+            personalAccount.toJson()
+              ..removeWhere(
+                (key, value) =>
+                    value == null || (value is String && value.isEmpty),
+              )
+              ..remove('avatar')
+              ..remove('personal_info');
+
+        if (personalAccount.personalInfos.isNotEmpty) {
+          data['personal_info'] = personalAccount.personalInfos;
+        }
+
         return await apiClient.post(
           ApiEndpoints.updatePersonalAccount,
           data,
@@ -176,10 +189,11 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     required String token,
     required int id,
   }) async {
-    final response = await apiClient.get(
-      '${ApiEndpoints.fetchUserAccount}/$id',
-      headers: _authHeaders(token),
-    );
+    final response =
+        (await apiClient.get(
+          '${ApiEndpoints.fetchUserAccount}/$id',
+          headers: _authHeaders(token),
+        ))['user'];
     if (response['username'] == null) {
       throw AccountException(AccountErrorMessages.accountNotFound);
     }
@@ -192,11 +206,12 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     required int id,
   }) async {
     try {
-      final response = await apiClient.get(
-        '${ApiEndpoints.fetchUserAccount}/$id',
-        headers: _authHeaders(token),
-      );
-      return Right(OtherAccountModel.fromJson(response['account']));
+      final response =
+          (await apiClient.get(
+            '${ApiEndpoints.fetchUserAccount}/$id',
+            headers: _authHeaders(token),
+          ))['user'];
+      return Right(OtherAccountModel.fromJson(response));
     } on ServerException catch (e) {
       return Left(AccountFailure(e.message));
     } on NetworkException catch (e) {
@@ -205,7 +220,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   }
 
   @override
-  Future<void> updateAccountFollowingStatus({
+  Future<FollowStatus> updateAccountFollowingStatus({
     required String token,
     required int targetId,
     required bool newStatus,
@@ -217,13 +232,21 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         }, headers: _authHeaders(token));
 
         if (response['message'] == 'You cannot follow yourself.') {
-          throw AccountException("You cannot follow yourself.");
+          throw AccountException(response['message']);
         }
+        if (response['message'].contains('request sent')) {
+          return FollowStatus.pending;
+        }
+        if (response['message'].contains('request withdrawn')) {
+          return FollowStatus.notFollowing;
+        }
+        return FollowStatus.following;
       } else {
         await apiClient.delete(
           '${ApiEndpoints.usersPrefix}/$targetId/${ApiEndpoints.unfollow}',
           headers: _authHeaders(token),
         );
+        return FollowStatus.notFollowing;
       }
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -245,9 +268,16 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         headers: _authHeaders(token),
       );
 
-      return (response as List)
-          .map((json) => SimplifiedAccountModel.fromJson(json))
-          .toList();
+      final followersList = response['followers'] as List;
+      final accounts =
+          followersList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+      return accounts;
     } on ServerException catch (e) {
       throw AccountException(e.message);
     } on NetworkException catch (e) {
@@ -266,9 +296,16 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         headers: _authHeaders(token),
       );
 
-      return (response as List)
-          .map((json) => SimplifiedAccountModel.fromJson(json))
-          .toList();
+      final followingList = response['following'] as List;
+      final accounts =
+          followingList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+      return accounts;
     } on ServerException catch (e) {
       throw AccountException(e.message);
     } on NetworkException catch (e) {
@@ -298,7 +335,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   }
 
   @override
-  Future<StatusModel> createStatus({
+  Future<void> createStatus({
     required String token,
     required String privacy,
     String? text,
@@ -308,7 +345,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       if (media != null && await media.exists()) {
         var request = http.MultipartRequest(
           'POST',
-          Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.getUserStatuses}'),
+          Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.createStatus}'),
         );
         request.headers.addAll({
           'Authorization': 'Bearer $token',
@@ -329,18 +366,16 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         final response = await request.send();
         final responseBody = await http.Response.fromStream(response);
 
-        final data = ApiClient.handleResponse(responseBody);
-        return StatusModel.fromJson(data['status'] as Map<String, dynamic>);
+        ApiClient.handleResponse(responseBody);
       } else {
         final data = {'privacy': privacy};
         if (text != null) data['text'] = text;
 
-        final response = await apiClient.post(
-          ApiEndpoints.getUserStatuses,
+        await apiClient.post(
+          ApiEndpoints.createStatus,
           data,
           headers: _authHeaders(token),
         );
-        return StatusModel.fromJson(response['status'] as Map<String, dynamic>);
       }
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -367,16 +402,68 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   }
 
   @override
-  Future<void> deleteAccount({required String token, required int id}) async {
-    await apiClient.post('/accounts/delete', {
-      'account_id': id,
-    }, headers: _authHeaders(token));
+  Future<void> deleteAccount({required String token}) async {
+    try {
+      await apiClient.delete(
+        ApiEndpoints.deletePersonalAccount,
+        headers: _authHeaders(token),
+      );
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
   }
 
   @override
-  Future<void> blockUser({required String token, required int targetId}) {
-    //TODO: implement this function
-    throw UnimplementedError();
+  Future<void> blockUser({required String token, required int targetId}) async {
+    try {
+      await apiClient.post(ApiEndpoints.blockOtherUser, {
+        'targetId': targetId,
+      }, headers: _authHeaders(token));
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<void> unblockUser({
+    required String token,
+    required int targetId,
+  }) async {
+    try {
+      await apiClient.post(ApiEndpoints.unblockOtherUser, {
+        'targetId': targetId,
+      }, headers: _authHeaders(token));
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<List<SimplifiedAccountModel>> getFollowingStatuses({
+    required String token,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        ApiEndpoints.getFollowingWithStatus,
+        headers: _authHeaders(token),
+      );
+
+      final accounts =
+          (response['followings'] as List)
+              .map((json) => SimplifiedAccountModel.fromJson(json))
+              .toList();
+      return accounts;
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
   }
 
   Map<String, String> _authHeaders(String token) => {

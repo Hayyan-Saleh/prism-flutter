@@ -24,6 +24,15 @@ class StatusLoaded extends StatusState {
   List<Object> get props => [statuses];
 }
 
+class FollowingStatusLoaded extends StatusState {
+  final List<SimplifiedAccountEntity> simpleAccounts;
+
+  const FollowingStatusLoaded({required this.simpleAccounts});
+
+  @override
+  List<Object> get props => [simpleAccounts];
+}
+
 class StatusFailure extends StatusState {
   final String error;
 

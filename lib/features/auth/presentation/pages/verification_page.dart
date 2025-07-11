@@ -169,6 +169,7 @@ class _VerificationPageState extends State<VerificationPage> {
           email = state.email;
         }
         return Scaffold(
+          backgroundColor: Theme.of(context).primaryColor,
           body:
               isLoading
                   ? Center(

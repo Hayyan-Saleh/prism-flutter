@@ -14,6 +14,15 @@ class AppRoutes {
   static String accMiddlePoint = "/account-middle-point";
   static String updateAccount = "/update-account";
   static String home = "/home";
+  static String accounts = "/accounts";
+  static String otherAccPage = "/other-account-page";
+  static String blocAccPage = "/block-account-page";
+  static String deleteAccount = "/delete-account";
+
+  // ? sub acount   ! status
+  static String addStatusPage = "/add-status-page";
+  static String showStatusPage = "/show-status-page";
+  static String followingStatusesPage = "/following-statuses-page";
 
   //! core
   static String myApp = "/my-app";

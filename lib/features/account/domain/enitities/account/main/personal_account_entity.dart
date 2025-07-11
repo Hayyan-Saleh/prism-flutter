@@ -4,7 +4,7 @@ class PersonalAccountEntity extends AccountEntity {
   final Map<String, List<String>> personalInfos;
   final String accountName;
   final int followingCount;
-  final String hasStatus;
+  final bool hasStatus;
 
   const PersonalAccountEntity({
     required super.id,
@@ -36,7 +36,7 @@ class PersonalAccountEntity extends AccountEntity {
       bio: bio,
       isPrivate: isPrivate,
       personalInfos: personalInfos,
-      hasStatus: 'false',
+      hasStatus: false,
       accountName: accountName,
       followingCount: 0,
     );

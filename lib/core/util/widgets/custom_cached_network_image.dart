@@ -5,6 +5,7 @@ class CustomCachedNetworkImage extends StatelessWidget {
   final bool isRounded;
   final String imageUrl;
   final double radius;
+
   const CustomCachedNetworkImage({
     super.key,
     required this.isRounded,
@@ -14,65 +15,81 @@ class CustomCachedNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isRounded) {
-      return _buildRoundedCachedImage();
-    } else {
-      return _buildRegularCachedImage(context);
-    }
+    return isRounded
+        ? _buildRoundedCachedImage(context)
+        : _buildRegularCachedImage(context);
   }
 
   Widget _buildRegularCachedImage(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary,
-          width: 0.5,
-        ),
-        borderRadius: BorderRadius.circular(10),
         color: Theme.of(context).colorScheme.primary.withAlpha(150),
       ),
       child: CachedNetworkImage(
         imageUrl: imageUrl,
         alignment: Alignment.center,
         fit: BoxFit.cover,
+        progressIndicatorBuilder:
+            (context, url, downloadProgress) => Center(
+              child: SizedBox(
+                height: 25,
+                width: 25,
+                child: CircularProgressIndicator(
+                  value: downloadProgress.progress,
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            ),
+        errorWidget:
+            (context, url, error) => Center(
+              child: Text(
+                isRounded ? "Error" : "Error downloading image",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
       ),
     );
   }
 
-  Widget _buildRoundedCachedImage() {
+  Widget _buildRoundedCachedImage(BuildContext context) {
     return CachedNetworkImage(
       imageUrl: imageUrl,
-      progressIndicatorBuilder: (context, url, downloadProgress) {
-        return Center(
-          child: CircularProgressIndicator(
-            value: downloadProgress.progress,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            color: Theme.of(context).colorScheme.onPrimary,
-          ),
-        );
-      },
-      fit: BoxFit.cover,
-      alignment: Alignment.center,
-      imageBuilder: (context, imageProvider) {
-        return CircleAvatar(
-          radius: radius,
-          backgroundColor: Theme.of(
-            context,
-          ).colorScheme.onPrimary.withAlpha(150),
-          foregroundImage: imageProvider,
-        );
-      },
-      errorWidget: (context, url, error) {
-        return Center(
-          child: Text(
-            "Error downloading the image : \n$imageUrl",
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.primary,
+      progressIndicatorBuilder:
+          (context, url, downloadProgress) => Center(
+            child: SizedBox(
+              height: 15,
+              width: 15,
+              child: CircularProgressIndicator(
+                value: downloadProgress.progress,
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ),
-        );
-      },
+      fit: BoxFit.cover,
+      alignment: Alignment.center,
+      imageBuilder:
+          (context, imageProvider) => CircleAvatar(
+            radius: radius,
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.onPrimary.withAlpha(150),
+            foregroundImage: imageProvider,
+          ),
+      errorWidget:
+          (context, url, error) => Center(
+            child: Text(
+              "Error downloading image",
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
     );
   }
 }

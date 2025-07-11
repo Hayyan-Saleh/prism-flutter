@@ -19,4 +19,7 @@ class FailedAccountNameState extends AccountNameState {
   final AccountFailure failure;
 
   const FailedAccountNameState({required this.failure});
+
+  @override
+  List<Object> get props => [failure];
 }

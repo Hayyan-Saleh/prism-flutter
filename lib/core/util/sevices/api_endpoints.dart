@@ -19,36 +19,34 @@ class ApiEndpoints {
       "$baseUrl/user/verify-change-email-code";
 
   //! account
+  static const String usersPrefix = "/users";
 
   // ! personal
   static const String checkUserName = "/user/check-username";
   static const String fetchUserAccount = "/user";
   static const String updatePersonalAccount = "/user/update";
+  static const String deletePersonalAccount = "/user/delete";
+  static const String blockOtherUser = "$usersPrefix/block";
+  static const String unblockOtherUser = "$usersPrefix/unblock";
 
   // TODO:
-  static const String usersPrefix = "/users";
-  static const String getFollowingWithStatus =
-      "$usersPrefix/followingWithStatus ";
+  static const String getFollowingWithStatus = "/followingWithStatus";
   static const String getUserStatuses =
-      "$usersPrefix/statuses"; //body : user_id //! gets the user's statuses (all - no pagination)
+      "/statuses"; //body : user_id //! gets the user's statuses (all - no pagination)
+
+  static const String createStatus = "/statuses";
 
   static const String followUser = "$usersPrefix/followUser";
   static const String unfollow = "unfollow";
   static const String followers = "followers";
   static const String following = "following";
 
-  //? follow user : users/followUser
-  //* type: POST
-  //  body: targetId
+  static const String getFollowRequests = "$usersPrefix/requests";
+  static const String respondToFollowRequest = "$usersPrefix/follow/request";
+
   //? accept user follow request: users/requests/{{request_id}/accept
   //* type: POST
   //  body: targetId
-  //? unfollow user : users/{user_id}/unfollow
-  //* type: DELETE
-  //? get followers :  /users/{user_id}/followers
-  //* type: GET
-  //? get following :  /users/{user_id}/following
-  //* type: GET
   //? get all follow requests : /users/requests
   //* type: GET
 }

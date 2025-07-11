@@ -11,6 +11,8 @@ class LoadingPage extends StatelessWidget {
     double height = getHeight(context);
     double width = getWidth(context);
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
+      appBar: null,
       body: Container(
         color: Theme.of(context).colorScheme.primary,
         height: height,

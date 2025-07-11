@@ -4,19 +4,36 @@ import 'package:prism/core/network/api_client.dart';
 import 'package:prism/core/util/sevices/api_endpoints.dart';
 import 'package:prism/core/util/sevices/token_service.dart';
 import 'package:prism/features/account/data/data-sources/account_remote_data_source.dart';
+import 'package:prism/features/account/data/data-sources/notification_remote_data_source.dart';
 import 'package:prism/features/account/data/data-sources/personal_account_local_data_source.dart';
 import 'package:prism/features/account/data/repository/account_repository_impl.dart';
+import 'package:prism/features/account/data/repository/notification_repository_impl.dart';
 import 'package:prism/features/account/domain/repository/account_repository.dart';
+import 'package:prism/features/account/domain/repository/notification_repository.dart';
+import 'package:prism/features/account/domain/use-cases/account/block_user_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/check_account_name_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/create_status_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/delete_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/delete_status_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_followers_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_following_statuses_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_following_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_local_personal_account_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_other_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_remote_personal_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_statuses_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/toggle_other_account_follow_use_case.dart';
+import 'package:prism/features/account/domain/use-cases/account/unblock_user_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/update_personal_account_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/notification/get_follow_requests_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/notification/respond_to_follow_request_usecase.dart';
+import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/other_account_bloc/other_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/notification/notification_bloc.dart';
 import 'package:prism/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:prism/features/auth/data/datasources/google_auth_datasource.dart';
 import 'package:prism/features/auth/data/datasources/user_local_data_source.dart';
@@ -153,6 +170,7 @@ Future<void> init() async {
       getLocalPersonalAccount: sl(),
       getRemotePersonalAccount: sl(),
       updatePersonalAccount: sl(),
+      deleteAccount: sl(),
     ),
   );
 
@@ -163,9 +181,25 @@ Future<void> init() async {
       createStatusUseCase: sl(),
       deleteStatusUseCase: sl(),
       getStatusesUseCase: sl(),
+      getFollowingStatuses: sl(),
     ),
   );
+  sl.registerFactory(
+    () =>
+        OAccountBloc(blockUser: sl(), getOtherAccount: sl(), unblockUser: sl()),
+  );
 
+  sl.registerFactory(
+    () => AccountsBloc(getFollowers: sl(), getFollowing: sl()),
+  );
+
+  sl.registerFactory(() => FollowBloc(toggleOAccountFollow: sl()));
+  sl.registerFactory(
+    () => NotificationBloc(
+      getFollowRequestsUseCase: sl(),
+      respondToFollowRequestUseCase: sl(),
+    ),
+  );
   // Use cases
   sl.registerLazySingleton(
     () => GetLocalPersonalAccountUsecase(repository: sl()),
@@ -177,10 +211,22 @@ Future<void> init() async {
   sl.registerLazySingleton(
     () => UpdatePersonalAccountUsecase(repository: sl()),
   );
+  sl.registerLazySingleton(() => DeleteAccountUsecase(repository: sl()));
   sl.registerLazySingleton(() => CreateStatusUseCase(repository: sl()));
   sl.registerLazySingleton(() => DeleteStatusUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetStatusesUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetFollowingStatusesUsecase(repository: sl()));
 
+  sl.registerLazySingleton(() => GetFollowersUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetFollowingUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetOtherAccountUsecase(repository: sl()));
+  sl.registerLazySingleton(() => ToggleOAccountFollowUseCase(repository: sl()));
+  sl.registerLazySingleton(() => BlockUserUsecase(repository: sl()));
+  sl.registerLazySingleton(() => UnblockUserUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetFollowRequestsUseCase(repository: sl()));
+  sl.registerLazySingleton(
+    () => RespondToFollowRequestUseCase(repository: sl()),
+  );
   // Repository
   sl.registerLazySingleton<AccountRepository>(
     () => AccountRepositoryImpl(
@@ -190,6 +236,10 @@ Future<void> init() async {
       tokenService: sl(),
     ),
   );
+  sl.registerLazySingleton<NotificationRepository>(
+    () =>
+        NotificationRepositoryImpl(remoteDataSource: sl(), tokenService: sl()),
+  );
 
   // Data sources
   sl.registerLazySingleton<PersonalAccountLocalDataSource>(
@@ -197,5 +247,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<AccountRemoteDataSource>(
     () => AccountRemoteDataSourceImpl(apiClient: sl()),
+  );
+  sl.registerLazySingleton<NotificationRemoteDataSource>(
+    () => NotificationRemoteDataSourceImpl(apiClient: sl()),
   );
 }

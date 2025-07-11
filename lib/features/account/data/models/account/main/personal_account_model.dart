@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:prism/features/account/data/models/main/account_model.dart';
+import 'package:prism/features/account/data/models/account/main/account_model.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 
 class PersonalAccountModel extends PersonalAccountEntity {
@@ -60,8 +60,7 @@ class PersonalAccountModel extends PersonalAccountEntity {
       personalInfos: personalInfo,
       accountName: json['username'] ?? '',
       followingCount: json['following_count'] ?? 0,
-      // TODO: check wrong json
-      hasStatus: json['is_following'] ?? 'false',
+      hasStatus: json['has_status'] ?? false,
     );
   }
 
@@ -99,7 +98,7 @@ class PersonalAccountModel extends PersonalAccountEntity {
       ...baseJson,
       'username': accountName,
       'following_count': followingCount,
-      'is_following': hasStatus,
+      'has_status': hasStatus,
       'personal_info': personalInfos,
     };
   }

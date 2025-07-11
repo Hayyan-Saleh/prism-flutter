@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prism/core/util/validators/account_name_validator.dart';
 import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountNameTFF extends StatefulWidget {
   final GlobalKey<FormState> formkey;
@@ -58,8 +59,7 @@ class _AccountNameTFFState extends State<AccountNameTFF> {
           if (val == null || val.isEmpty) {
             return widget.errorMessage;
           } else if (!AccountNameValidator.isValid(val)) {
-            // TODO: LOCALIZE
-            return "This account name is NOT valid!";
+            return AppLocalizations.of(context)!.accountNameNotValid;
           }
           return null;
         },
@@ -93,7 +93,7 @@ class _AccountNameTFFState extends State<AccountNameTFF> {
               width: 2.5,
             ),
           ),
-          hintText: 'john_doe123',
+          hintText: AppLocalizations.of(context)!.accountNameExample,
           border: OutlineInputBorder(
             borderSide: BorderSide(
               color: Theme.of(context).colorScheme.onPrimary.withAlpha(200),

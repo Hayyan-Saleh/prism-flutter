@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
 import 'package:prism/core/util/constants/strings.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
+import 'package:prism/features/account/domain/use-cases/account/delete_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_local_personal_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_remote_personal_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/update_personal_account_usecase.dart';
@@ -18,10 +19,13 @@ class PAccountBloc extends Bloc<PAccountEvent, PAccountState> {
   final GetLocalPersonalAccountUsecase getLocalPersonalAccount;
   final GetRemotePersonalAccountUsecase getRemotePersonalAccount;
   final UpdatePersonalAccountUsecase updatePersonalAccount;
+  final DeleteAccountUsecase deleteAccount;
+  PersonalAccountEntity? pAccount;
   PAccountBloc({
     required this.getLocalPersonalAccount,
     required this.getRemotePersonalAccount,
     required this.updatePersonalAccount,
+    required this.deleteAccount,
   }) : super(AccountInitial()) {
     on<PAccountEvent>((event, emit) async {
       if (event is DefinePAccountCurrentStateEvent) {
@@ -35,6 +39,7 @@ class PAccountBloc extends Bloc<PAccountEvent, PAccountState> {
               loadedLocalePersonalAccount = loadedLocalePersonal,
         );
         if (loadedLocalePersonalAccount != null) {
+          pAccount = loadedLocalePersonalAccount;
           emit(
             LoadedPAccountState(personalAccount: loadedLocalePersonalAccount!),
           );
@@ -51,9 +56,18 @@ class PAccountBloc extends Bloc<PAccountEvent, PAccountState> {
           profilePic: event.profilePic,
         );
 
+        either.fold((failure) => FailedAuthState(failure: failure), (
+          newPAccount,
+        ) {
+          pAccount = newPAccount;
+          emit(DoneUpdatePAccountState());
+        });
+      } else if (event is DeletePAccountEvent) {
+        emit(LoadingPAccountState());
+        final either = await deleteAccount();
         either.fold(
-          (failure) => FailedAuthState(failure: failure),
-          (_) => emit(DoneUpdatePAccountState()),
+          (failure) => emit(FailedPAccountState(failure: failure)),
+          (_) => emit(PAccountDeletedState()),
         );
       }
     }, transformer: restartable());
@@ -70,8 +84,10 @@ class PAccountBloc extends Bloc<PAccountEvent, PAccountState> {
           emit(FailedPAccountState(failure: failure));
         }
       },
-      (loadedRemotePersonal) =>
-          emit(LoadedPAccountState(personalAccount: loadedRemotePersonal)),
+      (loadedRemotePersonal) {
+        pAccount = loadedRemotePersonal;
+        emit(LoadedPAccountState(personalAccount: loadedRemotePersonal));
+      },
     );
   }
 }

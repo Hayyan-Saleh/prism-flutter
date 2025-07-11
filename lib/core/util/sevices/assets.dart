@@ -11,4 +11,10 @@ class Assets {
   static String verify = 'assets/images/auth/verify.svg';
   static String google = 'assets/images/auth/google.svg';
   static String done = 'assets/images/auth/done.svg';
+
+  //! other
+  static String error = 'assets/images/other/error.svg';
+  static String locked = 'assets/images/other/locked.svg';
+  static String locked2 = 'assets/images/other/locked2.svg';
+  static String note = 'assets/images/other/note.svg';
 }

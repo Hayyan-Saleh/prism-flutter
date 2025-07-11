@@ -1,5 +1,5 @@
 import 'package:prism/core/util/models/media_model.dart';
-import 'package:prism/features/account/data/models/simplified/simplified_account_model.dart';
+import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
 
 class StatusModel extends StatusEntity {
@@ -15,7 +15,7 @@ class StatusModel extends StatusEntity {
 
   factory StatusModel.fromJson(Map<String, dynamic> json) => StatusModel(
     id: json['id'] as int,
-    text: json['text'] as String,
+    text: json['text'] as String?,
     expirationDate: DateTime.parse(json['expiration_date'] as String),
     privacy: json['privacy'] as String,
     media:

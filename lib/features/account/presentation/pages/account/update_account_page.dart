@@ -11,9 +11,11 @@ import 'package:prism/features/account/presentation/bloc/account/personal_accoun
 import 'package:prism/features/account/presentation/widgets/account_name_tff.dart';
 import 'package:prism/features/account/presentation/widgets/unlimited_details__ttf_widget.dart';
 import 'package:prism/features/account/presentation/widgets/unlimited_keys_ttf_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UpdateAccountPage extends StatefulWidget {
-  const UpdateAccountPage({super.key});
+  final PersonalAccountEntity? pAccount;
+  const UpdateAccountPage({super.key, this.pAccount});
 
   @override
   State<UpdateAccountPage> createState() => _UpdateAccountPageState();
@@ -44,10 +46,6 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as bool;
-      editProfile = args;
-    });
     final initialParentKey = GlobalKey<FormState>();
     final initialParentController = TextEditingController();
     final initialNestedKey = GlobalKey<FormState>();
@@ -55,6 +53,10 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
 
     personalInfoFormKeys[initialParentKey] = [initialNestedKey];
     personalInfoTECs[initialParentController] = [initialNestedController];
+    if (widget.pAccount != null) {
+      editProfile = true;
+      _initializeData(widget.pAccount!);
+    }
   }
 
   @override
@@ -116,7 +118,8 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
     isPrivate = pAccount.isPrivate; // Initialize privacy setting
 
     // Initialize personal info sections
-    if (pAccount.personalInfos.keys.first.isNotEmpty) {
+    if (pAccount.personalInfos.isNotEmpty &&
+        pAccount.personalInfos.keys.first.isNotEmpty) {
       personalInfoFormKeys.clear();
       personalInfoTECs.clear();
 
@@ -144,9 +147,9 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
 
   AppBar _buildAppBar() {
     return AppBar(
-      // TODO: LOCALIZE
+      backgroundColor: Colors.transparent,
       title: Text(
-        'Profile Details',
+        AppLocalizations.of(context)!.profileDetails,
         style: Theme.of(context).textTheme.headlineMedium,
       ),
       centerTitle: true,
@@ -154,50 +157,42 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
   }
 
   Widget _buildProfilePic() {
-    return BlocBuilder<PAccountBloc, PAccountState>(
-      builder: (context, state) {
-        return GestureDetector(
-          onTap: _pickImage,
-          child: CircleAvatar(
-            backgroundColor: Theme.of(
-              context,
-            ).colorScheme.secondary.withAlpha(50),
-            radius: 66,
-            child: ClipOval(
-              child: Container(
-                width: 126,
-                height: 126,
-                color: Theme.of(context).colorScheme.primary,
-                child:
-                    selectedProfilePic != null
-                        ? Image.file(selectedProfilePic!, fit: BoxFit.cover)
-                        : profilePicLink != null
-                        ? CachedNetworkImage(
-                          imageUrl: profilePicLink!,
-                          fit: BoxFit.cover,
-                          placeholder:
-                              (context, url) => const Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                          errorWidget:
-                              (context, url, error) => Icon(
-                                Icons.error,
-                                color: Theme.of(context).colorScheme.error,
-                                size: 50,
-                              ),
-                        )
-                        : Icon(
-                          Icons.add_a_photo,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          size: 50,
-                        ),
-              ),
-            ),
+    return GestureDetector(
+      onTap: _pickImage,
+      child: CircleAvatar(
+        backgroundColor: Theme.of(context).colorScheme.secondary.withAlpha(50),
+        radius: 66,
+        child: ClipOval(
+          child: Container(
+            width: 126,
+            height: 126,
+            color: Theme.of(context).colorScheme.primary,
+            child:
+                selectedProfilePic != null
+                    ? Image.file(selectedProfilePic!, fit: BoxFit.cover)
+                    : profilePicLink != null
+                    ? CachedNetworkImage(
+                      imageUrl: profilePicLink!,
+                      fit: BoxFit.cover,
+                      placeholder:
+                          (context, url) => const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                      errorWidget:
+                          (context, url, error) => Icon(
+                            Icons.error,
+                            color: Theme.of(context).colorScheme.error,
+                            size: 50,
+                          ),
+                    )
+                    : Icon(
+                      Icons.add_a_photo,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      size: 50,
+                    ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -223,8 +218,7 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
                     controller: _bioController,
                     maxLines: 2,
                     decoration: InputDecoration(
-                      // TODO: LOCALIZE
-                      hintText: "bio",
+                      hintText: AppLocalizations.of(context)!.bio,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(color: Colors.pink),
@@ -245,8 +239,10 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       spacing: 20,
       children: [
-        // TODO: LOCALIZE
-        Text('Privacy', style: Theme.of(context).textTheme.bodyLarge),
+        Text(
+          AppLocalizations.of(context)!.privacy,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
         SizedBox(
           height: 32,
           child: Switch(
@@ -283,44 +279,40 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
 
   List<Widget> _buildAccountNameTextField() {
     return [
-      // TODO: LOCALIZE
-      _buildTitle("Enter Account Name:"),
+      _buildTitle(AppLocalizations.of(context)!.enterAccountName),
       SizedBox(height: 16),
       AccountNameTFF(
         formkey: _accountNameFormKey,
         textEditingController: _accountNameController,
-        // TODO: LOCALIZE
-        errorMessage: 'Enter a unique account name',
+        errorMessage: AppLocalizations.of(context)!.enterUniqueAccountName,
       ),
     ];
   }
 
   List<Widget> _buildTextFields(double height) {
     return [
-      // TODO: LOCALIZE
-      _buildTitle("Enter Full Name:"),
+      _buildTitle(AppLocalizations.of(context)!.enterFullName),
       SizedBox(height: 16),
       CustomTextFormField(
         formkey: _fullNameFormKey,
         textEditingController: _fullNameController,
-        // TODO: LOCALIZE
-        hintText: 'Ex: Alex Richard',
-        // TODO: LOCALIZE
-        errorMessage: 'Enter your full name',
+        hintText: AppLocalizations.of(context)!.fullNameExample,
+        errorMessage: AppLocalizations.of(context)!.enterYourFullName,
         obsecure: false,
-        // TODO: LOCALIZE
-        validator: (value) => value!.isEmpty ? 'Full name is required' : null,
+        validator:
+            (value) =>
+                value!.isEmpty
+                    ? AppLocalizations.of(context)!.fullNameRequired
+                    : null,
       ),
       const SizedBox(height: 16),
 
-      // TODO: LOCALIZE
       if (!editProfile) ..._buildAccountNameTextField(),
-      // TODO: LOCALIZE
       SizedBox(height: 16),
       Row(
         children: [
-          _buildTitle("Add Extra details"),
-          _buildSubTitle(' (optional):'),
+          _buildTitle(AppLocalizations.of(context)!.addExtraDetails),
+          _buildSubTitle(AppLocalizations.of(context)!.optional),
         ],
       ),
       SizedBox(height: 16),
@@ -347,8 +339,7 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
         return UnlimitedKeysTtfWidget(
           formkey: parentKey,
           textEditingController: parentController,
-          // TODO: LOCALIZE
-          hintText: "Title $parentIndex",
+          hintText: AppLocalizations.of(context)!.title(parentIndex),
           onDelete: () {
             // Dispose all nested controllers first
             for (TextEditingController controller in nestedItems) {
@@ -383,8 +374,7 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
               return UnlimitedDetailsTTFWidget(
                 formkey: personalInfoFormKeys[parentKey]![nestedIndex],
                 textEditingController: nestedItems[nestedIndex],
-                // TODO: LOCALIZE
-                hintText: "Detail $nestedIndex",
+                hintText: AppLocalizations.of(context)!.detail(nestedIndex),
                 onDelete: () {
                   // Dispose the nested controller
                   nestedItems[nestedIndex].dispose();
@@ -443,31 +433,49 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
                                   _fullNameController.text.trim();
                               final String accountName =
                                   _accountNameController.text.trim();
-                              final Map<String, List<String>>
-                              personalInfoString = personalInfoTECs.map((
-                                title,
-                                details,
-                              ) {
-                                final String titleString = title.text.trim();
-                                final List<String> detailsString =
-                                    details
-                                        .map((detail) => detail.text.trim())
-                                        .toList();
-                                return MapEntry(titleString, detailsString);
-                              });
-                              context.read<PAccountBloc>().add(
-                                UpdatePAccountEvent(
-                                  personalAccount:
-                                      PersonalAccountEntity.fromScratch(
-                                        fullName: fullName,
-                                        bio: bio,
-                                        isPrivate: isPrivate,
-                                        personalInfos: personalInfoString,
-                                        accountName: accountName,
-                                      ),
-                                  profilePic: selectedProfilePic,
-                                ),
-                              );
+
+                              if (personalInfoTECs.keys.first.text.trim() !=
+                                  '') {
+                                final Map<String, List<String>>
+                                personalInfoString = personalInfoTECs.map((
+                                  title,
+                                  details,
+                                ) {
+                                  final String titleString = title.text.trim();
+                                  final List<String> detailsString =
+                                      details
+                                          .map((detail) => detail.text.trim())
+                                          .toList();
+                                  return MapEntry(titleString, detailsString);
+                                });
+                                context.read<PAccountBloc>().add(
+                                  UpdatePAccountEvent(
+                                    personalAccount:
+                                        PersonalAccountEntity.fromScratch(
+                                          fullName: fullName,
+                                          bio: bio,
+                                          isPrivate: isPrivate,
+                                          personalInfos: personalInfoString,
+                                          accountName: accountName,
+                                        ),
+                                    profilePic: selectedProfilePic,
+                                  ),
+                                );
+                              } else {
+                                context.read<PAccountBloc>().add(
+                                  UpdatePAccountEvent(
+                                    personalAccount:
+                                        PersonalAccountEntity.fromScratch(
+                                          fullName: fullName,
+                                          bio: bio,
+                                          isPrivate: isPrivate,
+                                          personalInfos: {},
+                                          accountName: accountName,
+                                        ),
+                                    profilePic: selectedProfilePic,
+                                  ),
+                                );
+                              }
                             }
                           },
                   child:
@@ -485,10 +493,8 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
                               ),
                             ),
                           )
-                          :
-                          // TODO: LOCALIZE
-                          Text(
-                            'Save Profile',
+                          : Text(
+                            AppLocalizations.of(context)!.saveProfile,
                             style: Theme.of(
                               context,
                             ).textTheme.titleLarge?.copyWith(
@@ -508,9 +514,6 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
   Widget _wrapWithAccountBloc({required Widget child}) {
     return BlocListener<PAccountBloc, PAccountState>(
       listener: (context, state) {
-        if (state is LoadedPAccountState && !initialized) {
-          _initializeData(state.personalAccount);
-        }
         if (state is DoneUpdatePAccountState) {
           Navigator.pushNamedAndRemoveUntil(
             context,
@@ -520,7 +523,7 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
         } else if (state is FailedPAccountState) {
           showCustomAboutDialog(
             context,
-            "Error",
+            AppLocalizations.of(context)!.error,
             state.failure.message,
             null,
             true,
@@ -536,6 +539,7 @@ class _UpdateAccountPageState extends State<UpdateAccountPage> {
     final double height = getHeight(context);
     return _wrapWithAccountBloc(
       child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
         appBar: _buildAppBar(),
         body: Padding(
           padding: const EdgeInsets.all(16.0),

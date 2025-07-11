@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:prism/core/errors/exceptions/cache_exception.dart';
 import 'package:prism/core/util/constants/strings.dart';
-import 'package:prism/features/account/data/models/main/personal_account_model.dart';
+import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class PersonalAccountLocalDataSource {

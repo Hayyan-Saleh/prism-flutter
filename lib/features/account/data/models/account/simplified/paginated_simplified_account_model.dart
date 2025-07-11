@@ -1,5 +1,5 @@
 import 'package:prism/core/util/models/pagination_model.dart';
-import 'package:prism/features/account/data/models/simplified/simplified_account_model.dart';
+import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
 
 class PaginatedSimplifiedAccountModel extends PaginatedSimplifiedAccountEntity {

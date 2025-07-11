@@ -8,6 +8,7 @@ import 'package:prism/features/auth/domain/usecases/store_token_use_case.dart';
 abstract class TokenService {
   Future<Either<CoreFailure, String>> getToken();
   Future<Either<CoreFailure, Unit>> storeNewToken({required String newToken});
+  Future<Either<CoreFailure, Unit>> deleteUserToken();
 }
 
 class TokenServiceImpl implements TokenService {
@@ -47,5 +48,14 @@ class TokenServiceImpl implements TokenService {
         (_) => Right(unit),
       );
     });
+  }
+
+  @override
+  Future<Either<CoreFailure, Unit>> deleteUserToken() async {
+    final either = await deleteToken();
+    return either.fold(
+      (failure) => Left(CoreFailure(failure.message)),
+      (_) => Right(unit),
+    );
   }
 }

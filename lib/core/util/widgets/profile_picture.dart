@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:prism/core/util/widgets/custom_cached_network_image.dart';
 
 class ProfilePicture extends StatelessWidget {
-  final String link;
+  final String? link;
   final double? radius;
   final bool hasStatus;
   const ProfilePicture({
@@ -14,18 +14,21 @@ class ProfilePicture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final exists = link != '';
+    final exists = link != null && link != '';
+    final secondaryColor = Theme.of(context).colorScheme.secondary;
     return Stack(
       alignment: Alignment.center,
       children: [
         if (hasStatus) ...[
           Container(
-            width: (radius ?? 48) * 2 + 16,
-            height: (radius ?? 48) * 2 + 16,
+            width:
+                (radius ?? 48) * 2 + (radius != null ? (0.375 * radius!) : 16),
+            height:
+                (radius ?? 48) * 2 + (radius != null ? (0.375 * radius!) : 16),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Colors.purple, Colors.pink, Colors.orange],
+              gradient: LinearGradient(
+                colors: [Colors.lightGreenAccent, secondaryColor, Colors.green],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -48,11 +51,11 @@ class ProfilePicture extends StatelessWidget {
           child:
               exists
                   ? CustomCachedNetworkImage(
-                    imageUrl: link,
+                    imageUrl: link!,
                     isRounded: true,
                     radius: radius ?? 48,
                   )
-                  : Icon(Icons.person, size: 48),
+                  : Icon(Icons.person, size: radius ?? 48),
         ),
       ],
     );

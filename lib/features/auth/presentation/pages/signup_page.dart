@@ -234,6 +234,7 @@ class _SignUpPageState extends State<SignUpPage> {
       builder: (context, state) {
         final bool isLoading = state is LoadingAuthState;
         return Scaffold(
+          backgroundColor: Theme.of(context).primaryColor,
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),

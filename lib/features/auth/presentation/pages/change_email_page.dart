@@ -181,6 +181,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
       builder: (context, state) {
         final bool isLoading = state is LoadingAuthState;
         return Scaffold(
+          backgroundColor: Theme.of(context).primaryColor,
           appBar: _buildAppBar(),
           body:
               isLoading

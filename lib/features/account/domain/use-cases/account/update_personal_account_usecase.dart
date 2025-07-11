@@ -10,7 +10,7 @@ class UpdatePersonalAccountUsecase {
 
   UpdatePersonalAccountUsecase({required this.repository});
 
-  Future<Either<AppFailure, Unit>> call({
+  Future<Either<AppFailure, PersonalAccountEntity>> call({
     required File? profilePic,
     required PersonalAccountEntity personalAccount,
   }) async {

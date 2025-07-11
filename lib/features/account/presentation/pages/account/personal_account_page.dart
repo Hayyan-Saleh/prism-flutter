@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
-import 'package:prism/features/account/domain/use-cases/account/get_local_personal_account_usecase.dart';
-import 'package:prism/features/account/domain/use-cases/account/get_remote_personal_account_usecase.dart';
-import 'package:prism/features/account/domain/use-cases/account/update_personal_account_usecase.dart';
+import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
-import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/features/account/presentation/widgets/personal_info_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PersonalAccountPage extends StatefulWidget {
   const PersonalAccountPage({super.key});
@@ -16,35 +15,66 @@ class PersonalAccountPage extends StatefulWidget {
 }
 
 class _PersonalAccountPageState extends State<PersonalAccountPage> {
-  Widget _buildFollowersWidget(int count, BuildContext context) {
-    return Column(
-      spacing: 4,
-      children: [
-        // TODO: LOCALIZE
-        Text(
-          "Followers",
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
+  @override
+  void initState() {
+    context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
+    super.initState();
+  }
 
-        Text(count.toString(), style: Theme.of(context).textTheme.bodyLarge),
-      ],
+  Widget _buildFollowersWidget(
+    PersonalAccountEntity account,
+    BuildContext context,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.accounts,
+          arguments: {'personalAccount': account, 'following': false},
+        );
+      },
+      child: Column(
+        spacing: 4,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.followers,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+
+          Text(
+            account.followersCount.toString(),
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildFollowingWidget(int count, BuildContext context) {
-    return Column(
-      children: [
-        // TODO: LOCALIZE
-        Text(
-          "Following",
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        Text(count.toString(), style: Theme.of(context).textTheme.bodyLarge),
-      ],
+  Widget _buildFollowingWidget(
+    PersonalAccountEntity account,
+    BuildContext context,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.accounts,
+          arguments: {'personalAccount': account, 'following': true},
+        );
+      },
+      child: Column(
+        spacing: 4,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.following,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            account.followingCount.toString(),
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ],
+      ),
     );
   }
 
@@ -53,21 +83,38 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
       spacing: 10,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           mainAxisSize: MainAxisSize.max,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: ProfilePicture(link: '', hasStatus: false),
+              padding: const EdgeInsets.only(left: 8.0),
+              child: ProfilePicture(link: '', hasStatus: false, radius: 42),
             ),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Column(children: [Text("Followers"), Text('')]),
-                  Column(children: [Text("Following"), Text('')]),
+                  if (context != null) ...[
+                    Column(
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)?.followers ??
+                              'followers',
+                        ),
+                        Text(''),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)?.following ??
+                              'following',
+                        ),
+                        Text(''),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -99,84 +146,96 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
     );
   }
 
+  Widget _buildProfilePic(PersonalAccountEntity personalAccount) {
+    return GestureDetector(
+      onTap:
+          personalAccount.hasStatus
+              ? () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.showStatusPage,
+                  arguments: {
+                    'userId': personalAccount.id,
+                    'personalStatuses': true,
+                  },
+                );
+              }
+              : null,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: ProfilePicture(
+          link: personalAccount.picUrl ?? '',
+          hasStatus: personalAccount.hasStatus,
+          radius: 42,
+        ),
+      ),
+    );
+  }
+
   Widget _buildFirstSection(BuildContext context) {
     return BlocBuilder<PAccountBloc, PAccountState>(
       builder: (context, state) {
-        if (state is LoadedPAccountState) {
+        final account =
+            state is LoadedPAccountState
+                ? state.personalAccount
+                : context.read<PAccountBloc>().pAccount;
+
+        if (account != null) {
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: ProfilePicture(
-                        link: state.personalAccount.picUrl ?? '',
-                        // TODO: check wrong json
-                        // hasStatus: state.personalAccount.hasStatus == 'true',
-                        hasStatus: true,
-                      ),
-                    ),
+                    _buildProfilePic(account),
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
                         children: [
-                          _buildFollowersWidget(
-                            state.personalAccount.followersCount,
-                            context,
-                          ),
-                          _buildFollowingWidget(
-                            state.personalAccount.followingCount,
-                            context,
-                          ),
+                          _buildFollowersWidget(account, context),
+                          _buildFollowingWidget(account, context),
                         ],
                       ),
                     ),
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 16.0, top: 24),
+                  padding: const EdgeInsets.only(left: 16.0, top: 8),
                   child: Text(
-                    state.personalAccount.accountName,
-
+                    account.accountName,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-                Container(
-                  margin: const EdgeInsets.only(left: 16.0, top: 8),
-                  child: Text(
-                    state.personalAccount.bio,
-
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onPrimary.withAlpha(150),
+                if (account.bio.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(left: 16.0, top: 8),
+                    child: Text(
+                      account.bio,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withAlpha(150),
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
+                if (account.personalInfos.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    child: PersonalInfoWidget(
+                      userName: account.fullName,
+                      personalInfo: account.personalInfos,
+                      onToggleExpand: () => setState(() {}),
+                    ),
                   ),
-                  child: PersonalInfoWidget(
-                    userName: state.personalAccount.fullName,
-                    personalInfo: state.personalAccount.personalInfos,
-                    onToggleExpand: () {
-                      setState(() {});
-                    },
-                  ),
-                ),
               ],
             ),
           );
         }
-        return _buildFirstSectionSkeleton();
+        return _buildFirstSectionSkeleton(context: context);
       },
     );
   }
@@ -187,9 +246,9 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 16.0),
+          padding: const EdgeInsets.only(left: 16.0, top: 8),
           child: Text(
-            "Highlights",
+            AppLocalizations.of(context)!.highlights,
             style: Theme.of(
               context,
             ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -210,7 +269,7 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     spacing: 8,
                     children: [
-                      ProfilePicture(link: '', hasStatus: true),
+                      ProfilePicture(link: '', hasStatus: true, radius: 32),
                       Text(
                         "28/$index/24",
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -227,7 +286,8 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
   }
 
   Widget _buildPostsSection() {
-    return Text("Posts Section");
+    // TODO: RAFAT POSTS ADDED HERE as widget (if wanted to add a list view or single child scroll view then make no scroll physics)
+    return Text(AppLocalizations.of(context)!.postsSection);
   }
 
   Widget _wrapWithRefreshIndicator({
@@ -243,41 +303,22 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
     );
   }
 
-  Widget _wrapWithProvider({required Widget child}) {
-    return BlocProvider<PAccountBloc>(
-      create:
-          (context) =>
-              _getPAccountBloc(context)..add(LoadRemotePAccountEvent()),
-      child: child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return _wrapWithProvider(
-      child: _wrapWithRefreshIndicator(
-        context: context,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              _buildFirstSection(context),
-              _buildHighlightsSection(context),
-              _buildPostsSection(),
-              SizedBox(height: 1000),
-            ],
-          ),
+    return _wrapWithRefreshIndicator(
+      context: context,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            _buildFirstSection(context),
+            _buildHighlightsSection(context),
+            _buildPostsSection(),
+          ],
         ),
       ),
-    );
-  }
-
-  PAccountBloc _getPAccountBloc(BuildContext context) {
-    return PAccountBloc(
-      getLocalPersonalAccount: sl<GetLocalPersonalAccountUsecase>(),
-      getRemotePersonalAccount: sl<GetRemotePersonalAccountUsecase>(),
-      updatePersonalAccount: sl<UpdatePersonalAccountUsecase>(),
     );
   }
 }

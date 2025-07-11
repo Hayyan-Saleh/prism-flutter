@@ -35,3 +35,5 @@ class GetStatusesEvent extends StatusEvent {
   @override
   List<Object> get props => [accountId];
 }
+
+class GetFollowingStatusesEvent extends StatusEvent {}

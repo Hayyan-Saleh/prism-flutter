@@ -1,4 +1,4 @@
-import 'package:prism/features/account/data/models/simplified/simplified_account_model.dart';
+import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/domain/enitities/account/main/group_account_entity.dart';
 
 class GroupAccountModel extends GroupAccountEntity {

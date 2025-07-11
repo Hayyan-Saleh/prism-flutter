@@ -220,10 +220,12 @@ class _SignInPageState extends State<SignInPage> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is LoggedInAuthState) {
-          BlocProvider.of<PAccountBloc>(
+          context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
+          Navigator.pushNamedAndRemoveUntil(
             context,
-          ).add(DefinePAccountCurrentStateEvent());
-          Navigator.pushReplacementNamed(context, AppRoutes.accMiddlePoint);
+            AppRoutes.accMiddlePoint,
+            ModalRoute.withName(AppRoutes.myApp),
+          );
         } else if (state is FailedAuthState) {
           showCustomAboutDialog(
             context,
@@ -237,6 +239,7 @@ class _SignInPageState extends State<SignInPage> {
       builder: (context, state) {
         final isLoading = state is LoadingAuthState;
         return Scaffold(
+          backgroundColor: Theme.of(context).primaryColor,
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),

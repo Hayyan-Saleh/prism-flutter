@@ -1,6 +1,6 @@
 part of 'personal_account_bloc.dart';
 
-sealed class PAccountEvent extends Equatable {
+abstract class PAccountEvent extends Equatable {
   const PAccountEvent();
 
   @override
@@ -9,20 +9,16 @@ sealed class PAccountEvent extends Equatable {
 
 class DefinePAccountCurrentStateEvent extends PAccountEvent {}
 
-class UpdatePAccountEvent extends PAccountEvent {
-  final File? profilePic;
-  final PersonalAccountEntity personalAccount;
+class LoadRemotePAccountEvent extends PAccountEvent {}
 
-  const UpdatePAccountEvent({
-    required this.profilePic,
-    required this.personalAccount,
-  });
+class UpdatePAccountEvent extends PAccountEvent {
+  final PersonalAccountEntity personalAccount;
+  final File? profilePic;
+
+  const UpdatePAccountEvent({required this.personalAccount, this.profilePic});
 
   @override
-  List<Object> get props =>
-      profilePic == null ? [personalAccount] : [personalAccount, profilePic!];
+  List<Object> get props => [personalAccount];
 }
 
-class LoadPAccountEvent extends PAccountEvent {}
-
-class LoadRemotePAccountEvent extends PAccountEvent {}
+class DeletePAccountEvent extends PAccountEvent {}

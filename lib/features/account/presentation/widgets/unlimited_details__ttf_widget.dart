@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UnlimitedDetailsTTFWidget extends StatefulWidget {
   final GlobalKey<FormState> formkey;
@@ -33,8 +34,7 @@ class _UnlimitedDetailsTTFWidgetState extends State<UnlimitedDetailsTTFWidget> {
         controller: widget.textEditingController,
         validator:
             (val) =>
-                // TODO: LOCALIZE
-                val == null || val.isEmpty ? "This Field is Required!" : null,
+                val == null || val.isEmpty ? AppLocalizations.of(context)!.fieldRequired : null,
         style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
         decoration: InputDecoration(
           errorStyle: const TextStyle(color: Colors.red),

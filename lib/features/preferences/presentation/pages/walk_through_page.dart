@@ -62,7 +62,10 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
           );
         }
       },
-      child: Scaffold(body: _buildBodyElements()),
+      child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
+        body: _buildBodyElements(),
+      ),
     );
   }
 

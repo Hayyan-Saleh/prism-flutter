@@ -92,3 +92,7 @@ void showCustomAboutDialog(
 void showSnackBar(BuildContext context, String msg) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 }
+
+Widget fixDirection({required Widget child}) {
+  return Directionality(textDirection: TextDirection.ltr, child: child);
+}

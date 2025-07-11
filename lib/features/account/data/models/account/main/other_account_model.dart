@@ -1,4 +1,5 @@
-import 'package:prism/features/account/data/models/main/personal_account_model.dart';
+import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
+import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/other_account_entity.dart';
 
 class OtherAccountModel extends OtherAccountEntity {
@@ -13,12 +14,27 @@ class OtherAccountModel extends OtherAccountEntity {
     required super.isPrivate,
     required super.personalInfos,
     required super.hasStatus,
-    required super.isFollowing,
+    required super.followingStatus,
     required super.followingCount,
+    required super.isBlocked,
   });
 
   factory OtherAccountModel.fromJson(Map<String, dynamic> json) {
     final personalAccount = PersonalAccountModel.fromJson(json);
+    final bool isBlocked = json['is_blocked'] ?? false;
+    final isFollowingRaw = json['is_following'];
+    final isRequestedRaw = json['is_requested'] as bool? ?? false;
+    FollowStatus status;
+    if (isRequestedRaw) {
+      status = FollowStatus.pending;
+    } else if (isFollowingRaw is bool) {
+      status =
+          isFollowingRaw ? FollowStatus.following : FollowStatus.notFollowing;
+    } else if (isFollowingRaw == 'owner') {
+      status = FollowStatus.following;
+    } else {
+      status = FollowStatus.notFollowing;
+    }
 
     return OtherAccountModel(
       id: personalAccount.id,
@@ -32,10 +48,8 @@ class OtherAccountModel extends OtherAccountEntity {
       accountName: personalAccount.accountName,
       followingCount: personalAccount.followingCount,
       hasStatus: personalAccount.hasStatus,
-      isFollowing:
-          json['is_following'] is bool
-              ? json['is_following']
-              : json['is_following'] == 'owner',
+      followingStatus: status,
+      isBlocked: isBlocked,
     );
   }
 
@@ -51,8 +65,9 @@ class OtherAccountModel extends OtherAccountEntity {
       isPrivate: entity.isPrivate,
       personalInfos: entity.personalInfos,
       hasStatus: entity.hasStatus,
-      isFollowing: entity.isFollowing,
+      followingStatus: entity.followingStatus,
       followingCount: entity.followingCount,
+      isBlocked: entity.isBlocked,
     );
   }
 
@@ -74,6 +89,6 @@ class OtherAccountModel extends OtherAccountEntity {
           hasStatus: hasStatus,
         ).toJson();
 
-    return {...personalAccountJson, 'is_following': isFollowing};
+    return {...personalAccountJson, 'is_following': followingStatus.toString()};
   }
 }
