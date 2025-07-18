@@ -10,6 +10,7 @@ import 'package:prism/features/account/domain/enitities/account/main/follow_stat
 import 'package:prism/features/account/domain/enitities/account/main/other_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/other_account_bloc/other_account_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/personal_info_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -187,7 +188,10 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
                 onPressed: () {
                   if (isBlockedByMe) {
                     context.read<OAccountBloc>().add(
-                      UnblockUserEvent(targetId: widget.otherAccountId),
+                      UnblockUserEvent(
+                        targetId: widget.otherAccountId,
+                        fromDetailedPage: true,
+                      ),
                     );
                   } else {
                     _onFollowPressed(followStatus != FollowStatus.following);
@@ -223,10 +227,18 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
           account.isBlocked
               ? null
               : () {
-                Navigator.pushNamed(
-                  context,
+                Navigator.of(context).pushNamed(
                   AppRoutes.accounts,
-                  arguments: {'personalAccount': account, 'following': false},
+                  arguments: {
+                    'appBarTitle': AppLocalizations.of(
+                      context,
+                    )!.followersTitle(account.fullName),
+                    'triggerEvent': (BuildContext blocContext) {
+                      blocContext.read<AccountsBloc>().add(
+                        GetFollowersAccountsEvent(accountId: account.id),
+                      );
+                    },
+                  },
                 );
               },
       child: Column(
@@ -254,10 +266,18 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
           account.isBlocked
               ? null
               : () {
-                Navigator.pushNamed(
-                  context,
+                Navigator.of(context).pushNamed(
                   AppRoutes.accounts,
-                  arguments: {'personalAccount': account, 'following': true},
+                  arguments: {
+                    'appBarTitle': AppLocalizations.of(
+                      context,
+                    )!.followingTitle(account.fullName),
+                    'triggerEvent': (BuildContext blocContext) {
+                      blocContext.read<AccountsBloc>().add(
+                        GetFollowingAccountsEvent(accountId: account.id),
+                      );
+                    },
+                  },
                 );
               },
       child: Column(
@@ -378,13 +398,10 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
               : null,
       child: Padding(
         padding: const EdgeInsets.only(left: 8.0),
-        child: Hero(
-          tag: 'showStatusTag',
-          child: ProfilePicture(
-            link: otherAccount.picUrl ?? '',
-            hasStatus: otherAccount.hasStatus,
-            radius: 42,
-          ),
+        child: ProfilePicture(
+          link: otherAccount.picUrl ?? '',
+          hasStatus: otherAccount.hasStatus,
+          radius: 42,
         ),
       ),
     );
@@ -600,10 +617,10 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
             mainAxisSize: MainAxisSize.max,
             children: [
               _buildFirstSection(account),
-              if (isPrivateAndNotFollowing)
-                _buildHiddenDataWidget(true)
-              else if (isBlockedByMe)
+              if (isBlockedByMe)
                 _buildHiddenDataWidget(false)
+              else if (isPrivateAndNotFollowing)
+                _buildHiddenDataWidget(true)
               else ...[
                 if (account.personalInfos.isNotEmpty)
                   _buildPersonalInfoSection(account),

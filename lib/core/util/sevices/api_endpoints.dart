@@ -1,6 +1,6 @@
 class ApiEndpoints {
   //TODO: change this line to your own vm
-  // static const String baseUrl = 'http://192.168.235.11:8000/api';
+  // static const String baseUrl = 'http://192.168.1.38:8000/api';
   static const String baseUrl = 'http://10.0.2.2:8000/api';
 
   //! auth
@@ -28,25 +28,25 @@ class ApiEndpoints {
   static const String deletePersonalAccount = "/user/delete";
   static const String blockOtherUser = "$usersPrefix/block";
   static const String unblockOtherUser = "$usersPrefix/unblock";
-
-  // TODO:
-  static const String getFollowingWithStatus = "/followingWithStatus";
-  static const String getUserStatuses =
-      "/statuses"; //body : user_id //! gets the user's statuses (all - no pagination)
-
-  static const String createStatus = "/statuses";
-
-  static const String followUser = "$usersPrefix/followUser";
-  static const String unfollow = "unfollow";
+  static const String blockedUsers = '$usersPrefix/blocked-users';
+  static const String likes = '/likes';
+  static const String likers = '/likes/users';
   static const String followers = "followers";
   static const String following = "following";
 
+  static const String followUser = "$usersPrefix/followUser";
+  static const String unfollow = "unfollow";
+
+  //! statuses
+  static const String getFollowingWithStatus = "/followingWithStatus";
+  static const String getUserStatuses = "/statuses";
+  static const String createStatus = "/statuses";
+  static const String archivedStatuses = '/statuses/archived-statuses';
+
+  //! highlights
+  static const String highlights = "/highlights";
+
+  // ! nofiticaiton
   static const String getFollowRequests = "$usersPrefix/requests";
   static const String respondToFollowRequest = "$usersPrefix/follow/request";
-
-  //? accept user follow request: users/requests/{{request_id}/accept
-  //* type: POST
-  //  body: targetId
-  //? get all follow requests : /users/requests
-  //* type: GET
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/core/util/widgets/error_page.dart';
-import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
@@ -11,9 +10,14 @@ import 'package:prism/features/account/presentation/widgets/simplified_account_w
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AccountsPage extends StatefulWidget {
-  final PersonalAccountEntity? personalAccount;
-  final bool? following;
-  const AccountsPage({super.key, this.personalAccount, this.following});
+  final String appBarTitle;
+  final Function(BuildContext) triggerEvent;
+
+  const AccountsPage({
+    super.key,
+    required this.appBarTitle,
+    required this.triggerEvent,
+  });
 
   @override
   State<AccountsPage> createState() => _AccountsPageState();
@@ -23,13 +27,7 @@ class _AccountsPageState extends State<AccountsPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.personalAccount != null && widget.following != null) {
-      context.read<AccountsBloc>().add(
-        widget.following!
-            ? GetFollowingAccountsEvent(accountId: widget.personalAccount!.id)
-            : GetFollowersAccountsEvent(accountId: widget.personalAccount!.id),
-      );
-    }
+    widget.triggerEvent(context);
   }
 
   @override
@@ -63,27 +61,13 @@ class _AccountsPageState extends State<AccountsPage> {
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.transparent,
-            title: Text(
-              (widget.following ?? false)
-                  ? AppLocalizations.of(context)!.followingTitle(widget.personalAccount?.fullName ?? '')
-                  : AppLocalizations.of(context)!.followersTitle(widget.personalAccount?.fullName ?? ''),
-            ),
+            title: Text(widget.appBarTitle),
           ),
           backgroundColor: Theme.of(context).primaryColor,
           body: RefreshIndicator(
             color: Theme.of(context).colorScheme.onPrimary,
             onRefresh: () async {
-              if (widget.personalAccount != null && widget.following != null) {
-                context.read<AccountsBloc>().add(
-                  widget.following!
-                      ? GetFollowingAccountsEvent(
-                        accountId: widget.personalAccount!.id,
-                      )
-                      : GetFollowersAccountsEvent(
-                        accountId: widget.personalAccount!.id,
-                      ),
-                );
-              }
+              widget.triggerEvent(context);
             },
             child: stateWidget,
           ),

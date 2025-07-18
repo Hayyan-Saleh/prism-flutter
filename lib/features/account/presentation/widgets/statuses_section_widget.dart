@@ -159,14 +159,7 @@ class _StatusesSectionWidgetState extends State<StatusesSectionWidget> {
               'initialUserIndex': index,
             },
           ),
-      child: Hero(
-        tag: account.id,
-        child: ProfilePicture(
-          link: account.avatar,
-          hasStatus: true,
-          radius: 36,
-        ),
-      ),
+      child: ProfilePicture(link: account.avatar, hasStatus: true, radius: 36),
     );
   }
 }

@@ -24,3 +24,14 @@ class GetFollowingAccountsEvent extends AccountsEvent {
   @override
   List<Object> get props => [accountId];
 }
+
+class GetBlockedAccountsEvent extends AccountsEvent {}
+
+class GetStatusLikersEvent extends AccountsEvent {
+  final int statusId;
+
+  const GetStatusLikersEvent({required this.statusId});
+
+  @override
+  List<Object> get props => [statusId];
+}

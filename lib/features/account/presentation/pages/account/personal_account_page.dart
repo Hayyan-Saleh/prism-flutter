@@ -4,6 +4,7 @@ import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/personal_info_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -26,13 +27,20 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
     BuildContext context,
   ) {
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          AppRoutes.accounts,
-          arguments: {'personalAccount': account, 'following': false},
-        );
-      },
+      onTap:
+          () => Navigator.of(context).pushNamed(
+            AppRoutes.accounts,
+            arguments: {
+              'appBarTitle': AppLocalizations.of(
+                context,
+              )!.followersTitle(account.fullName),
+              'triggerEvent': (BuildContext blocContext) {
+                blocContext.read<AccountsBloc>().add(
+                  GetFollowersAccountsEvent(accountId: account.id),
+                );
+              },
+            },
+          ),
       child: Column(
         spacing: 4,
         children: [
@@ -55,13 +63,20 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
     BuildContext context,
   ) {
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          AppRoutes.accounts,
-          arguments: {'personalAccount': account, 'following': true},
-        );
-      },
+      onTap:
+          () => Navigator.of(context).pushNamed(
+            AppRoutes.accounts,
+            arguments: {
+              'appBarTitle': AppLocalizations.of(
+                context,
+              )!.followingTitle(account.fullName),
+              'triggerEvent': (BuildContext blocContext) {
+                blocContext.read<AccountsBloc>().add(
+                  GetFollowingAccountsEvent(accountId: account.id),
+                );
+              },
+            },
+          ),
       child: Column(
         spacing: 4,
         children: [

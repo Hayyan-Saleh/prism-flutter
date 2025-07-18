@@ -10,6 +10,8 @@ class StatusEntity extends Equatable {
   final MediaEntity? media;
   final DateTime createdAt;
   final SimplifiedAccountEntity user;
+  final int likesCount;
+  final bool isLiked;
 
   const StatusEntity({
     required this.id,
@@ -19,7 +21,33 @@ class StatusEntity extends Equatable {
     this.media,
     required this.createdAt,
     required this.user,
+    required this.likesCount,
+    required this.isLiked,
   });
+
+  StatusEntity copyWith({
+    int? id,
+    String? text,
+    DateTime? expirationDate,
+    String? privacy,
+    MediaEntity? media,
+    DateTime? createdAt,
+    SimplifiedAccountEntity? user,
+    int? likesCount,
+    bool? isLiked,
+  }) {
+    return StatusEntity(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      expirationDate: expirationDate ?? this.expirationDate,
+      privacy: privacy ?? this.privacy,
+      media: media ?? this.media,
+      createdAt: createdAt ?? this.createdAt,
+      user: user ?? this.user,
+      likesCount: likesCount ?? this.likesCount,
+      isLiked: isLiked ?? this.isLiked,
+    );
+  }
 
   @override
   List<Object?> get props => [
@@ -30,5 +58,7 @@ class StatusEntity extends Equatable {
     media,
     createdAt,
     user,
+    likesCount,
+    isLiked,
   ];
 }

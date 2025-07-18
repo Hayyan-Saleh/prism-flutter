@@ -37,3 +37,5 @@ class GetStatusesEvent extends StatusEvent {
 }
 
 class GetFollowingStatusesEvent extends StatusEvent {}
+
+class GetArchivedStatusesEvent extends StatusEvent {}

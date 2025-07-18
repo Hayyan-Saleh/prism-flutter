@@ -76,4 +76,23 @@ abstract class AccountRepository {
   Future<Either<AccountFailure, Unit>> blockUser({required int targetId});
 
   Future<Either<AccountFailure, Unit>> unblockUser({required int targetId});
+
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>>
+  getBlockedAccounts();
+
+  Future<Either<AccountFailure, List<StatusEntity>>> getArchivedStatuses();
+
+  Future<Either<AccountFailure, Unit>> createHighlight({
+    required List<int> statusIds,
+    String? text,
+    File? cover,
+  });
+
+  Future<Either<AccountFailure, Unit>> toggleLikeStatus({
+    required int statusId,
+  });
+
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getStatusLikers({
+    required int statusId,
+  });
 }

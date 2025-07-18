@@ -16,19 +16,22 @@ import 'package:prism/features/account/domain/enitities/account/main/personal_ac
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
 import 'package:prism/features/account/domain/repository/account_repository.dart';
+import 'package:prism/features/auth/data/datasources/user_local_data_source.dart';
 import 'package:prism/features/auth/domain/usecases/load_user_use_case.dart';
 
 class AccountRepositoryImpl implements AccountRepository {
   final AccountRemoteDataSource remoteDataSource;
-  final PersonalAccountLocalDataSource localDataSource;
+  final PersonalAccountLocalDataSource personalAccLDS;
+  final UserLocalDataSource authLDS;
   final LoadUserUseCase loadUser;
   final TokenService tokenService;
 
   AccountRepositoryImpl({
     required this.remoteDataSource,
-    required this.localDataSource,
+    required this.personalAccLDS,
     required this.tokenService,
     required this.loadUser,
+    required this.authLDS,
   });
 
   Future<Either<AccountFailure, String>> _getToken() async {
@@ -92,7 +95,7 @@ class AccountRepositoryImpl implements AccountRepository {
         final PersonalAccountModel backendModel = PersonalAccountModel.fromJson(
           result['user'],
         );
-        await localDataSource.storeAccount(backendModel);
+        await personalAccLDS.storeAccount(backendModel);
         return Right(backendModel.toEntity());
       });
     });
@@ -102,7 +105,7 @@ class AccountRepositoryImpl implements AccountRepository {
   Future<Either<AccountFailure, PersonalAccountEntity?>>
   getLocalPersonalAccount() async {
     try {
-      final PersonalAccountModel? model = await localDataSource.getAccount();
+      final PersonalAccountModel? model = await personalAccLDS.getAccount();
       return Right(model?.toEntity());
     } catch (e) {
       return Left(AccountFailure(e.toString()));
@@ -123,7 +126,7 @@ class AccountRepositoryImpl implements AccountRepository {
               token: token,
               id: loadedUser.id,
             );
-            await localDataSource.storeAccount(model);
+            await personalAccLDS.storeAccount(model);
             return Right(model.toEntity());
           } on AccountException catch (e) {
             return Left(AccountFailure(e.message));
@@ -223,8 +226,9 @@ class AccountRepositoryImpl implements AccountRepository {
     return _withToken((token) async {
       try {
         await remoteDataSource.deleteAccount(token: token);
-        await localDataSource.clearAccount();
+        await personalAccLDS.clearAccount();
         await tokenService.deleteUserToken();
+        await authLDS.clearSession();
         return const Right(unit);
       } on AccountException catch (e) {
         return Left(AccountFailure(e.message));
@@ -311,6 +315,100 @@ class AccountRepositoryImpl implements AccountRepository {
       try {
         await remoteDataSource.unblockUser(token: token, targetId: targetId);
         return Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>>
+  getBlockedAccounts() {
+    return _withToken((token) async {
+      try {
+        final accounts = await remoteDataSource.getBlockedAccounts(
+          token: token,
+        );
+        return Right(accounts);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, List<StatusEntity>>> getArchivedStatuses() {
+    return _withToken((token) async {
+      try {
+        final statuses = await remoteDataSource.getArchivedStatuses(
+          token: token,
+        );
+        return Right(statuses.map((model) => model).toList());
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> createHighlight({
+    required List<int> statusIds,
+    String? text,
+    File? cover,
+  }) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.createHighlight(
+          token: token,
+          statusIds: statusIds,
+          text: text,
+          cover: cover,
+        );
+        return const Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> toggleLikeStatus({
+    required int statusId,
+  }) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.toggleLikeStatus(
+          token: token,
+          statusId: statusId,
+        );
+        return const Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getStatusLikers({
+    required int statusId,
+  }) {
+    return _withToken((token) async {
+      try {
+        final likers = await remoteDataSource.getStatusLikers(
+          token: token,
+          statusId: statusId,
+        );
+        return Right(likers);
       } on AccountException catch (e) {
         return Left(AccountFailure(e.message));
       } catch (e) {

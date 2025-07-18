@@ -12,16 +12,21 @@ import 'package:prism/features/account/domain/repository/account_repository.dart
 import 'package:prism/features/account/domain/repository/notification_repository.dart';
 import 'package:prism/features/account/domain/use-cases/account/block_user_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/check_account_name_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/create_highlight_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/create_status_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/delete_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/delete_status_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_archived_statuses_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_blocked_accounts_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_followers_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_following_statuses_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_following_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_local_personal_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_other_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_remote_personal_account_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_status_likers_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_statuses_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/toggle_like_status_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/toggle_other_account_follow_use_case.dart';
 import 'package:prism/features/account/domain/use-cases/account/unblock_user_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/update_personal_account_usecase.dart';
@@ -33,7 +38,9 @@ import 'package:prism/features/account/presentation/bloc/account/personal_accoun
 import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
-import 'package:prism/features/account/presentation/bloc/notification/notification_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/highlight_bloc/highlight_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/like_bloc/like_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 import 'package:prism/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:prism/features/auth/data/datasources/google_auth_datasource.dart';
 import 'package:prism/features/auth/data/datasources/user_local_data_source.dart';
@@ -182,6 +189,14 @@ Future<void> init() async {
       deleteStatusUseCase: sl(),
       getStatusesUseCase: sl(),
       getFollowingStatuses: sl(),
+      getArchivedStatusesUsecase: sl(),
+    ),
+  );
+  sl.registerFactoryParam<LikeBloc, bool, int>(
+    (isLiked, likesCount) => LikeBloc(
+      toggleLikeStatusUseCase: sl(),
+      isLiked: isLiked,
+      likesCount: likesCount,
     ),
   );
   sl.registerFactory(
@@ -190,7 +205,12 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-    () => AccountsBloc(getFollowers: sl(), getFollowing: sl()),
+    () => AccountsBloc(
+      getFollowers: sl(),
+      getFollowing: sl(),
+      getBlocked: sl(),
+      getStatusLikers: sl(),
+    ),
   );
 
   sl.registerFactory(() => FollowBloc(toggleOAccountFollow: sl()));
@@ -200,6 +220,7 @@ Future<void> init() async {
       respondToFollowRequestUseCase: sl(),
     ),
   );
+  sl.registerFactory(() => HighlightBloc(createHighlightUseCase: sl()));
   // Use cases
   sl.registerLazySingleton(
     () => GetLocalPersonalAccountUsecase(repository: sl()),
@@ -212,13 +233,17 @@ Future<void> init() async {
     () => UpdatePersonalAccountUsecase(repository: sl()),
   );
   sl.registerLazySingleton(() => DeleteAccountUsecase(repository: sl()));
+
   sl.registerLazySingleton(() => CreateStatusUseCase(repository: sl()));
   sl.registerLazySingleton(() => DeleteStatusUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetStatusesUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetFollowingStatusesUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetArchivedStatusesUsecase(repository: sl()));
+  sl.registerLazySingleton(() => ToggleLikeStatusUseCase(repository: sl()));
 
   sl.registerLazySingleton(() => GetFollowersUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetFollowingUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetBlockedAccountsUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetOtherAccountUsecase(repository: sl()));
   sl.registerLazySingleton(() => ToggleOAccountFollowUseCase(repository: sl()));
   sl.registerLazySingleton(() => BlockUserUsecase(repository: sl()));
@@ -227,10 +252,13 @@ Future<void> init() async {
   sl.registerLazySingleton(
     () => RespondToFollowRequestUseCase(repository: sl()),
   );
+  sl.registerLazySingleton(() => GetStatusLikersUseCase(repository: sl()));
+  sl.registerLazySingleton(() => CreateHighlightUseCase(repository: sl()));
   // Repository
   sl.registerLazySingleton<AccountRepository>(
     () => AccountRepositoryImpl(
-      localDataSource: sl(),
+      authLDS: sl(),
+      personalAccLDS: sl(),
       remoteDataSource: sl(),
       loadUser: sl(),
       tokenService: sl(),

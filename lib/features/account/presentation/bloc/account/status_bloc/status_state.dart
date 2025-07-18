@@ -33,6 +33,15 @@ class FollowingStatusLoaded extends StatusState {
   List<Object> get props => [simpleAccounts];
 }
 
+class ArchivedStatusLoaded extends StatusState {
+  final List<StatusEntity> statuses;
+
+  const ArchivedStatusLoaded({required this.statuses});
+
+  @override
+  List<Object> get props => [statuses];
+}
+
 class StatusFailure extends StatusState {
   final String error;
 

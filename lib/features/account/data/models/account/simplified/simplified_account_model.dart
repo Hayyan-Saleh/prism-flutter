@@ -39,7 +39,7 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
       id: json['id'] as int,
       fullName: json['name'] as String,
       accountName: json['username'] as String,
-      avatar: json['avatar'] as String?,
+      avatar: json['avatar'] as String? ?? '',
       followingStatus: status,
       isPrivate:
           (json['is_private'] is int?

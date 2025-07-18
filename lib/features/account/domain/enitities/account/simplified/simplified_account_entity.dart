@@ -5,7 +5,7 @@ class SimplifiedAccountEntity extends Equatable {
   final int id;
   final String fullName;
   final String accountName;
-  final String? avatar;
+  final String avatar;
   final FollowStatus followingStatus;
   final bool isPrivate;
 

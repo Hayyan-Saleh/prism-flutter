@@ -43,7 +43,9 @@ class OAccountBloc extends Bloc<OAccountEvent, OAccountState> {
         either.fold((failure) => emit(FailedOAccountState(failure: failure)), (
           _,
         ) {
-          add(LoadOAccountEvent(id: event.targetId));
+          !event.fromDetailedPage
+              ? emit(UserUnblockedState())
+              : add(LoadOAccountEvent(id: event.targetId));
         });
       }
     });

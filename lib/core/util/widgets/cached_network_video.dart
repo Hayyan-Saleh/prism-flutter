@@ -31,8 +31,10 @@ class CachedNetworkVideoState extends State<CachedNetworkVideo> {
   void _initializePlayer() {
     _controller = BetterPlayerController(
       BetterPlayerConfiguration(
+        fit: BoxFit.cover,
+        expandToFill: true,
         autoPlay: true,
-        aspectRatio: 16 / 9,
+        aspectRatio: 3 / 4,
         errorBuilder:
             (context, errorMessage) => Center(
               child: Text(
@@ -73,6 +75,14 @@ class CachedNetworkVideoState extends State<CachedNetworkVideo> {
     );
   }
 
+  void pause() {
+    _controller.pause();
+  }
+
+  void resume() {
+    _controller.play();
+  }
+
   @override
   void didUpdateWidget(CachedNetworkVideo oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -92,9 +102,6 @@ class CachedNetworkVideoState extends State<CachedNetworkVideo> {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: BetterPlayer(controller: _controller),
-    );
+    return BetterPlayer(controller: _controller);
   }
 }

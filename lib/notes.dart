@@ -14,22 +14,45 @@
 // 11- create the 'delete status' btn in the show status page (after creating the boolean attr 'personalStatuses' ) in it and default it to false then pass it from personal account page as true   
 // 12- create the 'delete account' btn in the settings bottom sheet
 // 13- create the 'block other account' btn in the other account page (add the pop up menu in the app bar actions)
-//* 14- create the 'block users' btn in the home page settings bottom sheet
-//* 15- check the 'delete account' after hamza push git changes
+// 14- create the 'show blocked users' btn in the home page settings bottom sheet
+// 15- make the 'getBlockedAccounts' usecase inside the 'accounts bloc' instead of the 'oAccountBloc' and fix their pages in blocked accounts page...
+// 16- create 'getArchivedStories' btn in the homepage settings bottom sheet (status bloc)
+// 17- add a the liking functionality to a status and alter the status entity
+// 18- add a the 'show likers' functionality to a status and use the accounts bloc
+// 19- make a pauser in the status timer when the likers page is pushed or popped
 
-//! next step : creating the local notifications section 
-//* 1- create the notification section in home page for (requests)
-//* 2- handle (accept) the follow request
+ 
+//! highlights
+// 1- add highlight to account : Route::post('/highlights', [HighlightController::class, 'store']);
+//* 2- get account's highlights : Route::get('/highlights', [HighlightController::class, 'index']);
+//* 3- get account's highlights : Route::get('/highlights', [HighlightController::class, 'index']);
+//* 4- get detailed highlight : Route::get('highlights/{id}', [HighlightController::class, 'show']);
+//* 5- delete a highlight : Route::delete('/highlights/{id}', [HighlightController::class, 'destroy']);
+//* 6- set a cover to a highlight: Route::post('/highlights/set-cover', [HighlightController::class, 'setCover']);
+
+
+//! notifications section 
+// 1- create the notification section in home page for (requests)
+// 2- handle (accept/reject) the follow request
 
 // ?Feature TODO: in account feature in account section: 
-// ! 1- block a user
+// 1- block a user
 // 2- delete an account
 // ! 3- get User Highlightes
-// ! 3- add a status to highlights
-// 4- delete a status
-// 5- handle private status logic
-// 6- handle private other account logic
+// 4- add a status to highlights
+// 5- delete a status
+// 6- handle private status logic
+// 7- handle private other account logic
+// ! 8- create/ delete/ update a group
 
+// ?Feature TODO: in account feature in notification section:
+// 1- handle account follow requests notifications  
+// ! 2- handle group follow requests notifications  
+
+// ? TODOS: ON END the account feature:
+// ! 1- fix all text fields which could make an overflow
+// ! 2- fix api endpoints file in auth strings so that they don't rely on the hard coded string from the rather the one from the api client
+// ! 3- see if you can fix the error in which the 'cached_video_player' is finding troubles when changing the url of a video from 10.0.2.2 to 192.168.1.xx or in the opposite way (video won't play or load) or it is because of bad connection with backend server
 // TODOs (End Hayyan Section): ======================================================
 
 //? Adiveces for friends:
@@ -40,3 +63,4 @@
 // * 1. using the image picker package methods located in functions.dart
 // * 2. using the widget which shows a gallery named gallery_widget.dart
 // ! 3- for media showing we're using cached network img for the images and cached_video_player for videos => the widgets can be found in the core section 
+// ! 4- for the post/comment like we can use the 'like bloc' and provide it in the required scope respectively after adding the required usecases 

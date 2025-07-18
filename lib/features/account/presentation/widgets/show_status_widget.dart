@@ -2,15 +2,19 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/core/util/entities/media_entity.dart';
 import 'package:prism/core/util/functions/functions.dart';
+import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/widgets/cached_network_video.dart';
 import 'package:prism/core/util/widgets/custom_cached_network_image.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/like_bloc/like_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ShowStatusWidget extends StatefulWidget {
   final int userId;
@@ -34,36 +38,65 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
   int _currentPage = 0;
   Timer? _timer;
   double _progress = 0.0;
+  List<StatusEntity> _statuses = [];
+  bool _isTextExpanded = false;
+  CachedNetworkVideoState? _videoController;
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<StatusBloc, StatusState>(
-      listener: _handleBlocListener,
-      builder: _buildContent,
+    return WillPopScope(
+      onWillPop: _handlePop,
+      child: BlocConsumer<StatusBloc, StatusState>(
+        listener: _handleBlocListener,
+        builder: _buildContent,
+      ),
     );
   }
 
+  Future<bool> _handlePop() async {
+    _pauseContent();
+    return true;
+  }
+
   void _handleBlocListener(BuildContext context, StatusState state) {
-    if (state is StatusLoaded &&
-        state.statuses.isNotEmpty &&
-        _currentPage == 0) {
-      if (state.statuses[0].media == null ||
-          state.statuses[0].media!.type == MediaType.image) {
-        _startTimer(5.0, state.statuses.length, 0);
+    if (state is StatusDeleted) {
+      context.read<StatusBloc>().add(
+        GetStatusesEvent(accountId: widget.userId),
+      );
+      return;
+    }
+
+    if (state is StatusLoaded) {
+      if (mounted) {
+        setState(() {
+          _statuses = state.statuses;
+        });
+        if (state.statuses.isNotEmpty && _currentPage == 0) {
+          if (state.statuses[0].media == null ||
+              state.statuses[0].media!.type == MediaType.image) {
+            _startTimer(5.0, state.statuses.length, 0);
+          }
+        }
       }
     }
   }
 
   Widget _buildContent(BuildContext context, StatusState state) {
-    if (state is StatusLoading) return _buildLoading();
-    if (state is StatusLoaded) {
-      return Hero(
-        tag: state.statuses.first.user.id,
-        child: _buildLoaded(state),
+    if (state is StatusLoading) {
+      return _buildLoading();
+    }
+    if (state is StatusLoaded && _statuses.isNotEmpty) {
+      return Hero(tag: _statuses.first.user.id, child: _buildLoaded());
+    }
+    if (state is StatusFailure) {
+      return _buildError(state.error);
+    }
+    if (state is StatusLoaded && _statuses.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noStatusesAvailable),
       );
     }
-    if (state is StatusFailure) return _buildError(state.error);
-    return _buildError(AppLocalizations.of(context)!.somethingWentWrong);
+    return Container();
   }
 
   Widget _buildLoading() {
@@ -78,8 +111,8 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     return Center(child: Text(message));
   }
 
-  Widget _buildLoaded(StatusLoaded state) {
-    if (state.statuses.isEmpty) {
+  Widget _buildLoaded() {
+    if (_statuses.isEmpty) {
       return Center(
         child: Text(AppLocalizations.of(context)!.noStatusesAvailable),
       );
@@ -87,11 +120,11 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     return SafeArea(
       child: Stack(
         children: [
-          _buildPageView(state),
+          _buildPageView(),
           Column(
             children: [
-              _buildProgressIndicators(state.statuses),
-              _buildTopBar(state.statuses[_currentPage]),
+              _buildProgressIndicators(_statuses),
+              _buildTopBar(_statuses[_currentPage]),
             ],
           ),
         ],
@@ -99,59 +132,78 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     );
   }
 
-  Widget _buildPageView(StatusLoaded state) {
+  Widget _buildPageView() {
     return PageView.builder(
       controller: _pageController,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: state.statuses.length,
-      onPageChanged: (index) => _handlePageChange(index, state),
+      itemCount: _statuses.length,
+      onPageChanged: (index) => _handlePageChange(index),
       itemBuilder:
-          (context, index) => _buildStatusPage(
-            state.statuses[index],
-            state.statuses.length,
-            index,
-          ),
+          (context, index) =>
+              _buildStatusPage(_statuses[index], _statuses.length, index),
     );
   }
 
-  void _handlePageChange(int index, StatusLoaded state) {
-    setState(() {
-      _currentPage = index;
-      _progress = 0.0;
-    });
-    if (state.statuses[index].media == null ||
-        state.statuses[index].media!.type == MediaType.image) {
-      _startTimer(5.0, state.statuses.length, index);
+  void _handlePageChange(int index) {
+    if (mounted) {
+      setState(() {
+        _currentPage = index;
+        _progress = 0.0;
+        _isTextExpanded = false;
+        _videoController = null;
+      });
+      if (_statuses.isNotEmpty &&
+          (_statuses[index].media == null ||
+              _statuses[index].media!.type == MediaType.image)) {
+        _startTimer(5.0, _statuses.length, index);
+      }
     }
   }
 
   void _startTimer(double duration, int totalStatuses, int currentIndex) {
     _timer?.cancel();
-    _progress = 0.0;
-    const updateInterval = Duration(milliseconds: 50);
-    _timer = Timer.periodic(updateInterval, (timer) {
-      setState(() {
-        _progress += updateInterval.inMilliseconds / 1000 / duration;
-        if (_progress >= 1.0) {
-          timer.cancel();
-          _navigateNext(totalStatuses, currentIndex);
+    if (mounted) {
+      _progress = 0.0;
+      const updateInterval = Duration(milliseconds: 50);
+      _timer = Timer.periodic(updateInterval, (timer) {
+        if (mounted) {
+          setState(() {
+            _progress += updateInterval.inMilliseconds / 1000 / duration;
+            if (_progress >= 1.0) {
+              timer.cancel();
+              _navigateNext(totalStatuses, currentIndex);
+            }
+          });
         }
       });
-    });
+    }
+  }
+
+  void _pauseContent() {
+    _timer?.cancel();
+    if (_videoController != null) {
+      _videoController!.pause();
+    }
+  }
+
+  void _resumeContent(int totalStatuses, int currentIndex) {
+    final status = _statuses[currentIndex];
+    if (status.media == null || status.media!.type == MediaType.image) {
+      _startTimer(5.0, totalStatuses, currentIndex);
+    } else if (status.media!.type == MediaType.video &&
+        _videoController != null) {
+      _videoController!.resume();
+    }
   }
 
   void _navigatePrevious() {
     if (_currentPage != 0) {
-      setState(() {
-        _pageController.previousPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.linear,
-        );
-      });
-    } else if (widget.onFinished != null) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.linear,
+      );
+    } else if (widget.onStart != null) {
       widget.onStart!();
-    } else {
-      Navigator.of(context).pop();
     }
   }
 
@@ -163,8 +215,6 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
       );
     } else if (widget.onFinished != null) {
       widget.onFinished!();
-    } else {
-      Navigator.of(context).pop();
     }
   }
 
@@ -181,11 +231,82 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     );
   }
 
+  Widget _buildLikeWidget(StatusEntity status) {
+    return BlocBuilder<LikeBloc, LikeState>(
+      builder: (context, state) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                state.isLiked ? Icons.favorite : Icons.favorite_border,
+                color: state.isLiked ? Colors.pink : Colors.white,
+                size: 32,
+              ),
+              onPressed: () {
+                if (state is! LikeInProgress) {
+                  context.read<LikeBloc>().add(
+                    ToggleLikeEvent(statusId: status.id),
+                  );
+                }
+              },
+            ),
+            state.likesCount > 0
+                ? GestureDetector(
+                  onTap: () {
+                    _pauseContent();
+                    Navigator.of(context)
+                        .pushNamed(
+                          AppRoutes.accounts,
+                          arguments: {
+                            'appBarTitle': AppLocalizations.of(context)!.likers,
+                            'triggerEvent': (BuildContext blocContext) {
+                              blocContext.read<AccountsBloc>().add(
+                                GetStatusLikersEvent(statusId: status.id),
+                              );
+                            },
+                          },
+                        )
+                        .then(
+                          (_) => _resumeContent(_statuses.length, _currentPage),
+                        );
+                  },
+                  child: Container(
+                    color: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
+                    ),
+                    child: Text(
+                      state.likesCount.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                )
+                : Container(
+                  color: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
+                  ),
+                  child: Text(
+                    state.likesCount.toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildStatusContent(
     StatusEntity status,
     int totalStatuses,
     int currentIndex,
   ) {
+    final hasMediaWithText =
+        status.media != null && status.text != null && status.text!.isNotEmpty;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -195,10 +316,88 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
           _buildImageStatus(status)
         else
           _buildVideoStatus(status, totalStatuses, currentIndex),
-        if (status.media != null &&
-            status.text != null &&
-            status.text!.isNotEmpty)
-          _buildTextOverlay(status.text!),
+        Positioned(
+          bottom: 16,
+          left: 16,
+          right: 16,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (hasMediaWithText)
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      setState(() {
+                        _isTextExpanded = !_isTextExpanded;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      constraints: BoxConstraints(
+                        maxHeight:
+                            _isTextExpanded
+                                ? 0.6 * getHeight(context)
+                                : 3 * 18.0 * 1.2,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            _isTextExpanded
+                                ? Colors.black.withOpacity(0.5)
+                                : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: SingleChildScrollView(
+                        physics:
+                            _isTextExpanded
+                                ? const AlwaysScrollableScrollPhysics()
+                                : const NeverScrollableScrollPhysics(),
+                        child: Text(
+                          status.text!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.left,
+                          maxLines: _isTextExpanded ? null : 3,
+                          overflow:
+                              _isTextExpanded ? null : TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              BlocProvider<LikeBloc>(
+                create:
+                    (context) => LikeBloc(
+                      toggleLikeStatusUseCase: sl(),
+                      isLiked: status.isLiked,
+                      likesCount: status.likesCount,
+                    ),
+                child: BlocListener<LikeBloc, LikeState>(
+                  listener: (context, state) {
+                    if (state is LikeSuccess && mounted) {
+                      setState(() {
+                        final index = _statuses.indexWhere(
+                          (s) => s.id == status.id,
+                        );
+                        if (index != -1) {
+                          _statuses[index] = _statuses[index].copyWith(
+                            isLiked: state.isLiked,
+                            likesCount: state.likesCount,
+                          );
+                        }
+                      });
+                    }
+                  },
+                  child: _buildLikeWidget(status),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -209,14 +408,43 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text(
-            status.text ?? '',
-            style: const TextStyle(
-              fontSize: 24,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              setState(() {
+                _isTextExpanded = !_isTextExpanded;
+              });
+            },
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight:
+                    _isTextExpanded ? 0.6 * getHeight(context) : 3 * 24.0 * 1.2,
+              ),
+              decoration: BoxDecoration(
+                color:
+                    _isTextExpanded
+                        ? Colors.black.withOpacity(0.5)
+                        : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SingleChildScrollView(
+                physics:
+                    _isTextExpanded
+                        ? const AlwaysScrollableScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
+                child: Text(
+                  status.text ?? '',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: _isTextExpanded ? null : 3,
+                  overflow: _isTextExpanded ? null : TextOverflow.ellipsis,
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         ),
       ),
@@ -273,6 +501,7 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     int currentIndex,
   ) {
     final vidWidget = CachedNetworkVideo(
+      key: ValueKey(status.media!.url),
       videoUrl: status.media!.url,
       showControls: false,
       onEnd: () => setState(() => _navigateNext(totalStatuses, currentIndex)),
@@ -289,7 +518,7 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
             child: Stack(
               fit: StackFit.expand,
               children: [
-                AspectRatio(aspectRatio: 16 / 9, child: vidWidget),
+                vidWidget,
                 BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
                   child: Container(color: Colors.black.withAlpha(100)),
@@ -298,36 +527,35 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
             ),
           ),
         ),
-        Center(child: vidWidget),
-      ],
-    );
-  }
-
-  Widget _buildTextOverlay(String text) {
-    return Positioned(
-      bottom: 16,
-      left: 16,
-      right: 16,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        color: Colors.transparent,
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        Center(
+          child: Builder(
+            builder: (context) {
+              final controller =
+                  context.findAncestorStateOfType<CachedNetworkVideoState>();
+              if (controller != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    setState(() {
+                      _videoController = controller;
+                    });
+                  }
+                });
+              }
+              return vidWidget;
+            },
           ),
-          textAlign: TextAlign.center,
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildNavigationOverlay(int totalStatuses) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 102),
-      height: 0.9 * getHeight(context),
+      margin: const EdgeInsets.only(
+        top: 102,
+        bottom: 102 + 16 + 3 * 18.0 * 1.2,
+      ),
+      height: 0.9 * getHeight(context) - (102 + 16 + 3 * 18.0 * 1.2),
       color: Colors.transparent,
       child: Row(
         children: [
@@ -374,7 +602,6 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      spacing: 4,
       children: [
         Text(
           status.user.fullName,
@@ -384,6 +611,7 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
             color: Colors.white,
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           _formatTimeElapsed(status.createdAt),
           style: const TextStyle(fontSize: 12, color: Colors.white70),
@@ -395,12 +623,13 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
   String _formatTimeElapsed(DateTime createdAt) {
     final now = DateTime.now();
     final difference = now.difference(createdAt);
+    final localizations = AppLocalizations.of(context)!;
     if (difference.inMinutes < 60) {
       return difference.inMinutes == 0
-          ? AppLocalizations.of(context)!.justNow
-          : AppLocalizations.of(context)!.minutesAgo(difference.inMinutes);
+          ? localizations.justNow
+          : localizations.minutesAgo(difference.inMinutes);
     } else if (difference.inHours < 24) {
-      return AppLocalizations.of(context)!.hoursAgo(difference.inHours);
+      return localizations.hoursAgo(difference.inHours);
     }
     return DateFormat('MMM d, yyyy').format(createdAt);
   }

@@ -11,16 +11,18 @@ import 'package:prism/features/account/presentation/bloc/account/personal_accoun
 import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
-import 'package:prism/features/account/presentation/bloc/notification/notification_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/account_middle_point_page.dart';
 import 'package:prism/features/account/presentation/pages/account/accounts_page.dart';
 import 'package:prism/features/account/presentation/pages/account/add_status_page.dart';
 import 'package:prism/features/account/presentation/pages/account/block_account_page.dart';
+import 'package:prism/features/account/presentation/pages/account/blocked_accounts_page.dart';
 import 'package:prism/features/account/presentation/pages/account/delete_account_page.dart';
 import 'package:prism/features/account/presentation/pages/account/following_statuses_page.dart';
 import 'package:prism/features/account/presentation/pages/account/other_account_page.dart';
 import 'package:prism/features/account/presentation/pages/account/show_status_page.dart';
 import 'package:prism/features/account/presentation/pages/account/update_account_page.dart';
+import 'package:prism/features/account/presentation/pages/account/archived_statuses_page.dart';
 import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
 import 'package:prism/features/preferences/presentation/pages/walk_through_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -65,10 +67,9 @@ main() async {
         BlocProvider<AccountNameBloc>(
           create: (context) => sl<AccountNameBloc>(),
         ),
+        BlocProvider<OAccountBloc>(create: (context) => sl<OAccountBloc>()),
         BlocProvider<StatusBloc>(create: (context) => sl<StatusBloc>()),
-        BlocProvider<NotificationBloc>(
-          create: (context) => sl<NotificationBloc>(),
-        ),
+        BlocProvider<HighlightBloc>(create: (context) => sl<HighlightBloc>()),
       ],
       child: const MyApp(),
     ),
@@ -132,6 +133,11 @@ class _MyAppState extends State<MyApp> {
       },
       AppRoutes.home: (context) => HomePage(),
       AppRoutes.deleteAccount: (context) => DeleteAccountPage(),
+      AppRoutes.blockedAccounts:
+          (context) => BlocProvider<AccountsBloc>(
+            create: (context) => sl<AccountsBloc>(),
+            child: BlockedAccountsPage(),
+          ),
       AppRoutes.blocAccPage: (context) {
         final args =
             ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -164,14 +170,14 @@ class _MyAppState extends State<MyApp> {
       AppRoutes.accounts: (context) {
         final args =
             ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-        final personalAccount =
-            args?['personalAccount'] as PersonalAccountEntity?;
-        final following = args?['following'] as bool?;
+        final appBarTitle = args?['appBarTitle'] as String;
+        final triggerEvent = args?['triggerEvent'] as Function(BuildContext);
+
         return BlocProvider<AccountsBloc>(
           create: (context) => sl<AccountsBloc>(),
           child: AccountsPage(
-            personalAccount: personalAccount,
-            following: following ?? false,
+            appBarTitle: appBarTitle,
+            triggerEvent: triggerEvent,
           ),
         );
       },
@@ -192,8 +198,11 @@ class _MyAppState extends State<MyApp> {
         final personalStatuses = args?['personalStatuses'] as bool? ?? false;
 
         final followStatus = args?['followStatus'] as FollowStatus?;
-        return BlocProvider<StatusBloc>(
-          create: (context) => sl<StatusBloc>(),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<StatusBloc>(create: (context) => sl<StatusBloc>()),
+            BlocProvider<AccountsBloc>(create: (context) => sl<AccountsBloc>()),
+          ],
           child: ShowStatusPage(
             userId: userId ?? 0,
             personalStatuses: personalStatuses,
@@ -206,6 +215,11 @@ class _MyAppState extends State<MyApp> {
           (context) => BlocProvider<StatusBloc>(
             create: (context) => sl<StatusBloc>(),
             child: AddStatusPage(),
+          ),
+      AppRoutes.archivedStatuses:
+          (context) => BlocProvider<StatusBloc>(
+            create: (context) => sl<StatusBloc>(),
+            child: const ArchivedStatusesPage(),
           ),
       AppRoutes.myApp: (context) => MyApp(),
       AppRoutes.settings:

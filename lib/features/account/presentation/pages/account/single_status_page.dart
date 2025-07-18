@@ -10,40 +10,42 @@ import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/widgets/cached_network_video.dart';
 import 'package:prism/core/util/widgets/custom_cached_network_image.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
-import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/like_bloc/like_bloc.dart';
 
-class ShowStatusPage extends StatefulWidget {
-  final int userId;
-  final VoidCallback? onFinished;
-  final bool personalStatuses;
-  final FollowStatus followStatus;
+class SingleStatusPage extends StatefulWidget {
+  final bool isArchived;
+  final StatusEntity status;
 
-  const ShowStatusPage({
+  const SingleStatusPage({
     super.key,
-    required this.userId,
-    this.onFinished,
-    required this.personalStatuses,
-    required this.followStatus,
+    required this.status,
+    required this.isArchived,
   });
 
   @override
-  State<ShowStatusPage> createState() => _ShowStatusPageState();
+  State<SingleStatusPage> createState() => _SingleStatusPageState();
 }
 
-class _ShowStatusPageState extends State<ShowStatusPage>
+class _SingleStatusPageState extends State<SingleStatusPage>
     with TickerProviderStateMixin {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
   Timer? _timer;
   double _progress = 0.0;
-  List<StatusEntity> _statuses = [];
   bool _isTextExpanded = false;
   CachedNetworkVideoState? _videoController;
+  late StatusEntity _status;
+
+  @override
+  void initState() {
+    super.initState();
+    _status = widget.status;
+    if (_status.media == null || _status.media!.type == MediaType.image) {
+      _startTimer(5.0);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +53,13 @@ class _ShowStatusPageState extends State<ShowStatusPage>
       onWillPop: _handlePop,
       child: Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
-        body: BlocConsumer<StatusBloc, StatusState>(
-          listener: _handleBlocListener,
-          builder: _buildContent,
+        body: BlocListener<StatusBloc, StatusState>(
+          listener: (context, state) {
+            if (state is StatusDeleted) {
+              Navigator.of(context).pop(true);
+            }
+          },
+          child: _buildLoaded(),
         ),
       ),
     );
@@ -64,123 +70,33 @@ class _ShowStatusPageState extends State<ShowStatusPage>
     return true;
   }
 
-  void _handleBlocListener(BuildContext context, StatusState state) {
-    if (state is StatusDeleted) {
-      context.read<StatusBloc>().add(
-        GetStatusesEvent(accountId: widget.userId),
-      );
-      return;
-    }
-
-    if (state is StatusLoaded) {
-      setState(() {
-        _statuses =
-            state.statuses
-                .where(
-                  (s) =>
-                      widget.personalStatuses ||
-                      s.privacy != 'private' ||
-                      widget.followStatus != FollowStatus.notFollowing,
-                )
-                .toList();
-      });
-
-      if (_statuses.isEmpty) {
-        if (Navigator.canPop(context)) {
-          Navigator.of(context).pop();
-        }
-        widget.onFinished?.call();
-        return;
-      }
-
-      if (_statuses.isNotEmpty && _currentPage == 0) {
-        if (_statuses[0].media == null ||
-            _statuses[0].media!.type == MediaType.image) {
-          _startTimer(5.0, _statuses.length, 0);
-        }
-      }
-    }
-  }
-
-  Widget _buildContent(BuildContext context, StatusState state) {
-    if (state is StatusLoading) return _buildLoading();
-    if (state is StatusLoaded || _statuses.isNotEmpty) {
-      return Hero(tag: 'showStatusTag', child: _buildLoaded());
-    }
-    if (state is StatusFailure) return _buildError(state.error);
-    return _buildError(AppLocalizations.of(context)!.somethingWentWrong);
-  }
-
-  Widget _buildLoading() {
-    return Center(
-      child: CircularProgressIndicator(
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    );
-  }
-
-  Widget _buildError(String message) {
-    return Center(child: Text(message));
-  }
-
   Widget _buildLoaded() {
-    if (_statuses.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.noStatusesAvailable),
-      );
-    }
-
     return SafeArea(
       child: Stack(
         children: [
-          _buildPageView(_statuses),
-          Column(
-            children: [
-              _buildProgressIndicators(_statuses),
-              _buildTopBar(_statuses[_currentPage]),
-            ],
-          ),
+          _buildStatusPage(_status),
+          Column(children: [_buildProgressIndicator(), _buildTopBar(_status)]),
         ],
       ),
     );
   }
 
-  Widget _buildPageView(List<StatusEntity> statuses) {
-    return PageView.builder(
-      controller: _pageController,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: statuses.length,
-      onPageChanged: (index) => _handlePageChange(index, statuses),
-      itemBuilder:
-          (context, index) =>
-              _buildStatusPage(statuses[index], statuses.length, index),
-    );
-  }
-
-  void _handlePageChange(int index, List<StatusEntity> statuses) {
-    setState(() {
-      _currentPage = index;
-      _progress = 0.0;
-      _isTextExpanded = false;
-      _videoController = null;
-    });
-    if (statuses.isNotEmpty &&
-        (statuses[index].media == null ||
-            statuses[index].media!.type == MediaType.image)) {
-      _startTimer(5.0, statuses.length, index);
-    }
-  }
-
-  void _startTimer(double duration, int totalStatuses, int currentIndex) {
+  void _startTimer(double duration) {
     _timer?.cancel();
     _progress = 0.0;
     const updateInterval = Duration(milliseconds: 50);
     _timer = Timer.periodic(updateInterval, (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         _progress += updateInterval.inMilliseconds / 1000 / duration;
         if (_progress >= 1.0) {
           timer.cancel();
-          _navigateNext(totalStatuses, currentIndex);
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop();
+          }
         }
       });
     });
@@ -188,44 +104,26 @@ class _ShowStatusPageState extends State<ShowStatusPage>
 
   void _pauseContent() {
     _timer?.cancel();
-    if (_videoController != null) {
-      _videoController!.pause();
+    _videoController?.pause();
+  }
+
+  void _resumeContent() {
+    if (_status.media == null || _status.media!.type == MediaType.image) {
+      _startTimer(5.0);
+    } else if (_status.media!.type == MediaType.video) {
+      _videoController?.resume();
     }
   }
 
-  void _resumeContent(int totalStatuses, int currentIndex) {
-    final status = _statuses[currentIndex];
-    if (status.media == null || status.media!.type == MediaType.image) {
-      _startTimer(5.0, totalStatuses, currentIndex);
-    } else if (status.media!.type == MediaType.video &&
-        _videoController != null) {
-      _videoController!.resume();
-    }
-  }
-
-  void _navigateNext(int totalStatuses, int currentIndex) {
-    if (currentIndex < totalStatuses - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.linear,
-      );
-    } else if (widget.onFinished != null) {
-      widget.onFinished!();
-    } else {
+  void _navigateNext() {
+    if (Navigator.canPop(context)) {
       Navigator.of(context).pop();
     }
   }
 
-  Widget _buildStatusPage(
-    StatusEntity status,
-    int totalStatuses,
-    int currentIndex,
-  ) {
+  Widget _buildStatusPage(StatusEntity status) {
     return Stack(
-      children: [
-        _buildStatusContent(status, totalStatuses, currentIndex),
-        _buildNavigationOverlay(totalStatuses),
-      ],
+      children: [_buildStatusContent(status), _buildNavigationOverlay()],
     );
   }
 
@@ -265,9 +163,7 @@ class _ShowStatusPageState extends State<ShowStatusPage>
                             },
                           },
                         )
-                        .then(
-                          (_) => _resumeContent(_statuses.length, _currentPage),
-                        );
+                        .then((_) => _resumeContent());
                   },
                   child: Container(
                     color: Colors.transparent,
@@ -298,11 +194,7 @@ class _ShowStatusPageState extends State<ShowStatusPage>
     );
   }
 
-  Widget _buildStatusContent(
-    StatusEntity status,
-    int totalStatuses,
-    int currentIndex,
-  ) {
+  Widget _buildStatusContent(StatusEntity status) {
     final hasMediaWithText =
         status.media != null && status.text != null && status.text!.isNotEmpty;
     return Stack(
@@ -313,7 +205,7 @@ class _ShowStatusPageState extends State<ShowStatusPage>
         else if (status.media!.type == MediaType.image)
           _buildImageStatus(status)
         else
-          _buildVideoStatus(status, totalStatuses, currentIndex),
+          _buildVideoStatus(status),
         Positioned(
           bottom: 16,
           left: 16,
@@ -367,32 +259,28 @@ class _ShowStatusPageState extends State<ShowStatusPage>
                     ),
                   ),
                 ),
-              BlocProvider<LikeBloc>(
-                create:
-                    (context) => LikeBloc(
-                      toggleLikeStatusUseCase: sl(),
-                      isLiked: status.isLiked,
-                      likesCount: status.likesCount,
-                    ),
-                child: BlocListener<LikeBloc, LikeState>(
-                  listener: (context, state) {
-                    if (state is LikeSuccess) {
-                      setState(() {
-                        final index = _statuses.indexWhere(
-                          (s) => s.id == status.id,
-                        );
-                        if (index != -1) {
-                          _statuses[index] = _statuses[index].copyWith(
+              if (!widget.isArchived)
+                BlocProvider<LikeBloc>(
+                  create:
+                      (context) => LikeBloc(
+                        toggleLikeStatusUseCase: sl(),
+                        isLiked: status.isLiked,
+                        likesCount: status.likesCount,
+                      ),
+                  child: BlocListener<LikeBloc, LikeState>(
+                    listener: (context, state) {
+                      if (state is LikeSuccess) {
+                        setState(() {
+                          _status = _status.copyWith(
                             isLiked: state.isLiked,
                             likesCount: state.likesCount,
                           );
-                        }
-                      });
-                    }
-                  },
-                  child: _buildLikeWidget(status),
+                        });
+                      }
+                    },
+                    child: _buildLikeWidget(status),
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -493,18 +381,13 @@ class _ShowStatusPageState extends State<ShowStatusPage>
     );
   }
 
-  Widget _buildVideoStatus(
-    StatusEntity status,
-    int totalStatuses,
-    int currentIndex,
-  ) {
+  Widget _buildVideoStatus(StatusEntity status) {
     final vidWidget = CachedNetworkVideo(
       key: ValueKey(status.media!.url),
       videoUrl: status.media!.url,
       showControls: false,
-      onEnd: () => setState(() => _navigateNext(totalStatuses, currentIndex)),
-      onDurationLoaded:
-          (duration) => _startTimer(duration, totalStatuses, currentIndex),
+      onEnd: () => setState(() => _navigateNext()),
+      onDurationLoaded: (duration) => _startTimer(duration),
     );
     return Stack(
       children: [
@@ -547,7 +430,7 @@ class _ShowStatusPageState extends State<ShowStatusPage>
     );
   }
 
-  Widget _buildNavigationOverlay(int totalStatuses) {
+  Widget _buildNavigationOverlay() {
     return Container(
       margin: const EdgeInsets.only(
         top: 102,
@@ -559,33 +442,23 @@ class _ShowStatusPageState extends State<ShowStatusPage>
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: _navigatePrevious,
+              onTap: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.of(context).pop();
+                }
+              },
               child: Container(color: Colors.transparent),
             ),
           ),
           Expanded(
             child: GestureDetector(
-              onTap:
-                  () => setState(
-                    () => _navigateNext(totalStatuses, _currentPage),
-                  ),
+              onTap: () => setState(() => _navigateNext()),
               child: Container(color: Colors.transparent),
             ),
           ),
         ],
       ),
     );
-  }
-
-  void _navigatePrevious() {
-    if (_currentPage != 0) {
-      setState(() {
-        _pageController.previousPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.linear,
-        );
-      });
-    }
   }
 
   Widget _buildTopBar(StatusEntity status) {
@@ -597,7 +470,7 @@ class _ShowStatusPageState extends State<ShowStatusPage>
             ProfilePicture(link: status.user.avatar, radius: 32),
             const SizedBox(width: 16),
             Expanded(child: _buildUserInfo(status)),
-            if (widget.personalStatuses)
+            if (!widget.isArchived)
               PopupMenuButton<String>(
                 onSelected: (value) {
                   if (value == 'delete') {
@@ -660,48 +533,30 @@ class _ShowStatusPageState extends State<ShowStatusPage>
     return DateFormat('MMM d, yyyy').format(createdAt);
   }
 
-  Widget _buildProgressIndicators(List<StatusEntity> statuses) {
+  Widget _buildProgressIndicator() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
-        children: List.generate(
-          statuses.length,
-          (index) => Expanded(
+        children: [
+          Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 2),
               height: 4,
-              child:
-                  index == _currentPage
-                      ? LinearProgressIndicator(
-                        value: _progress,
-                        backgroundColor: Colors.grey,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      )
-                      : Container(
-                        color:
-                            index < _currentPage
-                                ? Theme.of(context).colorScheme.secondary
-                                : Colors.grey,
-                      ),
+              child: LinearProgressIndicator(
+                value: _progress,
+                backgroundColor: Colors.grey,
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   @override
-  void initState() {
-    super.initState();
-    context.read<StatusBloc>().add(GetStatusesEvent(accountId: widget.userId));
-  }
-
-  @override
   void dispose() {
     _timer?.cancel();
-    _pageController.dispose();
     super.dispose();
   }
 }

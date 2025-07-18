@@ -102,7 +102,7 @@
     "minutesAgo": "قبل {minutes} دقيقة",
     "hoursAgo": "قبل {hours} ساعة",
     "profileDetails": "تفاصيل الملف الشخصي",
-    "bio": "السيرة الذاتية",
+    "bio": "السير�� الذاتية",
     "enterAccountName": "أدخل اسم حسابك",
     "enterUniqueAccountName": "يرجى إدخال اسم حساب فريد",
     "enterFullName": "أدخل اسمك الكامل",
@@ -122,7 +122,7 @@
     "noMediaFound": "لم يتم العثور على وسائط في معرض الصور الخاص بك.",
     "galleryAccessDenied": "تم رفض الوصول إلى المعرض.",
     "requestPermission": "طلب إذن",
-    "personalInfoTitle": "المعلومات الشخصية لـ {userName}",
+    "personalInfoTitle": "المعلومات ��لشخصية لـ {userName}",
     "fieldRequired": "هذا الحقل مطلوب!",
     "enterYourFullName": "يجب ادخال الاسم الكامل",
     "prism": "بريزم",
@@ -145,6 +145,45 @@
             }
         }
     },
-    "blockUserExplanation": "لن يتمكنوا من العثور على ملفك الشخصي أو منشوراتك أو قصتك على بريزم. لن يخبرهم بريزم أنك حظرتهم.",
-    "unblockUser": "إلغاء الحظر"
+    "blockUserExplanation": "لن يتمكنوا من العثور على ملفك الشخصي أو منشوراتك أو قصتك على بريزم. لن يخبرهم بريزم أنك حظ��تهم.",
+    "unblockUser": "إلغاء الحظر",
+    "blockedAccounts": "الحسابات المحظورة",
+    "noBlockedAccounts": "ليس لديك حسابات محظورة.",
+    "all": "الكل",
+    "requests": "الطلبات",
+    "requestHandledSuccessfully": "تم التعامل مع الطلب بنجاح.",
+    "noNewRequests": "لا توجد طلبات جديدة.",
+    "requestedToFollowYou": "طلب متابعتك",
+    "accept": "قبول",
+    "reject": "رفض",
+    "archived": "المؤرشفة",
+    "likers": "المعجبون",
+    "personalAccountNotFound": "لم يتم العثور على الحساب الشخصي.",
+    "archivedStatuses": "الحالات المؤرشفة",
+    "statusesSelectedForHighlight": "تم تحديد {count} حالة للتمييز.",
+    "@statusesSelectedForHighlight": {
+        "description": "رسالة تظهر عند تحديد الحالات لتمييزها.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "noArchivedStatuses": "لا توجد حالات مؤرشفة.",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "thisYear": "هذه السنة",
+    "older": "أقدم",
+    "noStatusesMatchFilter": "لا توجد حالات تطابق الفلتر الخاص بك.",
+    "noText": "لا يوجد نص",
+    "today": "اليوم",
+    "yesterday": "البارحة",
+    "highlightCreatedSuccessfully": "تم إنشاء الحدث البارز بنجاح",
+    "failedToCreateHighlight": "فشل في إنشاء الحدث البارز",
+    "pickFromGallery": "اختر من المعرض",
+    "takeAPhoto": "التقط صورة",
+    "addCoverImage": "إضافة صورة غلاف",
+    "highlightTitle": "عنوان الحدث البارز",
+    "pleaseEnterAtitle": "يرجى إدخال عنوان",
+    "createHighlight": "إنشاء حدث بارز"
 }

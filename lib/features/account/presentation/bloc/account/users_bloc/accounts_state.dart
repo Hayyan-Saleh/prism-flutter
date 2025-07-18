@@ -28,3 +28,21 @@ class FailedAccountsState extends AccountsState {
   @override
   List<Object> get props => [failure];
 }
+
+class BlockedAccountsLoaded extends AccountsState {
+  final List<SimplifiedAccountEntity> blockedAccounts;
+
+  const BlockedAccountsLoaded({required this.blockedAccounts});
+
+  @override
+  List<Object> get props => [blockedAccounts];
+}
+
+class BlockedAccountsError extends AccountsState {
+  final String message;
+
+  const BlockedAccountsError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}

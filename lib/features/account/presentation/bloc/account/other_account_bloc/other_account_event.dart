@@ -26,9 +26,13 @@ class BlockUserEvent extends OAccountEvent {
 }
 
 class UnblockUserEvent extends OAccountEvent {
+  final bool fromDetailedPage;
   final int targetId;
 
-  const UnblockUserEvent({required this.targetId});
+  const UnblockUserEvent({
+    required this.targetId,
+    this.fromDetailedPage = false,
+  });
 
   @override
   List<Object> get props => [targetId];

@@ -11,6 +11,8 @@ class StatusModel extends StatusEntity {
     super.media,
     required super.createdAt,
     required super.user,
+    required super.likesCount,
+    required super.isLiked,
   });
 
   factory StatusModel.fromJson(Map<String, dynamic> json) => StatusModel(
@@ -24,6 +26,8 @@ class StatusModel extends StatusEntity {
             : null,
     createdAt: DateTime.parse(json['created_at'] as String),
     user: SimplifiedAccountModel.fromJson(json['user'] as Map<String, dynamic>),
+    likesCount: json['likes_count'] as int? ?? 0,
+    isLiked: json['is_liked'] as bool? ?? false,
   );
 
   Map<String, dynamic> toJson() => {
@@ -34,5 +38,7 @@ class StatusModel extends StatusEntity {
     'media': (media as MediaModel?)?.toJson(),
     'created_at': createdAt.toIso8601String(),
     'user': (user as SimplifiedAccountModel).toJson(),
+    'likes_count': likesCount,
+    'is_liked': isLiked,
   };
 }

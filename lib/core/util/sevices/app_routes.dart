@@ -18,11 +18,13 @@ class AppRoutes {
   static String otherAccPage = "/other-account-page";
   static String blocAccPage = "/block-account-page";
   static String deleteAccount = "/delete-account";
+  static String blockedAccounts = "/blocked-accounts";
 
   // ? sub acount   ! status
   static String addStatusPage = "/add-status-page";
   static String showStatusPage = "/show-status-page";
   static String followingStatusesPage = "/following-statuses-page";
+  static String archivedStatuses = "/archived-statuses";
 
   //! core
   static String myApp = "/my-app";

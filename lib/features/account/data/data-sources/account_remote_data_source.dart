@@ -76,6 +76,26 @@ abstract class AccountRemoteDataSource {
   Future<void> blockUser({required String token, required int targetId});
 
   Future<void> unblockUser({required String token, required int targetId});
+
+  Future<List<SimplifiedAccountModel>> getBlockedAccounts({
+    required String token,
+  });
+
+  Future<List<StatusModel>> getArchivedStatuses({required String token});
+
+  Future<void> createHighlight({
+    required String token,
+    required List<int> statusIds,
+    String? text,
+    File? cover,
+  });
+
+  Future<void> toggleLikeStatus({required String token, required int statusId});
+
+  Future<List<SimplifiedAccountModel>> getStatusLikers({
+    required String token,
+    required int statusId,
+  });
 }
 
 class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
@@ -469,4 +489,137 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   Map<String, String> _authHeaders(String token) => {
     'Authorization': 'Bearer $token',
   };
+
+  @override
+  Future<List<SimplifiedAccountModel>> getBlockedAccounts({
+    required String token,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        ApiEndpoints.blockedUsers,
+        headers: _authHeaders(token),
+      );
+
+      final blockedUsersList = response['blocked_users'] as List;
+      final accounts =
+          blockedUsersList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+      return accounts;
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<List<StatusModel>> getArchivedStatuses({required String token}) async {
+    try {
+      final response = await apiClient.get(
+        ApiEndpoints.archivedStatuses,
+        headers: _authHeaders(token),
+      );
+      return (response['statuses'] as List)
+          .map((json) => StatusModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<void> createHighlight({
+    required String token,
+    required List<int> statusIds,
+    String? text,
+    File? cover,
+  }) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.highlights}'),
+      );
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Content-Type': 'multipart/form-data',
+      });
+
+      if (text != null) {
+        request.fields['text'] = text;
+      }
+
+      for (var statusId in statusIds) {
+        request.fields['status_ids[]'] = statusId.toString();
+      }
+
+      if (cover != null && await cover.exists()) {
+        final coverFile = await http.MultipartFile.fromPath(
+          'cover',
+          cover.path,
+          filename: path.basename(cover.path),
+        );
+        request.files.add(coverFile);
+      }
+
+      final response = await request.send();
+      final responseBody = await http.Response.fromStream(response);
+
+      ApiClient.handleResponse(responseBody);
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<void> toggleLikeStatus({
+    required String token,
+    required int statusId,
+  }) async {
+    try {
+      await apiClient.post(ApiEndpoints.likes, {
+        'status_id': statusId,
+      }, headers: _authHeaders(token));
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<List<SimplifiedAccountModel>> getStatusLikers({
+    required String token,
+    required int statusId,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '${ApiEndpoints.likers}?status_id=$statusId',
+        headers: _authHeaders(token),
+      );
+      final likersList = response['users'] as List;
+      final accounts =
+          likersList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+      return accounts;
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
 }

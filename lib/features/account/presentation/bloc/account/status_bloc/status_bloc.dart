@@ -1,10 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
 import 'package:prism/features/account/domain/use-cases/account/create_status_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/delete_status_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_archived_statuses_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_following_statuses_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_statuses_usecase.dart';
 
@@ -16,6 +18,7 @@ class StatusBloc extends Bloc<StatusEvent, StatusState> {
   final DeleteStatusUsecase deleteStatusUseCase;
   final GetStatusesUsecase getStatusesUseCase;
   final GetFollowingStatusesUsecase getFollowingStatuses;
+  final GetArchivedStatusesUsecase getArchivedStatusesUsecase;
 
   List<SimplifiedAccountEntity>? simpleAccounts;
 
@@ -24,11 +27,13 @@ class StatusBloc extends Bloc<StatusEvent, StatusState> {
     required this.deleteStatusUseCase,
     required this.getStatusesUseCase,
     required this.getFollowingStatuses,
+    required this.getArchivedStatusesUsecase,
   }) : super(StatusInitial()) {
     on<CreateStatusEvent>(_onCreateStatus);
     on<DeleteStatusEvent>(_onDeleteStatus);
     on<GetStatusesEvent>(_onGetStatuses);
     on<GetFollowingStatusesEvent>(_onGetFollowingStatuses);
+    on<GetArchivedStatusesEvent>(_onGetArchivedStatuses);
   }
 
   Future<void> _onCreateStatus(
@@ -90,6 +95,20 @@ class StatusBloc extends Bloc<StatusEvent, StatusState> {
         simpleAccounts = accounts;
         return FollowingStatusLoaded(simpleAccounts: accounts);
       }),
+    );
+  }
+
+  Future<void> _onGetArchivedStatuses(
+    GetArchivedStatusesEvent event,
+    Emitter<StatusState> emit,
+  ) async {
+    emit(StatusLoading());
+    final result = await getArchivedStatusesUsecase();
+    emit(
+      result.fold(
+        (failure) => StatusFailure(error: failure.message),
+        (statuses) => ArchivedStatusLoaded(statuses: statuses),
+      ),
     );
   }
 }

@@ -146,5 +146,44 @@
         }
     },
     "blockUserExplanation": "They won't be able to find your profile, posts, or story on Prism. Prism won't let them know you blocked them.",
-    "unblockUser": "Unblock"
+    "unblockUser": "Unblock",
+    "blockedAccounts": "Blocked Accounts",
+    "noBlockedAccounts": "You have no blocked accounts.",
+    "all": "All",
+    "requests": "Requests",
+    "requestHandledSuccessfully": "Request handled successfully.",
+    "noNewRequests": "No new requests.",
+    "requestedToFollowYou": "Requested to follow you",
+    "accept": "Accept",
+    "reject": "Reject",
+    "archived": "Archived",
+    "likers": "Likers",
+    "personalAccountNotFound": "Personal account not found.",
+    "archivedStatuses": "Archived Statuses",
+    "statusesSelectedForHighlight": "{count} statuses selected for highlight.",
+    "@statusesSelectedForHighlight": {
+        "description": "Message shown when statuses are selected for a highlight.",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "noArchivedStatuses": "No archived statuses.",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "thisYear": "This Year",
+    "older": "Older",
+    "noStatusesMatchFilter": "No statuses match your filter.",
+    "noText": "No Text",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "highlightCreatedSuccessfully": "Highlight created successfully",
+    "failedToCreateHighlight": "Failed to create highlight",
+    "pickFromGallery": "Pick from Gallery",
+    "takeAPhoto": "Take a Photo",
+    "addCoverImage": "Add Cover Image",
+    "highlightTitle": "Highlight Title",
+    "pleaseEnterAtitle": "Please enter a title",
+    "createHighlight": "Create Highlight"
 }

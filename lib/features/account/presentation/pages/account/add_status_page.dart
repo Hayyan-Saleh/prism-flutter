@@ -86,22 +86,31 @@ class AddStatusPageState extends State<AddStatusPage> {
     _navigateToNextPage(type.name);
   }
 
-  Future<bool> _requestCameraPermission() async {
-    PermissionStatus status;
-    if (Platform.isAndroid) {
-      status = await Permission.camera.request();
-    } else {
-      status = await Permission.camera.request();
-    }
-    if (status.isGranted) return true;
-    if (status.isPermanentlyDenied) {
+  Future<bool> _requestCameraPermission(bool isVideo) async {
+    var cameraStatus = await Permission.camera.request();
+    if (cameraStatus.isPermanentlyDenied) {
       openAppSettings();
+      return false;
     }
-    return false;
+
+    if (!cameraStatus.isGranted) {
+      return false;
+    }
+
+    if (isVideo) {
+      var microphoneStatus = await Permission.microphone.request();
+      if (microphoneStatus.isPermanentlyDenied) {
+        openAppSettings();
+        return false;
+      }
+      return microphoneStatus.isGranted;
+    }
+
+    return true;
   }
 
   void _pickFromCamera(bool isVideo) async {
-    if (await _requestCameraPermission()) {
+    if (await _requestCameraPermission(isVideo)) {
       final picker = ImagePicker();
       final picked =
           isVideo
@@ -140,8 +149,8 @@ class AddStatusPageState extends State<AddStatusPage> {
             _videoController?.dispose();
             _videoController = null;
           }
-          _navigateToNextPage(_mediaType?.name ?? 'text');
         });
+        _navigateToNextPage(_mediaType?.name ?? 'text');
       }
     } else {
       if (mounted) {

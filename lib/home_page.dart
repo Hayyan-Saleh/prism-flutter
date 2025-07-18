@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/sevices/assets.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/personal_account_page.dart';
+import 'package:prism/features/account/presentation/pages/notification/notifications_page.dart';
 import 'package:prism/features/account/presentation/widgets/statuses_section_widget.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
 
@@ -154,7 +157,7 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 250,
+          height: 350,
           padding: EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -182,6 +185,22 @@ class _HomePageState extends State<HomePage> {
                       'personalAccount': context.read<PAccountBloc>().pAccount,
                     },
                   );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.block),
+                title: Text(AppLocalizations.of(context)!.blockedAccounts),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.blockedAccounts);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.archive),
+                title: Text(AppLocalizations.of(context)!.archived),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.archivedStatuses);
                 },
               ),
               ListTile(
@@ -283,6 +302,14 @@ class _HomePageState extends State<HomePage> {
     return PersonalAccountPage();
   }
 
+  Widget _getNotificationsPage() {
+    return BlocProvider<NotificationBloc>(
+      create:
+          (context) => sl<NotificationBloc>()..add(GetFollowRequestsEvent()),
+      child: NotificationsPage(),
+    );
+  }
+
   Widget _buildPostsSection() {
     // TODO: RAFAT POSTS ADDED HERE as widget (if wanted to add a list view or single child scroll view then make no scroll physics and wrap parent widget 'column' with a 'single child scroll view')
     return Center(child: Text(AppLocalizations.of(context)!.postsSection));
@@ -314,12 +341,7 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(fontSize: 32),
           ),
         ),
-        Center(
-          child: Text(
-            AppLocalizations.of(context)!.video,
-            style: TextStyle(fontSize: 32),
-          ),
-        ),
+        _getNotificationsPage(),
         _getPersonalAccountPage(),
       ],
     );
