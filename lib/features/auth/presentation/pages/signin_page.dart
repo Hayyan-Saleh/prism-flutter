@@ -64,13 +64,13 @@ class _SignInPageState extends State<SignInPage> {
       AppLocalizations.of(context)!.welcome,
       style: Theme.of(
         context,
-      ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
+      ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
       textAlign: TextAlign.center,
     );
   }
 
   Widget _buildIllustration(double height) {
-    return SvgPicture.asset(Assets.login, height: 0.25 * height);
+    return SvgPicture.asset(Assets.login, height: 0.2 * height);
   }
 
   Widget _buildTitle1() {

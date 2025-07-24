@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prism/core/util/functions/functions.dart';
 
 class WalkThroughWidget extends StatelessWidget {
   final String? imagePath;
@@ -20,7 +21,7 @@ class WalkThroughWidget extends StatelessWidget {
         if (imagePath != null)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Image.asset(imagePath!),
+            child: Image.asset(imagePath!, height: 0.3 * getHeight(context)),
           ),
         Text(
           title,

@@ -1,54 +1,67 @@
 import 'dart:async';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:prism/core/di/injection_container.dart';
-import 'package:prism/core/util/entities/media_entity.dart';
-import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/widgets/cached_network_video.dart';
 import 'package:prism/core/util/widgets/custom_cached_network_image.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
-import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
-import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
-import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
-import 'package:prism/features/account/presentation/bloc/like_bloc/like_bloc.dart';
+import 'package:prism/features/account/domain/enitities/account/highlight/detailed_highlight_entity.dart';
+import 'package:prism/features/account/domain/enitities/account/highlight/highlight_status_entity.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_entity.dart';
+import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
+import 'package:prism/core/util/functions/functions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class ShowStatusWidget extends StatefulWidget {
-  final int userId;
+class ShowDetailedHighlight extends StatefulWidget {
+  final int highlightId;
   final VoidCallback? onFinished;
   final VoidCallback? onStart;
+  final bool isMyHighlight;
+  final AccountEntity account;
 
-  const ShowStatusWidget({
+  const ShowDetailedHighlight({
     super.key,
-    required this.userId,
+    required this.highlightId,
     this.onFinished,
     this.onStart,
+    required this.isMyHighlight,
+    required this.account,
   });
 
   @override
-  State<ShowStatusWidget> createState() => _ShowStatusWidgetState();
+  State<ShowDetailedHighlight> createState() => _ShowDetailedHighlightState();
 }
 
-class _ShowStatusWidgetState extends State<ShowStatusWidget>
+class _ShowDetailedHighlightState extends State<ShowDetailedHighlight>
     with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _timer;
   double _progress = 0.0;
-  List<StatusEntity> _statuses = [];
+  DetailedHighlightEntity? _highlight;
   bool _isTextExpanded = false;
   CachedNetworkVideoState? _videoController;
   double? _videoDuration;
   bool _isNavigating = false;
 
+  bool updatedCover = false;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<HighlightBloc>().add(
+      GetDetailedHighlight(highlightId: widget.highlightId),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _handlePop,
-      child: BlocConsumer<StatusBloc, StatusState>(
+      child: BlocConsumer<HighlightBloc, HighlightState>(
         listener: _handleBlocListener,
         builder: _buildContent,
       ),
@@ -60,77 +73,81 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     return true;
   }
 
-  void _handleBlocListener(BuildContext context, StatusState state) {
-    if (state is StatusDeleted) {
-      context.read<StatusBloc>().add(
-        GetStatusesEvent(accountId: widget.userId),
-      );
-      return;
-    }
-
-    if (state is StatusLoaded) {
+  void _handleBlocListener(BuildContext context, HighlightState state) {
+    if (state is DetailedHighlightLoaded) {
       if (mounted) {
         setState(() {
-          _statuses = state.statuses;
+          _highlight = state.highlight;
         });
-        if (state.statuses.isNotEmpty && _currentPage == 0) {
-          if (state.statuses[0].media == null ||
-              state.statuses[0].media!.type == MediaType.image) {
+        if (state.highlight.statuses.isNotEmpty && _currentPage == 0) {
+          if (state.highlight.statuses[0].media == null ||
+              state.highlight.statuses[0].type == 'image') {
             _progress = 0.0;
-            _startTimer(5.0, state.statuses.length, 0);
+            _startTimer(5.0, state.highlight.statuses.length, 0);
           }
         }
+      }
+    } else if (state is HighlightDeleted) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context, true); // Return true to indicate deletion
       }
     }
   }
 
-  Widget _buildContent(BuildContext context, StatusState state) {
-    if (state is StatusLoading) {
+  Widget _buildContent(BuildContext context, HighlightState state) {
+    if (state is HighlightLoading) {
       return _buildLoading();
     }
-    if (state is StatusLoaded && _statuses.isNotEmpty) {
-      return Hero(tag: _statuses.first.user.id, child: _buildLoaded());
+    if (state is DetailedHighlightLoaded && _highlight != null) {
+      return Hero(tag: _highlight!.id, child: _buildLoaded());
     }
-    if (state is StatusFailure) {
-      return _buildError(state.error);
-    }
-    if (state is StatusLoaded && _statuses.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.noStatusesAvailable),
-      );
+    if (state is HighlightFailure) {
+      return _buildError(state.message);
     }
     return Container();
   }
 
   Widget _buildLoading() {
-    return Center(
-      child: CircularProgressIndicator(
-        color: Theme.of(context).colorScheme.primary,
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: CircularProgressIndicator(
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }
 
   Widget _buildError(String message) {
-    return Center(child: Text(message));
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(child: Text(message)),
+    );
   }
 
   Widget _buildLoaded() {
-    if (_statuses.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.noStatusesAvailable),
+    if (_highlight!.statuses.isEmpty) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Text(AppLocalizations.of(context)!.noStatusesAvailable),
+        ),
       );
     }
-    return SafeArea(
-      child: Stack(
-        children: [
-          _buildPageView(),
-          Column(
-            children: [
-              _buildProgressIndicators(_statuses),
-              _buildTopBar(_statuses[_currentPage]),
-            ],
-          ),
-        ],
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            _buildPageView(),
+            Column(
+              children: [
+                _buildProgressIndicators(_highlight!.statuses),
+                _buildTopBar(_highlight!),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -139,11 +156,14 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     return PageView.builder(
       controller: _pageController,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: _statuses.length,
+      itemCount: _highlight!.statuses.length,
       onPageChanged: (index) => _handlePageChange(index),
       itemBuilder:
-          (context, index) =>
-              _buildStatusPage(_statuses[index], _statuses.length, index),
+          (context, index) => _buildStatusPage(
+            _highlight!.statuses[index],
+            _highlight!.statuses.length,
+            index,
+          ),
     );
   }
 
@@ -157,10 +177,10 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
         _videoController = null;
         _videoDuration = null;
       });
-      if (_statuses.isNotEmpty &&
-          (_statuses[index].media == null ||
-              _statuses[index].media!.type == MediaType.image)) {
-        _startTimer(5.0, _statuses.length, index);
+      if (_highlight!.statuses.isNotEmpty &&
+          (_highlight!.statuses[index].media == null ||
+              _highlight!.statuses[index].type == 'image')) {
+        _startTimer(5.0, _highlight!.statuses.length, index);
       }
     }
   }
@@ -188,14 +208,15 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     _videoController?.pause();
   }
 
-  void _resumeContent(int totalStatuses, int currentIndex) {
-    final status = _statuses[currentIndex];
-    if (status.media == null || status.media!.type == MediaType.image) {
-      _startTimer(5.0, totalStatuses, currentIndex);
-    } else if (status.media!.type == MediaType.video) {
+  void _resumeContent() {
+    if (!mounted) return;
+    final status = _highlight!.statuses[_currentPage];
+    if (status.media == null || status.type == 'image') {
+      _startTimer(5.0, _highlight!.statuses.length, _currentPage);
+    } else if (status.type == 'video') {
       _videoController?.resume();
       if (_videoDuration != null) {
-        _startTimer(_videoDuration!, totalStatuses, currentIndex);
+        _startTimer(_videoDuration!, _highlight!.statuses.length, _currentPage);
       }
     }
   }
@@ -222,17 +243,21 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
       );
     } else if (widget.onFinished != null) {
       widget.onFinished!();
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context, updatedCover);
+      }
     }
   }
 
   Widget _buildStatusPage(
-    StatusEntity status,
+    HighlightStatusEntity status,
     int totalStatuses,
     int currentIndex,
   ) {
     return GestureDetector(
       onLongPressStart: (_) => _pauseContent(),
-      onLongPressEnd: (_) => _resumeContent(totalStatuses, currentIndex),
+      onLongPressEnd: (_) => _resumeContent(),
       child: Stack(
         children: [
           _buildStatusContent(status, totalStatuses, currentIndex),
@@ -242,77 +267,8 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     );
   }
 
-  Widget _buildLikeWidget(StatusEntity status) {
-    return BlocBuilder<LikeBloc, LikeState>(
-      builder: (context, state) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(
-                state.isLiked ? Icons.favorite : Icons.favorite_border,
-                color: state.isLiked ? Colors.pink : Colors.white,
-                size: 32,
-              ),
-              onPressed: () {
-                if (state is! LikeInProgress) {
-                  context.read<LikeBloc>().add(
-                    ToggleLikeEvent(statusId: status.id),
-                  );
-                }
-              },
-            ),
-            state.likesCount > 0
-                ? GestureDetector(
-                  onTap: () {
-                    _pauseContent();
-                    Navigator.of(context)
-                        .pushNamed(
-                          AppRoutes.accounts,
-                          arguments: {
-                            'appBarTitle': AppLocalizations.of(context)!.likers,
-                            'triggerEvent': (BuildContext blocContext) {
-                              blocContext.read<AccountsBloc>().add(
-                                GetStatusLikersEvent(statusId: status.id),
-                              );
-                            },
-                          },
-                        )
-                        .then(
-                          (_) => _resumeContent(_statuses.length, _currentPage),
-                        );
-                  },
-                  child: Container(
-                    color: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 16,
-                    ),
-                    child: Text(
-                      state.likesCount.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                )
-                : Container(
-                  color: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 16,
-                  ),
-                  child: Text(
-                    state.likesCount.toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildStatusContent(
-    StatusEntity status,
+    HighlightStatusEntity status,
     int totalStatuses,
     int currentIndex,
   ) {
@@ -323,97 +279,62 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
       children: [
         if (status.media == null)
           _buildTextStatus(status)
-        else if (status.media!.type == MediaType.image)
+        else if (status.type == 'image')
           _buildImageStatus(status)
         else
           _buildVideoStatus(status, totalStatuses, currentIndex),
-        Positioned(
-          bottom: 16,
-          left: 16,
-          right: 16,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (hasMediaWithText)
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      setState(() {
-                        _isTextExpanded = !_isTextExpanded;
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      constraints: BoxConstraints(
-                        maxHeight:
-                            _isTextExpanded
-                                ? 0.6 * getHeight(context)
-                                : 3 * 18.0 * 1.2,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            _isTextExpanded
-                                ? Colors.black.withOpacity(0.5)
-                                : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: SingleChildScrollView(
-                        physics:
-                            _isTextExpanded
-                                ? const AlwaysScrollableScrollPhysics()
-                                : const NeverScrollableScrollPhysics(),
-                        child: Text(
-                          status.text!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.left,
-                          maxLines: _isTextExpanded ? null : 3,
-                          overflow:
-                              _isTextExpanded ? null : TextOverflow.ellipsis,
-                        ),
-                      ),
+        if (hasMediaWithText)
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                setState(() {
+                  _isTextExpanded = !_isTextExpanded;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                constraints: BoxConstraints(
+                  maxHeight:
+                      _isTextExpanded
+                          ? 0.6 * getHeight(context)
+                          : 3 * 18.0 * 1.2,
+                ),
+                decoration: BoxDecoration(
+                  color:
+                      _isTextExpanded
+                          ? Colors.black.withAlpha(125)
+                          : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  physics:
+                      _isTextExpanded
+                          ? const AlwaysScrollableScrollPhysics()
+                          : const NeverScrollableScrollPhysics(),
+                  child: Text(
+                    status.text!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
+                    textAlign: TextAlign.left,
+                    maxLines: _isTextExpanded ? null : 3,
+                    overflow: _isTextExpanded ? null : TextOverflow.ellipsis,
                   ),
                 ),
-              BlocProvider<LikeBloc>(
-                create:
-                    (context) => LikeBloc(
-                      toggleLikeStatusUseCase: sl(),
-                      isLiked: status.isLiked,
-                      likesCount: status.likesCount,
-                    ),
-                child: BlocListener<LikeBloc, LikeState>(
-                  listener: (context, state) {
-                    if (state is LikeSuccess && mounted) {
-                      setState(() {
-                        final index = _statuses.indexWhere(
-                          (s) => s.id == status.id,
-                        );
-                        if (index != -1) {
-                          _statuses[index] = _statuses[index].copyWith(
-                            isLiked: state.isLiked,
-                            likesCount: state.likesCount,
-                          );
-                        }
-                      });
-                    }
-                  },
-                  child: _buildLikeWidget(status),
-                ),
               ),
-            ],
+            ),
           ),
-        ),
       ],
     );
   }
 
-  Widget _buildTextStatus(StatusEntity status) {
+  Widget _buildTextStatus(HighlightStatusEntity status) {
     return Container(
       color: Theme.of(context).colorScheme.secondary.withAlpha(200),
       padding: const EdgeInsets.all(16.0),
@@ -433,7 +354,7 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
             decoration: BoxDecoration(
               color:
                   _isTextExpanded
-                      ? Colors.black.withOpacity(0.5)
+                      ? Colors.black.withAlpha(125)
                       : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -460,10 +381,10 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     );
   }
 
-  Widget _buildImageStatus(StatusEntity status) {
+  Widget _buildImageStatus(HighlightStatusEntity status) {
     final imgWidget = CustomCachedNetworkImage(
       isRounded: false,
-      imageUrl: status.media!.url,
+      imageUrl: status.media!,
       radius: 0,
     );
     return Stack(
@@ -505,13 +426,13 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
   }
 
   Widget _buildVideoStatus(
-    StatusEntity status,
+    HighlightStatusEntity status,
     int totalStatuses,
     int currentIndex,
   ) {
     final vidWidget = CachedNetworkVideo(
-      key: ValueKey(status.media!.url),
-      videoUrl: status.media!.url,
+      key: ValueKey(status.media!),
+      videoUrl: status.media!,
       showControls: false,
       onEnd: () => setState(() => _navigateNext(totalStatuses, currentIndex)),
       onDurationLoaded: (duration) {
@@ -590,18 +511,55 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     );
   }
 
-  Widget _buildTopBar(StatusEntity status) {
+  Widget _buildTopBar(DetailedHighlightEntity highlight) {
+    final account = widget.account;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
           children: [
-            ProfilePicture(link: status.user.avatar, radius: 32),
+            ProfilePicture(link: account.picUrl ?? '', radius: 32),
             const SizedBox(width: 16),
-            Expanded(child: _buildUserInfo(status)),
+            Expanded(child: _buildUserInfo(highlight, account)),
+            if (widget.isMyHighlight)
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'delete') {
+                    context.read<HighlightBloc>().add(
+                      DeleteHighlight(highlightId: highlight.id),
+                    );
+                  } else if (value == 'update_cover') {
+                    Navigator.of(context)
+                        .pushNamed(
+                          AppRoutes.updateHighlightCover,
+                          arguments: {
+                            'highlightId': highlight.id,
+                            'coverUrl': highlight.cover,
+                          },
+                        )
+                        .then((isUpdated) {
+                          if (mounted && isUpdated is bool && isUpdated) {
+                            updatedCover = true;
+                          }
+                        });
+                  }
+                },
+                itemBuilder:
+                    (BuildContext context) => <PopupMenuEntry<String>>[
+                      PopupMenuItem<String>(
+                        value: 'update_cover',
+                        child: Text(AppLocalizations.of(context)!.updateCover),
+                      ),
+                      PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Text(AppLocalizations.of(context)!.delete),
+                      ),
+                    ],
+                icon: const Icon(Icons.more_vert, color: Colors.white),
+              ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context, updatedCover),
             ),
           ],
         ),
@@ -609,13 +567,16 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     );
   }
 
-  Widget _buildUserInfo(StatusEntity status) {
+  Widget _buildUserInfo(
+    DetailedHighlightEntity highlight,
+    AccountEntity account,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Text(
-          status.user.fullName,
+          account.fullName,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -624,7 +585,7 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
         ),
         const SizedBox(height: 4),
         Text(
-          _formatTimeElapsed(status.createdAt),
+          _formatTimeElapsed(highlight.statuses[_currentPage].addedAt),
           style: const TextStyle(fontSize: 12, color: Colors.white70),
         ),
       ],
@@ -645,7 +606,7 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
     return DateFormat('MMM d, yyyy').format(createdAt);
   }
 
-  Widget _buildProgressIndicators(List<StatusEntity> statuses) {
+  Widget _buildProgressIndicators(List<HighlightStatusEntity> statuses) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -675,12 +636,6 @@ class _ShowStatusWidgetState extends State<ShowStatusWidget>
         ),
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<StatusBloc>().add(GetStatusesEvent(accountId: widget.userId));
   }
 
   @override

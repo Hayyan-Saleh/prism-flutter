@@ -19,12 +19,17 @@ class AppRoutes {
   static String blocAccPage = "/block-account-page";
   static String deleteAccount = "/delete-account";
   static String blockedAccounts = "/blocked-accounts";
+  static String createGroup = "/create-group";
 
   // ? sub acount   ! status
   static String addStatusPage = "/add-status-page";
   static String showStatusPage = "/show-status-page";
   static String followingStatusesPage = "/following-statuses-page";
   static String archivedStatuses = "/archived-statuses";
+  // ? sub acount   ! higlight
+  static String showHighlights = "/show-highlights";
+  static String selectHighlight = "/select-highlight";
+  static String updateHighlightCover = "/update-highlight-cover";
 
   //! core
   static String myApp = "/my-app";

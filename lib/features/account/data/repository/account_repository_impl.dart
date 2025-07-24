@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:prism/core/errors/exceptions/account_exception.dart';
+import 'package:prism/core/errors/exceptions/server_exception.dart';
 import 'package:prism/core/errors/failures/account_failure.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
 import 'package:prism/core/util/sevices/token_service.dart';
 import 'package:prism/features/account/data/data-sources/account_remote_data_source.dart';
 import 'package:prism/features/account/data/data-sources/personal_account_local_data_source.dart';
+import 'package:prism/features/account/data/models/account/main/group_account_model.dart';
 import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
 import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/data/models/account/status/status_model.dart';
@@ -19,9 +21,14 @@ import 'package:prism/features/account/domain/repository/account_repository.dart
 import 'package:prism/features/auth/data/datasources/user_local_data_source.dart';
 import 'package:prism/features/auth/domain/usecases/load_user_use_case.dart';
 
+import '../../domain/enitities/account/highlight/detailed_highlight_entity.dart';
+import '../../domain/enitities/account/highlight/highlight_entity.dart';
+import '../../domain/enitities/account/group/group_account_entity.dart';
+
 class AccountRepositoryImpl implements AccountRepository {
   final AccountRemoteDataSource remoteDataSource;
   final PersonalAccountLocalDataSource personalAccLDS;
+
   final UserLocalDataSource authLDS;
   final LoadUserUseCase loadUser;
   final TokenService tokenService;
@@ -410,6 +417,130 @@ class AccountRepositoryImpl implements AccountRepository {
         );
         return Right(likers);
       } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, List<HighlightEntity>>> getHighlights({
+    int? accountId,
+  }) {
+    return _withToken((token) async {
+      try {
+        final highlights = await remoteDataSource.getHighlights(
+          token: token,
+          accountId: accountId,
+        );
+        return Right(highlights);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, DetailedHighlightEntity>> getDetailedHighlight({
+    required int highlightId,
+  }) {
+    return _withToken((token) async {
+      try {
+        final highlight = await remoteDataSource.getDetailedHighlight(
+          token: token,
+          highlightId: highlightId,
+        );
+        return Right(highlight);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> deleteHighlight({
+    required int highlightId,
+  }) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.deleteHighlight(
+          token: token,
+          highlightId: highlightId,
+        );
+        return const Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> updateHighlightCover({
+    required int highlightId,
+    required File cover,
+  }) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.updateHighlightCover(
+          token: token,
+          highlightId: highlightId,
+          cover: cover,
+        );
+        return Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> addToHighlight({
+    required int highlightId,
+    required int statusId,
+  }) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.addToHighlight(
+          token: token,
+          highlightId: highlightId,
+          statusId: statusId,
+        );
+        return const Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, GroupAccountEntity>> createGroup({
+    required String name,
+    required String privacy,
+    File? avatar,
+    String? bio,
+  }) async {
+    return _withToken((token) async {
+      try {
+        final GroupAccountModel group = await remoteDataSource.createGroup(
+          token: token,
+          name: name,
+          privacy: privacy,
+          avatar: avatar,
+          bio: bio,
+        );
+        return Right(group.toEntity());
+      } on ServerException catch (e) {
         return Left(AccountFailure(e.message));
       } catch (e) {
         return Left(AccountFailure(e.toString()));

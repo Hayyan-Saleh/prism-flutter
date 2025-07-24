@@ -185,5 +185,27 @@
     "addCoverImage": "Add Cover Image",
     "highlightTitle": "Highlight Title",
     "pleaseEnterAtitle": "Please enter a title",
-    "createHighlight": "Create Highlight"
+    "createHighlight": "Create Highlight",
+    "editHighlight": "Edit Highlight",
+    "updateCover": "Update Cover",
+    "pleaseSelectAnImage": "Please select an image.",
+    "save": "Save",
+    "selectAnImageFromGallery": "Select an image from gallery",
+    "addToHighlight": "Add to Highlight",
+    "noHighlightsFound": "No highlights found.",
+    "failedToAddToHighlight": "Failed to add to highlight: {message}",
+    "@failedToAddToHighlight": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "statusAddedToHighlight": "Status added to highlight successfully!",
+    "createGroup": "Create Group",
+    "groupCreatedSuccessfully": "Group created successfully",
+    "groupName": "Group Name",
+    "pleaseEnterGroupName": "Please enter a group name",
+    "public": "Public",
+    "private": "Private"
 }

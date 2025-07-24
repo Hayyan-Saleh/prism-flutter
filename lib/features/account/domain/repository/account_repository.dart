@@ -9,6 +9,10 @@ import 'package:prism/features/account/domain/enitities/account/main/other_accou
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
+import 'package:prism/features/account/domain/enitities/account/group/group_account_entity.dart';
+
+import '../enitities/account/highlight/detailed_highlight_entity.dart';
+import '../enitities/account/highlight/highlight_entity.dart';
 
 abstract class AccountRepository {
   // ! all following implementations should be wrapped with token for auth (ask hayyan for that)
@@ -94,5 +98,34 @@ abstract class AccountRepository {
 
   Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getStatusLikers({
     required int statusId,
+  });
+
+  Future<Either<AccountFailure, List<HighlightEntity>>> getHighlights({
+    int? accountId,
+  });
+
+  Future<Either<AccountFailure, DetailedHighlightEntity>> getDetailedHighlight({
+    required int highlightId,
+  });
+
+  Future<Either<AccountFailure, Unit>> deleteHighlight({
+    required int highlightId,
+  });
+
+  Future<Either<AccountFailure, Unit>> updateHighlightCover({
+    required int highlightId,
+    required File cover,
+  });
+
+  Future<Either<AccountFailure, Unit>> addToHighlight({
+    required int highlightId,
+    required int statusId,
+  });
+
+  Future<Either<AccountFailure, GroupAccountEntity>> createGroup({
+    required String name,
+    required String privacy,
+    File? avatar,
+    String? bio,
   });
 }

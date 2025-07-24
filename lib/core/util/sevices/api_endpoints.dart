@@ -1,6 +1,6 @@
 class ApiEndpoints {
   //TODO: change this line to your own vm
-  // static const String baseUrl = 'http://192.168.1.38:8000/api';
+  // static const String baseUrl = 'http://192.168.1.100:8000/api';
   static const String baseUrl = 'http://10.0.2.2:8000/api';
 
   //! auth
@@ -37,6 +37,8 @@ class ApiEndpoints {
   static const String followUser = "$usersPrefix/followUser";
   static const String unfollow = "unfollow";
 
+  static const String groups = '$baseUrl/groups';
+
   //! statuses
   static const String getFollowingWithStatus = "/followingWithStatus";
   static const String getUserStatuses = "/statuses";
@@ -45,6 +47,7 @@ class ApiEndpoints {
 
   //! highlights
   static const String highlights = "/highlights";
+  static const String setHighlightCover = "/highlights/set-cover";
 
   // ! nofiticaiton
   static const String getFollowRequests = "$usersPrefix/requests";

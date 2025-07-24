@@ -7,6 +7,7 @@ import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/sevices/assets.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
+import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/personal_account_page.dart';
@@ -103,6 +104,19 @@ class _HomePageState extends State<HomePage> {
       ),
       actions: [
         IconButton(
+          icon: Icon(Icons.add_box_outlined),
+          tooltip: AppLocalizations.of(context)!.add,
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.archivedStatuses).then((
+              addedNewHighlight,
+            ) {
+              if (mounted && addedNewHighlight is bool && addedNewHighlight) {
+                context.read<HighlightBloc>().add(GetHighlights());
+              }
+            });
+          },
+        ),
+        IconButton(
           icon: Icon(Icons.menu),
           onPressed: () {
             _showSettingsBottomSheet(context);
@@ -156,94 +170,97 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          height: 350,
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text(AppLocalizations.of(context)!.settings),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, AppRoutes.settings);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.person),
-                title: Text(AppLocalizations.of(context)!.editProfile),
-                onTap: () {
-                  context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text(AppLocalizations.of(context)!.settings),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.settings);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text(AppLocalizations.of(context)!.editProfile),
+              onTap: () {
+                context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
 
-                  Navigator.pop(context);
+                Navigator.pop(context);
 
-                  Navigator.pushNamed(
-                    context,
-                    AppRoutes.updateAccount,
-                    arguments: {
-                      'personalAccount': context.read<PAccountBloc>().pAccount,
-                    },
-                  );
-                },
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.updateAccount,
+                  arguments: {
+                    'personalAccount': context.read<PAccountBloc>().pAccount,
+                  },
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.block),
+              title: Text(AppLocalizations.of(context)!.blockedAccounts),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.blockedAccounts);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.group_add),
+              title: Text(AppLocalizations.of(context)!.createGroup),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed(AppRoutes.createGroup);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.archive),
+              title: Text(AppLocalizations.of(context)!.archivedStatuses),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed(AppRoutes.archivedStatuses);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.block),
+              title: Text(
+                AppLocalizations.of(context)!.deleteAccount,
+                style: TextStyle(color: Colors.red),
               ),
-              ListTile(
-                leading: const Icon(Icons.block),
-                title: Text(AppLocalizations.of(context)!.blockedAccounts),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, AppRoutes.blockedAccounts);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.archive),
-                title: Text(AppLocalizations.of(context)!.archived),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, AppRoutes.archivedStatuses);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.delete, color: Colors.red),
-                title: Text(
+              onTap: () {
+                showCustomAboutDialog(
+                  context,
                   AppLocalizations.of(context)!.deleteAccount,
-                  style: TextStyle(color: Colors.red),
-                ),
-                onTap: () {
-                  showCustomAboutDialog(
-                    context,
-                    AppLocalizations.of(context)!.deleteAccount,
-                    AppLocalizations.of(context)!.deleteAccountConfirmation,
-                    [
-                      AppButton(
-                        child: Text(AppLocalizations.of(context)!.ok),
-                        onPressed: () {
-                          if (Navigator.canPop(context)) {
-                            Navigator.pop(context);
-                          }
-                          Navigator.pushNamed(context, AppRoutes.deleteAccount);
-                        },
-                      ),
-                      AppButton(
-                        bgColor: Colors.green,
-                        child: Text(AppLocalizations.of(context)!.cancel),
-                        onPressed: () {
+                  AppLocalizations.of(context)!.deleteAccountConfirmation,
+                  [
+                    AppButton(
+                      child: Text(AppLocalizations.of(context)!.ok),
+                      onPressed: () {
+                        if (Navigator.canPop(context)) {
                           Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                    true,
-                  );
-                },
-              ),
-            ],
-          ),
+                        }
+                        Navigator.pushNamed(context, AppRoutes.deleteAccount);
+                      },
+                    ),
+                    AppButton(
+                      bgColor: Colors.green,
+                      child: Text(AppLocalizations.of(context)!.cancel),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                  true,
+                );
+              },
+            ),
+          ],
         );
       },
     );
   }
 
-  // ! hello?
   Widget _buildCustomNavBar() {
     final icons = [
       Icons.home,
@@ -265,8 +282,13 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(5, (index) {
             if (index == 4 && hasPic) {
+              final addCircle = _selectedIndex == index;
               return GestureDetector(
-                child: ProfilePicture(link: picUrl, radius: 16),
+                child: ProfilePicture(
+                  link: picUrl,
+                  radius: addCircle ? 18 : 16,
+                  hasStatus: addCircle,
+                ),
                 onTap: () => _updatePage(index),
               );
             }

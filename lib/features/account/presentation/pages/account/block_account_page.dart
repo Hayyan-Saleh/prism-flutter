@@ -34,7 +34,7 @@ class BlockAccountPage extends StatelessWidget {
                 },
               ),
             ],
-            false, // Not dismissible
+            false,
           );
         } else if (state is FailedOAccountState) {
           showCustomAboutDialog(

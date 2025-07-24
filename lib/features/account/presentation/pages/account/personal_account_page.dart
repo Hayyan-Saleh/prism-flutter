@@ -1,12 +1,17 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/personal_info_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/features/account/presentation/widgets/highlight_widget.dart';
 
 class PersonalAccountPage extends StatefulWidget {
   const PersonalAccountPage({super.key});
@@ -19,6 +24,7 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
   @override
   void initState() {
     context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
+    context.read<HighlightBloc>().add(GetHighlights());
     super.initState();
   }
 
@@ -48,7 +54,6 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
             AppLocalizations.of(context)!.followers,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-
           Text(
             account.followersCount.toString(),
             style: Theme.of(context).textTheme.bodyLarge,
@@ -234,18 +239,6 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
                       ),
                     ),
                   ),
-                if (account.personalInfos.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    child: PersonalInfoWidget(
-                      userName: account.fullName,
-                      personalInfo: account.personalInfos,
-                      onToggleExpand: () => setState(() {}),
-                    ),
-                  ),
               ],
             ),
           );
@@ -255,48 +248,144 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
     );
   }
 
-  Widget _buildHighlightsSection(context) {
-    // TODO: CREATE Status Bloc
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 8),
-          child: Text(
-            AppLocalizations.of(context)!.highlights,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(
-          height: 200,
-          child: ListView(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
+  Widget _buildPersonalInfoSection(BuildContext context) {
+    return BlocBuilder<PAccountBloc, PAccountState>(
+      builder: (context, state) {
+        final account =
+            state is LoadedPAccountState
+                ? state.personalAccount
+                : context.read<PAccountBloc>().pAccount;
+
+        if (account != null && account.personalInfos.isNotEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: PersonalInfoWidget(
+              userName: account.fullName,
+              personalInfo: account.personalInfos,
+              onToggleExpand: () => setState(() {}),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildHighlightsSection(BuildContext context) {
+    return BlocBuilder<HighlightBloc, HighlightState>(
+      builder: (context, state) {
+        if (state is HighlightsLoaded && state.highlights.isNotEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ...List.generate(
-                10,
-                (index) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    spacing: 8,
-                    children: [
-                      ProfilePicture(link: '', hasStatus: true, radius: 32),
-                      Text(
-                        "28/$index/24",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, top: 16, bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.highlights,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 0.25 * getHeight(context),
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(left: 8),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: state.highlights.length,
+                  itemBuilder: (context, index) {
+                    final highlight =
+                        state.highlights[state.highlights.length - 1 - index];
+                    return GestureDetector(
+                      onTap: () {
+                        final pAccount = context.read<PAccountBloc>().pAccount;
+                        if (pAccount != null) {
+                          Navigator.of(context)
+                              .pushNamed(
+                                AppRoutes.showHighlights,
+                                arguments: {
+                                  'initialHighlightIndex': index,
+                                  'highlightIds': state.highlights
+                                      .map((h) => h.id)
+                                      .toList()
+                                      .reversed
+                                      .toList(),
+                                  'account': pAccount,
+                                },
+                              )
+                              .then((hasChangedCover) {
+                            if (mounted &&
+                                hasChangedCover is bool &&
+                                hasChangedCover) {
+                              context.read<HighlightBloc>().add(
+                                    GetHighlights(),
+                                  );
+                            }
+                          });
+                        }
+                      },
+                      onLongPress: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return Wrap(
+                              children: <Widget>[
+                                ListTile(
+                                  leading: const Icon(Icons.edit),
+                                  title: Text(
+                                    AppLocalizations.of(context)!.editHighlight,
+                                  ),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.showHighlights,
+                                      arguments: {
+                                        'initialHighlightIndex': index,
+                                        'highlightIds':
+                                            state.highlights
+                                                .map((h) => h.id)
+                                                .toList()
+                                                .reversed
+                                                .toList(),
+                                      },
+                                    ).then((changesMade) {
+                                      if (mounted &&
+                                          changesMade is bool &&
+                                          changesMade) {
+                                        context.read<HighlightBloc>().add(
+                                          GetHighlights(),
+                                        );
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: HighlightWidget(highlight: highlight),
+                    );
+                  },
                 ),
               ),
             ],
-          ),
-        ),
-      ],
+          );
+        }
+        if (state is HighlightLoading) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 
@@ -313,6 +402,7 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
       color: Theme.of(context).colorScheme.onPrimary,
       onRefresh: () async {
         context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
+        context.read<HighlightBloc>().add(GetHighlights());
       },
       child: child,
     );
@@ -330,6 +420,7 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
           children: [
             _buildFirstSection(context),
             _buildHighlightsSection(context),
+            _buildPersonalInfoSection(context),
             _buildPostsSection(),
           ],
         ),

@@ -5,6 +5,7 @@ class CustomTextFormField extends StatefulWidget {
   final TextEditingController textEditingController;
   final String hintText, errorMessage;
   final bool obsecure;
+  final int maxLines;
   final String? Function(String?)? validator;
   const CustomTextFormField({
     required this.formkey,
@@ -13,6 +14,7 @@ class CustomTextFormField extends StatefulWidget {
     required this.errorMessage,
     required this.hintText,
     required this.validator,
+    this.maxLines = 1,
     super.key,
   });
 
@@ -21,13 +23,14 @@ class CustomTextFormField extends StatefulWidget {
 }
 
 class _CustomTextFormFieldState extends State<CustomTextFormField> {
-  bool _isObscured = true; // Local state to toggle visibility
+  bool _isObscured = true;
 
   @override
   Widget build(BuildContext context) {
     return Form(
       key: widget.formkey,
       child: TextFormField(
+        maxLines: widget.maxLines,
         cursorColor: Theme.of(context).colorScheme.secondary,
         obscureText: widget.obsecure ? _isObscured : false,
         autocorrect: false,

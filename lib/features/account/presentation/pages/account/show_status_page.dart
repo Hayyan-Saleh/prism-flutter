@@ -44,6 +44,8 @@ class _ShowStatusPageState extends State<ShowStatusPage>
   List<StatusEntity> _statuses = [];
   bool _isTextExpanded = false;
   CachedNetworkVideoState? _videoController;
+  double? _videoDuration;
+  bool _isNavigating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +98,7 @@ class _ShowStatusPageState extends State<ShowStatusPage>
       if (_statuses.isNotEmpty && _currentPage == 0) {
         if (_statuses[0].media == null ||
             _statuses[0].media!.type == MediaType.image) {
+          _progress = 0.0;
           _startTimer(5.0, _statuses.length, 0);
         }
       }
@@ -158,22 +161,25 @@ class _ShowStatusPageState extends State<ShowStatusPage>
   }
 
   void _handlePageChange(int index, List<StatusEntity> statuses) {
-    setState(() {
-      _currentPage = index;
-      _progress = 0.0;
-      _isTextExpanded = false;
-      _videoController = null;
-    });
-    if (statuses.isNotEmpty &&
-        (statuses[index].media == null ||
-            statuses[index].media!.type == MediaType.image)) {
-      _startTimer(5.0, statuses.length, index);
+    if (mounted) {
+      _isNavigating = false;
+      setState(() {
+        _currentPage = index;
+        _progress = 0.0;
+        _isTextExpanded = false;
+        _videoController = null;
+        _videoDuration = null;
+      });
+      if (statuses.isNotEmpty &&
+          (statuses[index].media == null ||
+              statuses[index].media!.type == MediaType.image)) {
+        _startTimer(5.0, statuses.length, index);
+      }
     }
   }
 
   void _startTimer(double duration, int totalStatuses, int currentIndex) {
     _timer?.cancel();
-    _progress = 0.0;
     const updateInterval = Duration(milliseconds: 50);
     _timer = Timer.periodic(updateInterval, (timer) {
       setState(() {
@@ -188,22 +194,25 @@ class _ShowStatusPageState extends State<ShowStatusPage>
 
   void _pauseContent() {
     _timer?.cancel();
-    if (_videoController != null) {
-      _videoController!.pause();
-    }
+    _videoController?.pause();
   }
 
   void _resumeContent(int totalStatuses, int currentIndex) {
     final status = _statuses[currentIndex];
     if (status.media == null || status.media!.type == MediaType.image) {
       _startTimer(5.0, totalStatuses, currentIndex);
-    } else if (status.media!.type == MediaType.video &&
-        _videoController != null) {
-      _videoController!.resume();
+    } else if (status.media!.type == MediaType.video) {
+      _videoController?.resume();
+      if (_videoDuration != null) {
+        _startTimer(_videoDuration!, totalStatuses, currentIndex);
+      }
     }
   }
 
   void _navigateNext(int totalStatuses, int currentIndex) {
+    if (_isNavigating) return;
+    _isNavigating = true;
+
     if (currentIndex < totalStatuses - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -212,7 +221,9 @@ class _ShowStatusPageState extends State<ShowStatusPage>
     } else if (widget.onFinished != null) {
       widget.onFinished!();
     } else {
-      Navigator.of(context).pop();
+      if (Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -221,11 +232,15 @@ class _ShowStatusPageState extends State<ShowStatusPage>
     int totalStatuses,
     int currentIndex,
   ) {
-    return Stack(
-      children: [
-        _buildStatusContent(status, totalStatuses, currentIndex),
-        _buildNavigationOverlay(totalStatuses),
-      ],
+    return GestureDetector(
+      onLongPressStart: (_) => _pauseContent(),
+      onLongPressEnd: (_) => _resumeContent(totalStatuses, currentIndex),
+      child: Stack(
+        children: [
+          _buildStatusContent(status, totalStatuses, currentIndex),
+          _buildNavigationOverlay(totalStatuses),
+        ],
+      ),
     );
   }
 
@@ -342,7 +357,7 @@ class _ShowStatusPageState extends State<ShowStatusPage>
                       decoration: BoxDecoration(
                         color:
                             _isTextExpanded
-                                ? Colors.black.withOpacity(0.5)
+                                ? Colors.black.withAlpha(125)
                                 : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -403,44 +418,42 @@ class _ShowStatusPageState extends State<ShowStatusPage>
   Widget _buildTextStatus(StatusEntity status) {
     return Container(
       color: Theme.of(context).colorScheme.secondary.withAlpha(200),
+      padding: const EdgeInsets.all(16.0),
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              setState(() {
-                _isTextExpanded = !_isTextExpanded;
-              });
-            },
-            child: Container(
-              constraints: BoxConstraints(
-                maxHeight:
-                    _isTextExpanded ? 0.6 * getHeight(context) : 3 * 24.0 * 1.2,
-              ),
-              decoration: BoxDecoration(
-                color:
-                    _isTextExpanded
-                        ? Colors.black.withOpacity(0.5)
-                        : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SingleChildScrollView(
-                physics:
-                    _isTextExpanded
-                        ? const AlwaysScrollableScrollPhysics()
-                        : const NeverScrollableScrollPhysics(),
-                child: Text(
-                  status.text ?? '',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: _isTextExpanded ? null : 3,
-                  overflow: _isTextExpanded ? null : TextOverflow.ellipsis,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            setState(() {
+              _isTextExpanded = !_isTextExpanded;
+            });
+          },
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight:
+                  _isTextExpanded ? 0.6 * getHeight(context) : 15 * 24.0 * 1.3,
+            ),
+            decoration: BoxDecoration(
+              color:
+                  _isTextExpanded
+                      ? Colors.black.withAlpha(125)
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: SingleChildScrollView(
+              physics:
+                  _isTextExpanded
+                      ? const AlwaysScrollableScrollPhysics()
+                      : const NeverScrollableScrollPhysics(),
+              child: Text(
+                status.text ?? '',
+                style: const TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
+                maxLines: _isTextExpanded ? null : 15,
+                overflow: _isTextExpanded ? null : TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -503,8 +516,10 @@ class _ShowStatusPageState extends State<ShowStatusPage>
       videoUrl: status.media!.url,
       showControls: false,
       onEnd: () => setState(() => _navigateNext(totalStatuses, currentIndex)),
-      onDurationLoaded:
-          (duration) => _startTimer(duration, totalStatuses, currentIndex),
+      onDurationLoaded: (duration) {
+        _videoDuration = duration;
+        _startTimer(duration, totalStatuses, currentIndex);
+      },
     );
     return Stack(
       children: [

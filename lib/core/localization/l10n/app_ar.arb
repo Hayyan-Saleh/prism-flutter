@@ -185,5 +185,27 @@
     "addCoverImage": "إضافة صورة غلاف",
     "highlightTitle": "عنوان الحدث البارز",
     "pleaseEnterAtitle": "يرجى إدخال عنوان",
-    "createHighlight": "إنشاء حدث بارز"
+    "createHighlight": "إنشاء حدث بارز",
+    "editHighlight": "تعديل الحدث البارز",
+    "addToHighlight": "أضف إلى الحدث البارز",
+    "updateCover": "تحديث الغلاف",
+    "pleaseSelectAnImage": "يرجى تحديد صورة.",
+    "save": "حفظ",
+    "selectAnImageFromGallery": "اختر صورة من المعرض",
+    "noHighlightsFound": "لم يتم العثور على أي هايلايت.",
+    "failedToAddToHighlight": "فشل في الإضافة إلى الهايلايت: {message}",
+    "@failedToAddToHighlight": {
+        "placeholders": {
+            "message": {
+                "type": "String"
+            }
+        }
+    },
+    "statusAddedToHighlight": "تمت إضافة الحالة إلى الهايلايت بنجاح!",
+    "createGroup": "إنشاء مجموعة",
+    "groupCreatedSuccessfully": "تم إنشاء المجموعة بنجاح",
+    "groupName": "اسم المجموعة",
+    "pleaseEnterGroupName": "يرجى إدخال اسم المجموعة",
+    "public": "عام",
+    "private": "خاص"
 }

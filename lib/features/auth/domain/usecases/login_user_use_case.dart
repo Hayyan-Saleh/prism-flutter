@@ -1,5 +1,3 @@
-// domain/usecases/login_with_email_use_case.dart
-
 import 'package:dartz/dartz.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
 import '../entities/user_entity.dart';

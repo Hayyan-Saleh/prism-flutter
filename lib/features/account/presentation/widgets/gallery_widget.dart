@@ -98,10 +98,7 @@ class GalleryWidgetState extends State<GalleryWidget>
         }
         return;
       }
-      final media = await albums[0].getAssetListRange(
-        start: 0,
-        end: 50,
-      ); // Increased limit
+      final media = await albums[0].getAssetListRange(start: 0, end: 50);
       if (mounted) {
         setState(() => _mediaList = media);
       }

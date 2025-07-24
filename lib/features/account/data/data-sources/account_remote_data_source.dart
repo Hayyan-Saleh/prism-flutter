@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
@@ -9,11 +10,15 @@ import 'package:prism/core/errors/failures/account_failure.dart';
 import 'package:prism/core/network/api_client.dart';
 import 'package:prism/core/util/constants/strings.dart';
 import 'package:prism/core/util/sevices/api_endpoints.dart';
+import 'package:prism/features/account/data/models/account/main/group_account_model.dart';
 import 'package:prism/features/account/data/models/account/main/other_account_model.dart';
 import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
 import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/data/models/account/status/status_model.dart';
+import 'package:prism/features/account/data/models/account/highlight/detailed_highlight_model.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
+
+import '../models/account/highlight/highlight_model.dart';
 
 abstract class AccountRemoteDataSource {
   Future<bool> checkAccountName({
@@ -95,6 +100,41 @@ abstract class AccountRemoteDataSource {
   Future<List<SimplifiedAccountModel>> getStatusLikers({
     required String token,
     required int statusId,
+  });
+
+  Future<List<HighlightModel>> getHighlights({
+    required String token,
+    int? accountId,
+  });
+
+  Future<DetailedHighlightModel> getDetailedHighlight({
+    required String token,
+    required int highlightId,
+  });
+
+  Future<void> deleteHighlight({
+    required String token,
+    required int highlightId,
+  });
+
+  Future<void> updateHighlightCover({
+    required String token,
+    required int highlightId,
+    required File cover,
+  });
+
+  Future<void> addToHighlight({
+    required String token,
+    required int highlightId,
+    required int statusId,
+  });
+
+  Future<GroupAccountModel> createGroup({
+    required String token,
+    required String name,
+    required String privacy,
+    File? avatar,
+    String? bio,
   });
 }
 
@@ -549,16 +589,16 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       request.headers.addAll({
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
-        'Content-Type': 'multipart/form-data',
       });
 
-      if (text != null) {
+      if (text != null && text.isNotEmpty) {
         request.fields['text'] = text;
       }
 
-      for (var statusId in statusIds) {
-        request.fields['status_ids[]'] = statusId.toString();
-      }
+      // Send status_ids as an array using status_ids[] notation
+      statusIds.asMap().forEach((index, statusId) {
+        request.fields['status_ids[$index]'] = statusId.toString();
+      });
 
       if (cover != null && await cover.exists()) {
         final coverFile = await http.MultipartFile.fromPath(
@@ -572,11 +612,19 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       final response = await request.send();
       final responseBody = await http.Response.fromStream(response);
 
+      if (responseBody.statusCode == 302) {
+        throw Exception(
+          'Redirect detected. Check authentication or middleware.',
+        );
+      }
+
       ApiClient.handleResponse(responseBody);
     } on ServerException catch (e) {
       throw AccountException(e.message);
     } on NetworkException catch (e) {
       throw AccountException(e.message);
+    } catch (e) {
+      throw AccountException('Failed to create highlight: $e');
     }
   }
 
@@ -620,6 +668,159 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       throw AccountException(e.message);
     } on NetworkException catch (e) {
       throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<List<HighlightModel>> getHighlights({
+    required String token,
+    int? accountId,
+  }) async {
+    try {
+      final endpoint =
+          accountId == null
+              ? ApiEndpoints.highlights
+              : '${ApiEndpoints.highlights}?user_id=$accountId';
+      final response = await apiClient.get(
+        endpoint,
+        headers: _authHeaders(token),
+      );
+      return (response['highlights'] as List)
+          .map((json) => HighlightModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on ServerException catch (e) {
+      if (e.message.contains('404')) {
+        throw AccountException('User or highlights not found');
+      }
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<DetailedHighlightModel> getDetailedHighlight({
+    required String token,
+    required int highlightId,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '${ApiEndpoints.highlights}/$highlightId',
+        headers: _authHeaders(token),
+      );
+      return DetailedHighlightModel.fromJson(response['highlight']);
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<void> deleteHighlight({
+    required String token,
+    required int highlightId,
+  }) async {
+    try {
+      await apiClient.delete(
+        '${ApiEndpoints.highlights}/$highlightId',
+        headers: _authHeaders(token),
+      );
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<void> updateHighlightCover({
+    required String token,
+    required int highlightId,
+    required File cover,
+  }) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.setHighlightCover}'),
+      );
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      request.fields['highlight_id'] = highlightId.toString();
+
+      final coverFile = await http.MultipartFile.fromPath(
+        'cover',
+        cover.path,
+        filename: path.basename(cover.path),
+      );
+      request.files.add(coverFile);
+
+      final response = await request.send();
+      final responseBody = await http.Response.fromStream(response);
+
+      ApiClient.handleResponse(responseBody);
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<void> addToHighlight({
+    required String token,
+    required int highlightId,
+    required int statusId,
+  }) async {
+    try {
+      await apiClient.post('/statuses/add-to-highlight', {
+        'highlight_id': highlightId,
+        'status_id': statusId,
+      }, headers: _authHeaders(token));
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<GroupAccountModel> createGroup({
+    required String token,
+    required String name,
+    required String privacy,
+    File? avatar,
+    String? bio,
+  }) async {
+    var uri = Uri.parse(ApiEndpoints.groups);
+    var request = http.MultipartRequest('POST', uri);
+    request.headers.addAll({
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+    });
+    request.fields['name'] = name;
+    request.fields['privacy'] = privacy;
+    if (bio != null) request.fields['bio'] = bio;
+    if (avatar != null) {
+      final imageFile = await http.MultipartFile.fromPath(
+        'avatar',
+        avatar.path,
+        filename: path.basename(avatar.path),
+      );
+      request.files.add(imageFile);
+    }
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      return GroupAccountModel.fromJson(data['group']);
+    } else {
+      throw ServerException(
+        'Failed to create group /n  details: ${response.body}',
+      );
     }
   }
 }

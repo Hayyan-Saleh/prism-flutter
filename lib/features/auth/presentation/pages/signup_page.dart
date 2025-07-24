@@ -61,13 +61,13 @@ class _SignUpPageState extends State<SignUpPage> {
       AppLocalizations.of(context)!.createAccount,
       style: Theme.of(
         context,
-      ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
+      ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
       textAlign: TextAlign.center,
     );
   }
 
   Widget _buildIllustration(double height) {
-    return SvgPicture.asset(Assets.signup, height: 0.25 * height);
+    return SvgPicture.asset(Assets.signup, height: 0.2 * height);
   }
 
   Widget _buildTitle1() {

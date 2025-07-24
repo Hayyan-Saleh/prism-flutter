@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
 import '../repositories/auth_repository.dart';
 
-//Used to verify password reset code
 class VerifyResetCodeUseCase {
   final AuthRepository repository;
 

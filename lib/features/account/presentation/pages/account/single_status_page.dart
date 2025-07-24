@@ -36,7 +36,9 @@ class _SingleStatusPageState extends State<SingleStatusPage>
   double _progress = 0.0;
   bool _isTextExpanded = false;
   CachedNetworkVideoState? _videoController;
+  double? _videoDuration;
   late StatusEntity _status;
+  bool _isNavigating = false;
 
   @override
   void initState() {
@@ -49,8 +51,12 @@ class _SingleStatusPageState extends State<SingleStatusPage>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _handlePop,
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          await _handlePop();
+        }
+      },
       child: Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
         body: BlocListener<StatusBloc, StatusState>(
@@ -83,7 +89,6 @@ class _SingleStatusPageState extends State<SingleStatusPage>
 
   void _startTimer(double duration) {
     _timer?.cancel();
-    _progress = 0.0;
     const updateInterval = Duration(milliseconds: 50);
     _timer = Timer.periodic(updateInterval, (timer) {
       if (!mounted) {
@@ -94,9 +99,7 @@ class _SingleStatusPageState extends State<SingleStatusPage>
         _progress += updateInterval.inMilliseconds / 1000 / duration;
         if (_progress >= 1.0) {
           timer.cancel();
-          if (Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-          }
+          _navigateNext();
         }
       });
     });
@@ -112,18 +115,27 @@ class _SingleStatusPageState extends State<SingleStatusPage>
       _startTimer(5.0);
     } else if (_status.media!.type == MediaType.video) {
       _videoController?.resume();
+      if (_videoDuration != null) {
+        _startTimer(_videoDuration!);
+      }
     }
   }
 
   void _navigateNext() {
+    if (_isNavigating) return;
+    _isNavigating = true;
     if (Navigator.canPop(context)) {
       Navigator.of(context).pop();
     }
   }
 
   Widget _buildStatusPage(StatusEntity status) {
-    return Stack(
-      children: [_buildStatusContent(status), _buildNavigationOverlay()],
+    return GestureDetector(
+      onLongPressStart: (_) => _pauseContent(),
+      onLongPressEnd: (_) => _resumeContent(),
+      child: Stack(
+        children: [_buildStatusContent(status), _buildNavigationOverlay()],
+      ),
     );
   }
 
@@ -234,7 +246,7 @@ class _SingleStatusPageState extends State<SingleStatusPage>
                       decoration: BoxDecoration(
                         color:
                             _isTextExpanded
-                                ? Colors.black.withOpacity(0.5)
+                                ? Colors.black.withAlpha(125)
                                 : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -291,44 +303,42 @@ class _SingleStatusPageState extends State<SingleStatusPage>
   Widget _buildTextStatus(StatusEntity status) {
     return Container(
       color: Theme.of(context).colorScheme.secondary.withAlpha(200),
+      padding: const EdgeInsets.all(16.0),
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              setState(() {
-                _isTextExpanded = !_isTextExpanded;
-              });
-            },
-            child: Container(
-              constraints: BoxConstraints(
-                maxHeight:
-                    _isTextExpanded ? 0.6 * getHeight(context) : 3 * 24.0 * 1.2,
-              ),
-              decoration: BoxDecoration(
-                color:
-                    _isTextExpanded
-                        ? Colors.black.withOpacity(0.5)
-                        : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SingleChildScrollView(
-                physics:
-                    _isTextExpanded
-                        ? const AlwaysScrollableScrollPhysics()
-                        : const NeverScrollableScrollPhysics(),
-                child: Text(
-                  status.text ?? '',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: _isTextExpanded ? null : 3,
-                  overflow: _isTextExpanded ? null : TextOverflow.ellipsis,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            setState(() {
+              _isTextExpanded = !_isTextExpanded;
+            });
+          },
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight:
+                  _isTextExpanded ? 0.6 * getHeight(context) : 15 * 24.0 * 1.3,
+            ),
+            decoration: BoxDecoration(
+              color:
+                  _isTextExpanded
+                      ? Colors.black.withAlpha(125)
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: SingleChildScrollView(
+              physics:
+                  _isTextExpanded
+                      ? const AlwaysScrollableScrollPhysics()
+                      : const NeverScrollableScrollPhysics(),
+              child: Text(
+                status.text ?? '',
+                style: const TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
+                maxLines: _isTextExpanded ? null : 15,
+                overflow: _isTextExpanded ? null : TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -386,8 +396,11 @@ class _SingleStatusPageState extends State<SingleStatusPage>
       key: ValueKey(status.media!.url),
       videoUrl: status.media!.url,
       showControls: false,
-      onEnd: () => setState(() => _navigateNext()),
-      onDurationLoaded: (duration) => _startTimer(duration),
+      onEnd: () => _navigateNext(),
+      onDurationLoaded: (duration) {
+        _videoDuration = duration;
+        _startTimer(duration);
+      },
     );
     return Stack(
       children: [

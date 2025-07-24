@@ -11,6 +11,8 @@ import 'package:prism/features/account/domain/enitities/account/main/other_accou
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/other_account_bloc/other_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
+import 'package:prism/features/account/presentation/widgets/highlight_widget.dart';
 import 'package:prism/features/account/presentation/widgets/personal_info_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -33,6 +35,9 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
   void initState() {
     context.read<OAccountBloc>().add(
       LoadOAccountEvent(id: widget.otherAccountId),
+    );
+    context.read<HighlightBloc>().add(
+      GetHighlights(accountId: widget.otherAccountId),
     );
     super.initState();
   }
@@ -143,6 +148,13 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
             state.failure.message,
             null,
             true,
+          );
+        }
+        // Reload account if unfollowed
+        if (state is DoneFollowState &&
+            state.newStatus == FollowStatus.notFollowing) {
+          context.read<OAccountBloc>().add(
+            LoadOAccountEvent(id: widget.otherAccountId),
           );
         }
       },
@@ -465,58 +477,77 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
     );
   }
 
-  Widget _buildHighlightsSection() {
-    // TODO: add Status Bloc
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 8),
-          child: Text(
-            AppLocalizations.of(context)!.highlights,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(
-          height: 200,
-          child: ListView(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
+  Widget _buildHighlightsSection(BuildContext context) {
+    return BlocBuilder<HighlightBloc, HighlightState>(
+      builder: (context, state) {
+        if (state is HighlightsLoaded && state.highlights.isNotEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ...List.generate(
-                10,
-                (index) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    spacing: 8,
-                    children: [
-                      ProfilePicture(link: '', hasStatus: true, radius: 32),
-                      Text(
-                        "28/$index/24",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, top: 8, bottom: 8),
+                child: Text(
+                  AppLocalizations.of(context)!.highlights,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+              SizedBox(
+                height: 0.25 * getHeight(context),
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(left: 8),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: state.highlights.length,
+                  itemBuilder: (context, index) {
+                    final highlight =
+                        state.highlights[state.highlights.length - 1 - index];
+                    return GestureDetector(
+                      onTap: () {
+                        final oAccountState = context.read<OAccountBloc>().state;
+                        if (oAccountState is LoadedOAccountState) {
+                          Navigator.of(context).pushNamed(
+                            AppRoutes.showHighlights,
+                            arguments: {
+                              'initialHighlightIndex': index,
+                              'highlightIds': state.highlights
+                                  .map((h) => h.id)
+                                  .toList()
+                                  .reversed
+                                  .toList(),
+                              'isMyHighlight': false,
+                              'account': oAccountState.otherAccount,
+                            },
+                          );
+                        }
+                      },
+                      child: HighlightWidget(highlight: highlight),
+                    );
+                  },
+                ),
+              ),
             ],
-          ),
-        ),
-      ],
+          );
+        }
+        if (state is HighlightLoading) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 
   Widget _buildPostsSection() {
+    // TODO: RAFAT POSTS ADDED HERE as widget (if wanted to add a list view or single child scroll view then make no scroll physics)
     return Text(AppLocalizations.of(context)!.postsSection);
   }
 
   Widget _buildPersonalInfoSection(OtherAccountEntity account) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: PersonalInfoWidget(
         userName: account.fullName,
         personalInfo: account.personalInfos,
@@ -561,7 +592,6 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
         if (state is UserBlockedState) {
           showCustomAboutDialog(
             context,
-
             AppLocalizations.of(context)!.success,
             AppLocalizations.of(context)!.userBlocked,
             [
@@ -604,9 +634,10 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
           );
         }
 
-        final bool isPrivateAndNotFollowing =
+        final bool isPrivateAndNotFollowingOrPending =
             account.isPrivate &&
-            account.followingStatus == FollowStatus.notFollowing;
+            (account.followingStatus == FollowStatus.notFollowing ||
+                account.followingStatus == FollowStatus.pending);
         final bool isBlockedByMe = account.isBlocked;
 
         return SingleChildScrollView(
@@ -619,12 +650,12 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
               _buildFirstSection(account),
               if (isBlockedByMe)
                 _buildHiddenDataWidget(false)
-              else if (isPrivateAndNotFollowing)
+              else if (isPrivateAndNotFollowingOrPending)
                 _buildHiddenDataWidget(true)
               else ...[
                 if (account.personalInfos.isNotEmpty)
                   _buildPersonalInfoSection(account),
-                _buildHighlightsSection(),
+                _buildHighlightsSection(context),
                 _buildPostsSection(),
               ],
             ],
@@ -644,6 +675,9 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
         onRefresh: () async {
           context.read<OAccountBloc>().add(
             LoadOAccountEvent(id: widget.otherAccountId),
+          );
+          context.read<HighlightBloc>().add(
+            GetHighlights(accountId: widget.otherAccountId),
           );
         },
         child: _handleOAccountBloc(),

@@ -164,14 +164,12 @@ class AddStatusPageState extends State<AddStatusPage> {
   }
 
   void _submitStatus() {
-    // Go to next page
     _showToggle = false;
     _pageController.animateToPage(
       2,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
-    // trigger bloc event
     final String privacy = _statusPrivacy ? 'private' : 'public';
 
     if (_selectedOption == 'text' &&
@@ -188,7 +186,6 @@ class AddStatusPageState extends State<AddStatusPage> {
         ),
       );
     }
-    // add simulation
     _simulateUpload();
   }
 

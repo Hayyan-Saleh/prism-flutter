@@ -20,7 +20,6 @@ class PersonalAccountModel extends PersonalAccountEntity {
 
   factory PersonalAccountModel.fromJson(Map<String, dynamic> json) {
     final accountModel = AccountModel.fromJson(json);
-    // Safely cast personal_info
     final personalInfo = <String, List<String>>{};
     if (json['personal_info'] != null) {
       if (json['personal_info'] is Map) {

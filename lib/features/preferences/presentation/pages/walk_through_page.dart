@@ -185,7 +185,7 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
                 onPressed: _moveBack,
                 child: Text(
                   "< ${AppLocalizations.of(context)!.back}",
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
           _currentPage == 4
@@ -196,7 +196,7 @@ class _WalkThroughPageState extends State<WalkThroughPage> {
                 onPressed: _moveNext,
                 child: Text(
                   "${AppLocalizations.of(context)!.next} >",
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
         ],
