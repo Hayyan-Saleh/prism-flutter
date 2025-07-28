@@ -5,9 +5,12 @@ import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/features/account/domain/enitities/account/main/account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
+import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/group_bloc/group_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/other_account_bloc/other_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
@@ -15,20 +18,25 @@ import 'package:prism/features/account/presentation/bloc/account/status_bloc/sta
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/account_middle_point_page.dart';
+import 'package:prism/features/account/presentation/pages/account/account_settings_page.dart';
 import 'package:prism/features/account/presentation/pages/account/accounts_page.dart';
 import 'package:prism/features/account/presentation/pages/account/add_status_page.dart';
 import 'package:prism/features/account/presentation/pages/account/block_account_page.dart';
 import 'package:prism/features/account/presentation/pages/account/blocked_accounts_page.dart';
 import 'package:prism/features/account/presentation/pages/account/create_group_page.dart';
 import 'package:prism/features/account/presentation/pages/account/delete_account_page.dart';
+import 'package:prism/features/account/presentation/pages/account/delete_group_page.dart';
 import 'package:prism/features/account/presentation/pages/account/following_statuses_page.dart';
+import 'package:prism/features/account/presentation/pages/account/group_page.dart';
 import 'package:prism/features/account/presentation/pages/account/other_account_page.dart';
+import 'package:prism/features/account/presentation/pages/account/groups_page.dart';
 import 'package:prism/features/account/presentation/pages/account/show_highlights_page.dart';
 import 'package:prism/features/account/presentation/pages/account/show_status_page.dart';
 import 'package:prism/features/account/presentation/pages/account/update_account_page.dart';
 import 'package:prism/features/account/presentation/pages/account/archived_statuses_page.dart';
 import 'package:prism/features/account/presentation/pages/account/select_highlight_page.dart';
 import 'package:prism/features/account/presentation/pages/account/update_highlight_cover_page.dart';
+import 'package:prism/features/account/presentation/pages/account/update_group_page.dart';
 import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
 import 'package:prism/features/preferences/presentation/pages/walk_through_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -286,7 +294,62 @@ class _MyAppState extends State<MyApp> {
             create: (context) => sl<GroupBloc>(),
             child: CreateGroupPage(),
           ),
+      AppRoutes.groupPage: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final groupId = args?['groupId'] as int?;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<GroupBloc>(create: (context) => sl<GroupBloc>()),
+            BlocProvider<JoinGroupBloc>(
+              create: (context) => sl<JoinGroupBloc>(),
+            ),
+          ],
+          child: GroupPage(groupId: groupId ?? 0),
+        );
+      },
+      AppRoutes.myFollowedGroups: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final trigger =
+            args?['trigger'] as void Function(BuildContext context)? ??
+            (context) {};
+        final title =
+            args?['title'] as String? ??
+            AppLocalizations.of(context)?.myGroups ??
+            '';
+        final applyJoin = args?['applyJoin'] as bool? ?? false;
+        return BlocProvider<GroupsBloc>(
+          create: (context) => sl<GroupsBloc>(),
+          child: GroupsPage(
+            title: title,
+            trigger: trigger,
+            applyJoin: applyJoin,
+          ),
+        );
+      },
+      AppRoutes.updateGroup: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final group = args?['group'] as GroupEntity?;
+        final groupId = args?['groupId'] as int?;
+        return BlocProvider<GroupBloc>(
+          create: (context) => sl<GroupBloc>(),
+          child: UpdateGroupPage(group: group, groupId: groupId),
+        );
+      },
+      AppRoutes.deleteGroup: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final groupName = args?['groupName'] as String? ?? '';
+        final groupId = args?['groupId'] as int? ?? 0;
+        return BlocProvider<GroupBloc>(
+          create: (context) => sl<GroupBloc>(),
+          child: DeleteGroupPage(groupName: groupName, groupId: groupId),
+        );
+      },
       AppRoutes.myApp: (context) => MyApp(),
+      AppRoutes.accountSettings: (context) => AccountSettingsPage(),
       AppRoutes.settings:
           (context) => SettingsPage(
             onLocaleChanged: _changeLocale,

@@ -9,10 +9,10 @@ import 'package:prism/features/account/domain/enitities/notification/follow_requ
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 
-class NotificationListTile extends StatelessWidget {
+class FollowRequestListTile extends StatelessWidget {
   final FollowRequestEntity followRequest;
 
-  const NotificationListTile({super.key, required this.followRequest});
+  const FollowRequestListTile({super.key, required this.followRequest});
 
   Widget _buildTopSection(BuildContext context, int personalAccId) {
     final local = AppLocalizations.of(context)!;

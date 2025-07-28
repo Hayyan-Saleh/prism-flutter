@@ -207,5 +207,64 @@
     "groupName": "Group Name",
     "pleaseEnterGroupName": "Please enter a group name",
     "public": "Public",
-    "private": "Private"
+    "private": "Private",
+    "accountSettings":"Account Settings",
+    "myFollowedGroups":"My Followed Groups",
+    "myOwnedGroups":"My Owned Groups",
+    "myGroups":"My Groups",
+    "updateGroup": "Update Group",
+    "groupBio": "Group Bio",
+    "privateGroup": "Private Group",
+    "gallery": "Gallery",
+    "groupUpdatedSuccessfully":"Group Updated Successfully",
+    "deleteGroupTitle": "Delete Group",
+    "deleteGroupConfirmation": "Are you sure you want to delete this group? This action cannot be undone.",
+    "deleteGroupName": "Delete {groupName}",
+    "@deleteGroupName": {
+        "placeholders": {
+            "groupName": {
+                "type": "String"
+            }
+        }
+    },
+    "leave": "Leave",
+    "join": "Join",
+    "membersCount": "{count} Members",
+    "@membersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "noGroupsHere": "You don't have any groups here.",
+    "group": "Group",
+    "owner": "Owner",
+    "noPostsYet": "No posts yet.",
+    "groupPageTitle": "Group",
+    "deleteGroup": "Delete Group",
+    "groupBioText": "{bio} group",
+    "@groupBioText": {
+        "placeholders": {
+            "bio": {
+                "type": "String"
+            }
+        }
+    },
+    "noGroupsFound": "You don't have any groups here.",
+    "groupMembers": "Group Members",
+    "explore": "Explore",
+    "groups": "Groups",
+    "exploreGroups": "Explore Groups",
+    "groupMembers": "{groupName} Members",
+    "@groupMembers": {
+        "placeholders": {
+            "groupName": {
+                "type": "String"
+            }
+        }
+    },
+    "requestJoin":"Request Join",
+    "groupRequests":"Group Requests",
+    "approve":"Approvet"
 }

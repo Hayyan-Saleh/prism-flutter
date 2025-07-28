@@ -137,7 +137,11 @@ class _SimplifiedAccountWidgetState extends State<SimplifiedAccountWidget> {
           child: Row(
             spacing: 16,
             children: [
-              ProfilePicture(link: widget.account.avatar, radius: 30),
+              ProfilePicture(
+                link: widget.account.avatar,
+                owner: widget.account.isOwner,
+                radius: 30,
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

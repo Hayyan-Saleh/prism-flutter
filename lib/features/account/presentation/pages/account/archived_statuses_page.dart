@@ -439,16 +439,14 @@ class _ArchivedStatusesPageState extends State<ArchivedStatusesPage> {
             borderRadius: BorderRadius.circular(8),
             child:
                 status.media != null
-                    ? CustomCachedNetworkImage(
-                      imageUrl: status.media!.url,
-                      isRounded: false,
-                      radius: 10,
-                    )
+                    ? _buildMediaWidget(status)
                     : Container(
-                      color: Colors.grey.shade200,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onPrimary.withAlpha(25),
                       child: Icon(
                         Icons.image_not_supported,
-                        color: Colors.grey.shade400,
+                        color: Colors.grey.shade200,
                       ),
                     ),
           ),
@@ -477,6 +475,23 @@ class _ArchivedStatusesPageState extends State<ArchivedStatusesPage> {
                 : null,
       ),
     );
+  }
+
+  Widget _buildMediaWidget(StatusEntity status) {
+    final isVideo = [
+      '.mp4',
+      '.mov',
+    ].any((ext) => status.media!.url.toLowerCase().endsWith(ext));
+    return isVideo
+        ? Container(
+          color: Theme.of(context).colorScheme.onPrimary.withAlpha(25),
+          child: Icon(Icons.play_circle, color: Colors.grey.shade400),
+        )
+        : CustomCachedNetworkImage(
+          imageUrl: status.media!.url,
+          isRounded: false,
+          radius: 10,
+        );
   }
 
   Widget _buildFilterChips(AppLocalizations localizations) {

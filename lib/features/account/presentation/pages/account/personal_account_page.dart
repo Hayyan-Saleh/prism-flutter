@@ -310,65 +310,25 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
                                 AppRoutes.showHighlights,
                                 arguments: {
                                   'initialHighlightIndex': index,
-                                  'highlightIds': state.highlights
-                                      .map((h) => h.id)
-                                      .toList()
-                                      .reversed
-                                      .toList(),
+                                  'highlightIds':
+                                      state.highlights
+                                          .map((h) => h.id)
+                                          .toList()
+                                          .reversed
+                                          .toList(),
                                   'account': pAccount,
                                 },
                               )
                               .then((hasChangedCover) {
-                            if (mounted &&
-                                hasChangedCover is bool &&
-                                hasChangedCover) {
-                              context.read<HighlightBloc>().add(
+                                if (mounted &&
+                                    hasChangedCover is bool &&
+                                    hasChangedCover) {
+                                  context.read<HighlightBloc>().add(
                                     GetHighlights(),
                                   );
-                            }
-                          });
+                                }
+                              });
                         }
-                      },
-                      onLongPress: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return Wrap(
-                              children: <Widget>[
-                                ListTile(
-                                  leading: const Icon(Icons.edit),
-                                  title: Text(
-                                    AppLocalizations.of(context)!.editHighlight,
-                                  ),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRoutes.showHighlights,
-                                      arguments: {
-                                        'initialHighlightIndex': index,
-                                        'highlightIds':
-                                            state.highlights
-                                                .map((h) => h.id)
-                                                .toList()
-                                                .reversed
-                                                .toList(),
-                                      },
-                                    ).then((changesMade) {
-                                      if (mounted &&
-                                          changesMade is bool &&
-                                          changesMade) {
-                                        context.read<HighlightBloc>().add(
-                                          GetHighlights(),
-                                        );
-                                      }
-                                    });
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
                       },
                       child: HighlightWidget(highlight: highlight),
                     );

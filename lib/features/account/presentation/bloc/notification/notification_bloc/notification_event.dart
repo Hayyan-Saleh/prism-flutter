@@ -21,3 +21,20 @@ class RespondToFollowRequestEvent extends NotificationEvent {
   @override
   List<Object> get props => [requestId, response];
 }
+
+class GetJoinRequestsEvent extends NotificationEvent {}
+
+class RespondToJoinRequestEvent extends NotificationEvent {
+  final int groupId;
+  final int requestId;
+  final String response;
+
+  const RespondToJoinRequestEvent({
+    required this.groupId,
+    required this.requestId,
+    required this.response,
+  });
+
+  @override
+  List<Object> get props => [groupId, requestId, response];
+}

@@ -5,11 +5,13 @@ import 'package:prism/core/errors/failures/account_failure.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
 import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
+import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
+import 'package:prism/features/account/domain/enitities/account/main/join_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/other_account_entity.dart';
+import 'package:prism/features/account/domain/enitities/account/simplified/paginated_groups_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
-import 'package:prism/features/account/domain/enitities/account/group/group_account_entity.dart';
 
 import '../enitities/account/highlight/detailed_highlight_entity.dart';
 import '../enitities/account/highlight/highlight_entity.dart';
@@ -122,10 +124,43 @@ abstract class AccountRepository {
     required int statusId,
   });
 
-  Future<Either<AccountFailure, GroupAccountEntity>> createGroup({
+  Future<Either<AccountFailure, GroupEntity>> createGroup({
     required String name,
     required String privacy,
     File? avatar,
     String? bio,
+  });
+
+  Future<Either<AccountFailure, GroupEntity>> getGroup({required int groupId});
+
+  Future<Either<AccountFailure, PaginatedGroupsEntity>> getOwnedGroups({
+    required int page,
+  });
+
+  Future<Either<AccountFailure, PaginatedGroupsEntity>> getFollowedGroups({
+    required int page,
+  });
+
+  Future<Either<AccountFailure, Unit>> updateGroup({
+    required int groupId,
+    String? name,
+    String? privacy,
+    File? avatar,
+    String? bio,
+  });
+
+  Future<Either<AccountFailure, Unit>> deleteGroup({required int groupId});
+
+  Future<Either<AppFailure, JoinStatus>> updateGroupMembershipStatus({
+    required int groupId,
+    required bool join,
+  });
+
+  Future<Either<AccountFailure, PaginatedGroupsEntity>> exploreGroups({
+    required int page,
+  });
+
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getGroupMembers({
+    required int groupId,
   });
 }

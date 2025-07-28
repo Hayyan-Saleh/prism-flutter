@@ -4,6 +4,7 @@ import 'package:prism/core/errors/failures/account_failure.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_followers_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_following_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_group_members_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_status_likers_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_blocked_accounts_usecase.dart';
 
@@ -15,17 +16,20 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
   final GetFollowingUsecase getFollowing;
   final GetBlockedAccountsUseCase getBlocked;
   final GetStatusLikersUseCase getStatusLikers;
+  final GetGroupMembersUseCase getGroupMembers;
 
   AccountsBloc({
     required this.getFollowers,
     required this.getFollowing,
     required this.getBlocked,
     required this.getStatusLikers,
+    required this.getGroupMembers,
   }) : super(AccountsInitial()) {
     on<GetFollowersAccountsEvent>(_onGetFollowers);
     on<GetFollowingAccountsEvent>(_onGetFollowing);
     on<GetBlockedAccountsEvent>(_onGetBlocked);
     on<GetStatusLikersEvent>(_onGetStatusLikers);
+    on<GetGroupMembersEvent>(_onGetGroupMembers);
   }
 
   Future<void> _onGetFollowers(
@@ -73,6 +77,18 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
     either.fold(
       (failure) =>
           emit(FailedAccountsState(failure: failure as AccountFailure)),
+      (accounts) => emit(LoadedAccountsState(accounts: accounts)),
+    );
+  }
+
+  Future<void> _onGetGroupMembers(
+    GetGroupMembersEvent event,
+    Emitter<AccountsState> emit,
+  ) async {
+    emit(LoadingAccountsState());
+    final either = await getGroupMembers(groupId: event.groupId);
+    either.fold(
+      (failure) => emit(FailedAccountsState(failure: failure)),
       (accounts) => emit(LoadedAccountsState(accounts: accounts)),
     );
   }

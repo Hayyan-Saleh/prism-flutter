@@ -42,27 +42,23 @@
 
 //! groups:
 // 1- create a group : Route::post('/', [GroupController::class, 'store']);
-//* 2- show a group : Route::get('/{group}', [GroupController::class, 'show']);
-//* 3- update a group : Route::post('/{group}', [GroupController::class, 'update']);
-//* 4- delete a group : Route::delete('/{group}', [GroupController::class, 'destroy']);
-//* 5- join a group : Route::post('/{group_id}/join', [GroupController::class, 'join']);
-//* 6- leave a group : Route::post('/{group_id}/leave', [GroupController::class, 'leave']);
-//* 7- list group members : Route::get('/{group}/members', [GroupController::class, 'members']);
+// 2- show a group : Route::get('/{group}', [GroupController::class, 'show']);
+// 3- update a group : Route::post('/{group}', [GroupController::class, 'update']);
+// 4- delete a group : Route::delete('/{group}', [GroupController::class, 'destroy']);
+// 5- join a group : Route::post('/{group_id}/join', [GroupController::class, 'join']);
+// 6- leave a group : Route::post('/{group_id}/leave', [GroupController::class, 'leave']);
+// 7- list group members : Route::get('/{group}/members', [GroupController::class, 'members']);
 //* 8- list join requests : Route::get('/{group}/requests', [GroupController::class, 'pendingRequests']);
 //* 9- respond to request : Route::post('/{group}/requests/respond', [GroupController::class, 'respondToRequest']);
+// 10- get owned groups: Route::get('/my-owned-groups',[GroupController::class,'myOwnedGroups']);
+// 11- get followed groups: Route::get('/my-groups',[GroupController::class,'myGroups']);
+// 12- search groups: Route::get('/explore-groups',[GroupController::class,'exploreGroups']);
+//* 13- fix the simplified group entity to accept the owner id and resolve the isOwner respectively in the simplified group widget to show members count or the join btn (note: you must update the groups_widget and groups_page to handle the applyJoin internally without explicitly passing it to the constructor)
+
 
 //! notifications section 
 // 1- create the notification section in home page for (requests)
 // 2- handle (accept/reject) the follow request
-
-
-                                                            
-
-//! errors:
-/*
-* on upload video status to make a single highlight
-{"error":"Failed to create highlight.","details":"Unable to probe C:\\xampp\\htdocs\\3d year project\\prism\\socialMediaProject\\storage\\app\/public\/statuses\/4pWFqvi047299KZfgKfLr5E5hfXi3z6nSEj2aNwO.mp4"}
-*/
 
 // ?Feature TODO: in account feature in account section: 
 // 1- block a user
@@ -72,7 +68,7 @@
 // 5- delete a status
 // 6- handle private status logic
 // 7- handle private other account logic
-// ! 8- create/ delete/ update a group
+// 8- create/ delete/ update a group
 
 // ?Feature TODO: in account feature in notification section:
 // 1- handle account follow requests notifications  
@@ -82,8 +78,7 @@
 // ! 1- fix all text fields which could make an overflow
 // ! 2- fix api endpoints file in auth strings so that they don't rely on the hard coded string from the rather the one from the api client
 // ! 3- see if you can fix the error in which the 'cached_video_player' is finding troubles when changing the url of a video from 10.0.2.2 to 192.168.1.xx or in the opposite way (video won't play or load) or it is because of bad connection with backend server
-// ! 4- refine ui in showArchivedStatuses
-// ! 4- refine ui in Show Highlights Section 
+
 // TODOs (End Hayyan Section): ======================================================
 
 //? Adiveces for friends:

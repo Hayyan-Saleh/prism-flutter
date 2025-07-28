@@ -19,7 +19,35 @@ class CreateGroupEvent extends GroupEvent {
     this.avatar,
     this.bio,
   });
+}
+
+class GetGroupEvent extends GroupEvent {
+  final int groupId;
+
+  const GetGroupEvent({required this.groupId});
+}
+
+class UpdateGroupEvent extends GroupEvent {
+  final int groupId;
+  final String? name;
+  final String? privacy;
+  final File? avatar;
+  final String? bio;
+
+  const UpdateGroupEvent({
+    required this.groupId,
+    this.name,
+    this.privacy,
+    this.avatar,
+    this.bio,
+  });
+}
+
+class DeleteGroup extends GroupEvent {
+  final int groupId;
+
+  const DeleteGroup({required this.groupId});
 
   @override
-  List<Object> get props => [name, privacy, avatar ?? '', bio ?? ''];
+  List<Object> get props => [groupId];
 }

@@ -20,6 +20,15 @@ class NotificationLoaded extends NotificationState {
   List<Object> get props => [followRequests];
 }
 
+class JoinRequestsLoaded extends NotificationState {
+  final List<JoinRequestEntity> joinRequests;
+
+  const JoinRequestsLoaded({required this.joinRequests});
+
+  @override
+  List<Object> get props => [joinRequests];
+}
+
 class NotificationError extends NotificationState {
   final String message;
 
@@ -30,3 +39,5 @@ class NotificationError extends NotificationState {
 }
 
 class FollowRequestResponseSuccess extends NotificationState {}
+
+class JoinRequestResponseSuccess extends NotificationState {}

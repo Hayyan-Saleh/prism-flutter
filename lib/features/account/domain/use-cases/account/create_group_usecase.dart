@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
-import 'package:prism/features/account/domain/enitities/account/group/group_account_entity.dart';
 import 'package:prism/core/errors/failures/account_failure.dart';
+import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
 import 'package:prism/features/account/domain/repository/account_repository.dart';
 
 class CreateGroupUseCase {
@@ -10,7 +10,7 @@ class CreateGroupUseCase {
 
   CreateGroupUseCase({required this.repository});
 
-  Future<Either<AccountFailure, GroupAccountEntity>> call({
+  Future<Either<AccountFailure, GroupEntity>> call({
     required String name,
     required String privacy,
     File? avatar,

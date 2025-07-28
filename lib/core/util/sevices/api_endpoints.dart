@@ -37,7 +37,10 @@ class ApiEndpoints {
   static const String followUser = "$usersPrefix/followUser";
   static const String unfollow = "unfollow";
 
-  static const String groups = '$baseUrl/groups';
+  static const String groups = '/groups';
+  static const String myOwnedGroups = '$groups/my-owned-groups';
+  static const String myFollowedGroups = '$groups/my-groups';
+  static const String exploreGroups = '$groups/explore-groups';
 
   //! statuses
   static const String getFollowingWithStatus = "/followingWithStatus";

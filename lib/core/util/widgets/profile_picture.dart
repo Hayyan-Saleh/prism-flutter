@@ -5,57 +5,75 @@ class ProfilePicture extends StatelessWidget {
   final String? link;
   final double? radius;
   final bool hasStatus;
+  final bool owner;
+
   const ProfilePicture({
     super.key,
     required this.link,
     this.radius,
     this.hasStatus = false,
+    this.owner = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final exists = link != null && link != '';
     final secondaryColor = Theme.of(context).colorScheme.secondary;
+    final effectiveRadius = radius ?? 48;
+
     return Stack(
       alignment: Alignment.center,
       children: [
-        if (hasStatus) ...[
+        if (hasStatus || owner) ...[
           Container(
-            width:
-                (radius ?? 48) * 2 + (radius != null ? (0.375 * radius!) : 16),
-            height:
-                (radius ?? 48) * 2 + (radius != null ? (0.375 * radius!) : 16),
+            width: effectiveRadius * 2 + (hasStatus || owner ? 12 : 0),
+            height: effectiveRadius * 2 + (hasStatus || owner ? 12 : 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [Colors.lightGreenAccent, secondaryColor, Colors.green],
+                colors:
+                    hasStatus
+                        ? [
+                          Colors.lightGreenAccent,
+                          secondaryColor,
+                          Colors.green,
+                        ]
+                        : [
+                          Colors.lightBlueAccent,
+                          Colors.blueGrey,
+                          Colors.lightBlueAccent,
+                        ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
           ),
           Container(
-            width: (radius ?? 48) * 2 + 8,
-            height: (radius ?? 48) * 2 + 8,
+            width: effectiveRadius * 2 + 6,
+            height: effectiveRadius * 2 + 6,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
               shape: BoxShape.circle,
             ),
           ),
         ],
-        CircleAvatar(
-          radius: radius ?? 48,
-          backgroundColor: Theme.of(
-            context,
-          ).colorScheme.onPrimary.withAlpha(100),
-          child:
-              exists
-                  ? CustomCachedNetworkImage(
-                    imageUrl: link!,
-                    isRounded: true,
-                    radius: radius ?? 48,
-                  )
-                  : Icon(Icons.person, size: radius ?? 48),
+        ClipOval(
+          child: Container(
+            width: effectiveRadius * 2,
+            height: effectiveRadius * 2,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.onPrimary.withAlpha(100),
+              shape: BoxShape.circle,
+            ),
+            child:
+                exists
+                    ? CustomCachedNetworkImage(
+                      imageUrl: link!,
+                      isRounded: true,
+                      radius: effectiveRadius,
+                    )
+                    : Icon(Icons.person, size: effectiveRadius),
+          ),
         ),
       ],
     );

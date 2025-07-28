@@ -8,6 +8,7 @@ class SimplifiedAccountEntity extends Equatable {
   final String avatar;
   final FollowStatus followingStatus;
   final bool isPrivate;
+  final bool isOwner;
 
   const SimplifiedAccountEntity({
     required this.id,
@@ -16,6 +17,7 @@ class SimplifiedAccountEntity extends Equatable {
     required this.avatar,
     required this.followingStatus,
     required this.isPrivate,
+    required this.isOwner,
   });
 
   @override
@@ -26,5 +28,6 @@ class SimplifiedAccountEntity extends Equatable {
     avatar,
     followingStatus,
     isPrivate,
+    isOwner,
   ];
 }

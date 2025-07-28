@@ -5,11 +5,12 @@ import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/sevices/assets.dart';
-import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
+import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
-import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
+import 'package:prism/features/account/presentation/pages/account/explore_groups_page.dart';
 import 'package:prism/features/account/presentation/pages/account/personal_account_page.dart';
 import 'package:prism/features/account/presentation/pages/notification/notifications_page.dart';
 import 'package:prism/features/account/presentation/widgets/statuses_section_widget.dart';
@@ -22,9 +23,23 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   final PageController _pageController = PageController();
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
 
   Widget _wrapWithListener(Widget child) {
     return MultiBlocListener(
@@ -182,76 +197,50 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text(AppLocalizations.of(context)!.editProfile),
+              leading: Icon(Icons.co_present_rounded),
+              title: Text(AppLocalizations.of(context)!.accountSettings),
               onTap: () {
-                context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
-
                 Navigator.pop(context);
-
+                Navigator.pushNamed(context, AppRoutes.accountSettings);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.group),
+              title: Text(
+                AppLocalizations.of(context)?.myOwnedGroups ?? 'Owned Groups',
+              ),
+              onTap: () {
+                Navigator.pop(context);
                 Navigator.pushNamed(
                   context,
-                  AppRoutes.updateAccount,
+                  AppRoutes.myFollowedGroups,
                   arguments: {
-                    'personalAccount': context.read<PAccountBloc>().pAccount,
+                    'trigger': (BuildContext context) {
+                      context.read<GroupsBloc>().add(GetOwnedGroupsEvent());
+                    },
+                    'title': AppLocalizations.of(context)?.myOwnedGroups,
                   },
                 );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.block),
-              title: Text(AppLocalizations.of(context)!.blockedAccounts),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, AppRoutes.blockedAccounts);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.group_add),
-              title: Text(AppLocalizations.of(context)!.createGroup),
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed(AppRoutes.createGroup);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.archive),
-              title: Text(AppLocalizations.of(context)!.archivedStatuses),
-              onTap: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed(AppRoutes.archivedStatuses);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.block),
+              leading: Icon(Icons.groups_2),
               title: Text(
-                AppLocalizations.of(context)!.deleteAccount,
-                style: TextStyle(color: Colors.red),
+                AppLocalizations.of(context)?.myFollowedGroups ??
+                    'Followed Groups',
               ),
               onTap: () {
-                showCustomAboutDialog(
+                Navigator.pop(context);
+                Navigator.pushNamed(
                   context,
-                  AppLocalizations.of(context)!.deleteAccount,
-                  AppLocalizations.of(context)!.deleteAccountConfirmation,
-                  [
-                    AppButton(
-                      child: Text(AppLocalizations.of(context)!.ok),
-                      onPressed: () {
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context);
-                        }
-                        Navigator.pushNamed(context, AppRoutes.deleteAccount);
-                      },
-                    ),
-                    AppButton(
-                      bgColor: Colors.green,
-                      child: Text(AppLocalizations.of(context)!.cancel),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                  true,
+                  AppRoutes.myFollowedGroups,
+                  arguments: {
+                    'trigger': (BuildContext context) {
+                      context.read<GroupsBloc>().add(GetFollowedGroupsEvent());
+                    },
+                    'title': AppLocalizations.of(context)?.myFollowedGroups,
+                    'applyJoin': true,
+                  },
                 );
               },
             ),
@@ -325,11 +314,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getNotificationsPage() {
-    return BlocProvider<NotificationBloc>(
-      create:
-          (context) => sl<NotificationBloc>()..add(GetFollowRequestsEvent()),
-      child: NotificationsPage(),
-    );
+    return NotificationsPage();
   }
 
   Widget _buildPostsSection() {
@@ -346,17 +331,44 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildSearchPage() {
+    return Column(
+      children: [
+        TabBar(
+          labelColor: Theme.of(context).colorScheme.secondary,
+          automaticIndicatorColorAdjustment: true,
+          dividerColor: Colors.transparent,
+          indicatorColor: Theme.of(context).colorScheme.secondary,
+          controller: _tabController,
+          tabs: [
+            Tab(text: AppLocalizations.of(context)!.explore),
+            Tab(text: 'all'),
+          ],
+        ),
+        Expanded(
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider<GroupsBloc>(create: (context) => sl<GroupsBloc>()),
+              BlocProvider<JoinGroupBloc>(
+                create: (context) => sl<JoinGroupBloc>(),
+              ),
+            ],
+            child: TabBarView(
+              controller: _tabController,
+              children: [const ExploreGroupsPage(), Text('all')],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPageView() {
     return PageView(
       controller: _pageController,
       children: [
         _buildHomePage(),
-        Center(
-          child: Text(
-            AppLocalizations.of(context)!.search,
-            style: TextStyle(fontSize: 32),
-          ),
-        ),
+        _buildSearchPage(),
         Center(
           child: Text(
             AppLocalizations.of(context)!.add,

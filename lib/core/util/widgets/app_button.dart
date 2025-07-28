@@ -22,9 +22,7 @@ class AppButton extends StatelessWidget {
         backgroundColor: bgColor ?? defaultBgColor,
         foregroundColor: fgColor ?? defaultFgColor,
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
       onPressed: () {
         onPressed();

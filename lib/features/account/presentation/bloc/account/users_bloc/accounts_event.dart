@@ -35,3 +35,12 @@ class GetStatusLikersEvent extends AccountsEvent {
   @override
   List<Object> get props => [statusId];
 }
+
+class GetGroupMembersEvent extends AccountsEvent {
+  final int groupId;
+
+  const GetGroupMembersEvent({required this.groupId});
+
+  @override
+  List<Object> get props => [groupId];
+}

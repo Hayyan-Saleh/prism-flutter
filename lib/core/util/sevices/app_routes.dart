@@ -20,6 +20,10 @@ class AppRoutes {
   static String deleteAccount = "/delete-account";
   static String blockedAccounts = "/blocked-accounts";
   static String createGroup = "/create-group";
+  static String groupPage = "/group-page";
+  static String myFollowedGroups = "/my-groups";
+  static String updateGroup = "/update-group-page";
+  static String deleteGroup = "/delete-group";
 
   // ? sub acount   ! status
   static String addStatusPage = "/add-status-page";
@@ -34,4 +38,5 @@ class AppRoutes {
   //! core
   static String myApp = "/my-app";
   static String settings = "/settings";
+  static String accountSettings = "/account-settings";
 }

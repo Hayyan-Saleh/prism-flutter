@@ -8,11 +8,12 @@ import 'package:prism/core/errors/failures/app_failure.dart';
 import 'package:prism/core/util/sevices/token_service.dart';
 import 'package:prism/features/account/data/data-sources/account_remote_data_source.dart';
 import 'package:prism/features/account/data/data-sources/personal_account_local_data_source.dart';
-import 'package:prism/features/account/data/models/account/main/group_account_model.dart';
+import 'package:prism/features/account/data/models/account/main/group_model.dart';
 import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
 import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/data/models/account/status/status_model.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
+import 'package:prism/features/account/domain/enitities/account/main/join_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/other_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
@@ -20,10 +21,10 @@ import 'package:prism/features/account/domain/enitities/account/status/status_en
 import 'package:prism/features/account/domain/repository/account_repository.dart';
 import 'package:prism/features/auth/data/datasources/user_local_data_source.dart';
 import 'package:prism/features/auth/domain/usecases/load_user_use_case.dart';
-
 import '../../domain/enitities/account/highlight/detailed_highlight_entity.dart';
 import '../../domain/enitities/account/highlight/highlight_entity.dart';
-import '../../domain/enitities/account/group/group_account_entity.dart';
+import '../../domain/enitities/account/main/group_entity.dart';
+import '../../domain/enitities/account/simplified/paginated_groups_entity.dart';
 
 class AccountRepositoryImpl implements AccountRepository {
   final AccountRemoteDataSource remoteDataSource;
@@ -524,7 +525,7 @@ class AccountRepositoryImpl implements AccountRepository {
   }
 
   @override
-  Future<Either<AccountFailure, GroupAccountEntity>> createGroup({
+  Future<Either<AccountFailure, GroupEntity>> createGroup({
     required String name,
     required String privacy,
     File? avatar,
@@ -532,7 +533,7 @@ class AccountRepositoryImpl implements AccountRepository {
   }) async {
     return _withToken((token) async {
       try {
-        final GroupAccountModel group = await remoteDataSource.createGroup(
+        final GroupModel group = await remoteDataSource.createGroup(
           token: token,
           name: name,
           privacy: privacy,
@@ -541,6 +542,159 @@ class AccountRepositoryImpl implements AccountRepository {
         );
         return Right(group.toEntity());
       } on ServerException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, GroupEntity>> getGroup({required int groupId}) {
+    return _withToken((token) async {
+      try {
+        final group = await remoteDataSource.getGroup(
+          token: token,
+          groupId: groupId,
+        );
+        return Right(group);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, PaginatedGroupsEntity>> getOwnedGroups({
+    required int page,
+  }) {
+    return _withToken((token) async {
+      try {
+        final groups = await remoteDataSource.getOwnedGroups(
+          token: token,
+          page: page,
+        );
+        return Right(groups);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, PaginatedGroupsEntity>> getFollowedGroups({
+    required int page,
+  }) {
+    return _withToken((token) async {
+      try {
+        final groups = await remoteDataSource.getFollowedGroups(
+          token: token,
+          page: page,
+        );
+        return Right(groups);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> updateGroup({
+    required int groupId,
+    String? name,
+    String? privacy,
+    File? avatar,
+    String? bio,
+  }) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.updateGroup(
+          token: token,
+          groupId: groupId,
+          name: name,
+          privacy: privacy,
+          avatar: avatar,
+          bio: bio,
+        );
+        return Right(unit);
+      } on ServerException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, Unit>> deleteGroup({required int groupId}) {
+    return _withToken((token) async {
+      try {
+        await remoteDataSource.deleteGroup(token: token, groupId: groupId);
+        return Right(unit);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AppFailure, JoinStatus>> updateGroupMembershipStatus({
+    required int groupId,
+    required bool join,
+  }) {
+    return _withToken((token) async {
+      try {
+        final result = await remoteDataSource.updateGroupMembershipStatus(
+          token: token,
+          groupId: groupId,
+          join: join,
+        );
+        return Right(result);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, PaginatedGroupsEntity>> exploreGroups({
+    required int page,
+  }) {
+    return _withToken((token) async {
+      try {
+        final groups = await remoteDataSource.exploreGroups(
+          token: token,
+          page: page,
+        );
+        return Right(groups);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getGroupMembers({
+    required int groupId,
+  }) {
+    return _withToken((token) async {
+      try {
+        final members = await remoteDataSource.getGroupMembers(
+          token: token,
+          groupId: groupId,
+        );
+        return Right(members);
+      } on AccountException catch (e) {
         return Left(AccountFailure(e.message));
       } catch (e) {
         return Left(AccountFailure(e.toString()));

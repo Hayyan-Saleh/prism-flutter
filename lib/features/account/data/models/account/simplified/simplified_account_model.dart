@@ -9,6 +9,7 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
     required super.avatar,
     required super.followingStatus,
     required super.isPrivate,
+    required super.isOwner,
   });
 
   factory SimplifiedAccountModel.fromEntity(SimplifiedAccountEntity entity) =>
@@ -19,6 +20,7 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
         avatar: entity.avatar,
         followingStatus: entity.followingStatus,
         isPrivate: entity.isPrivate,
+        isOwner: entity.isOwner,
       );
 
   factory SimplifiedAccountModel.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,12 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
               ? json['is_private']
               : int.parse(json['is_private'] ?? 0)) ==
           1,
+      isOwner:
+          json['role'] != null
+              ? json['role'] == 'owner'
+                  ? true
+                  : false
+              : false,
     );
   }
 
@@ -56,5 +64,6 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
     'avatar': avatar,
     'is_following': followingStatus.toString(),
     'is_private': isPrivate,
+    'is_owner': isOwner,
   };
 }

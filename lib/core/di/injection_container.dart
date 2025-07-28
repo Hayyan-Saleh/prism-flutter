@@ -13,31 +13,42 @@ import 'package:prism/features/account/domain/repository/notification_repository
 import 'package:prism/features/account/domain/use-cases/account/add_to_highlight_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/block_user_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/check_account_name_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/create_group_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/create_highlight_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/create_status_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/delete_account_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/delete_group_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/delete_highlight_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/delete_status_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/explore_groups_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_archived_statuses_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_blocked_accounts_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_detailed_highlight_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_followed_groups_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_followers_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_following_statuses_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_following_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_group_members_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_highlights_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_local_personal_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_other_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_remote_personal_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_status_likers_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_statuses_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/toggle_group_membership_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/toggle_like_status_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/toggle_other_account_follow_use_case.dart';
 import 'package:prism/features/account/domain/use-cases/account/unblock_user_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/update_group_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/update_highlight_cover_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/update_personal_account_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/notification/get_follow_requests_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/notification/get_join_requests_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/notification/respond_to_follow_request_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/notification/respond_to_join_request_usecase.dart';
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/other_account_bloc/other_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
@@ -47,7 +58,8 @@ import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/
 import 'package:prism/features/account/presentation/bloc/like_bloc/like_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/group_bloc/group_bloc.dart';
-import 'package:prism/features/account/domain/use-cases/account/create_group_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_group_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_owned_groups_usecase.dart';
 import 'package:prism/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:prism/features/auth/data/datasources/google_auth_datasource.dart';
 import 'package:prism/features/auth/data/datasources/user_local_data_source.dart';
@@ -217,6 +229,7 @@ Future<void> init() async {
       getFollowing: sl(),
       getBlocked: sl(),
       getStatusLikers: sl(),
+      getGroupMembers: sl(),
     ),
   );
 
@@ -225,6 +238,8 @@ Future<void> init() async {
     () => NotificationBloc(
       getFollowRequestsUseCase: sl(),
       respondToFollowRequestUseCase: sl(),
+      getJoinRequestsUseCase: sl(),
+      respondToJoinRequestUseCase: sl(),
     ),
   );
   sl.registerFactory(
@@ -238,8 +253,23 @@ Future<void> init() async {
     ),
   );
 
-  sl.registerFactory(() => GroupBloc(createGroupUseCase: sl()));
+  sl.registerFactory(
+    () => GroupBloc(
+      createGroupUseCase: sl(),
+      getGroupUseCase: sl(),
+      updateGroupUseCase: sl(),
+      deleteGroupUseCase: sl(),
+    ),
+  );
 
+  sl.registerFactory(
+    () => GroupsBloc(
+      getOwnedGroupsUseCase: sl(),
+      getFollowedGroupsUseCase: sl(),
+      exploreGroupsUseCase: sl(),
+    ),
+  );
+  sl.registerFactory(() => JoinGroupBloc(toggleGroupMembershipUseCase: sl()));
   // Use cases
   sl.registerLazySingleton(
     () => GetLocalPersonalAccountUsecase(repository: sl()),
@@ -268,10 +298,13 @@ Future<void> init() async {
   sl.registerLazySingleton(() => BlockUserUsecase(repository: sl()));
   sl.registerLazySingleton(() => UnblockUserUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetFollowRequestsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetJoinRequestsUseCase(repository: sl()));
   sl.registerLazySingleton(
     () => RespondToFollowRequestUseCase(repository: sl()),
   );
+  sl.registerLazySingleton(() => RespondToJoinRequestUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetStatusLikersUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetGroupMembersUseCase(repository: sl()));
   sl.registerLazySingleton(() => CreateHighlightUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetHighlightsUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetDetailedHighlightUsecase(repository: sl()));
@@ -279,6 +312,15 @@ Future<void> init() async {
   sl.registerLazySingleton(() => UpdateHighlightCoverUseCase(repository: sl()));
   sl.registerLazySingleton(() => AddToHighlightUseCase(repository: sl()));
   sl.registerLazySingleton(() => CreateGroupUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetGroupUseCase(repository: sl()));
+  sl.registerLazySingleton(() => UpdateGroupUseCase(repository: sl()));
+  sl.registerLazySingleton(() => DeleteGroupUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetOwnedGroupsUseCase(repository: sl()));
+  sl.registerLazySingleton(
+    () => ToggleGroupMembershipUseCase(repository: sl()),
+  );
+  sl.registerLazySingleton(() => GetFollowedGroupsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ExploreGroupsUseCase(repository: sl()));
 
   // Repository
   sl.registerLazySingleton<AccountRepository>(

@@ -10,15 +10,16 @@ import 'package:prism/core/errors/failures/account_failure.dart';
 import 'package:prism/core/network/api_client.dart';
 import 'package:prism/core/util/constants/strings.dart';
 import 'package:prism/core/util/sevices/api_endpoints.dart';
-import 'package:prism/features/account/data/models/account/main/group_account_model.dart';
+import 'package:prism/features/account/data/models/account/main/group_model.dart';
 import 'package:prism/features/account/data/models/account/main/other_account_model.dart';
+import 'package:prism/features/account/data/models/account/simplified/paginated_groups_model.dart';
 import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
 import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/data/models/account/status/status_model.dart';
 import 'package:prism/features/account/data/models/account/highlight/detailed_highlight_model.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
-
-import '../models/account/highlight/highlight_model.dart';
+import 'package:prism/features/account/data/models/account/highlight/highlight_model.dart';
+import 'package:prism/features/account/domain/enitities/account/main/join_status_enum.dart';
 
 abstract class AccountRemoteDataSource {
   Future<bool> checkAccountName({
@@ -129,12 +130,50 @@ abstract class AccountRemoteDataSource {
     required int statusId,
   });
 
-  Future<GroupAccountModel> createGroup({
+  Future<GroupModel> createGroup({
     required String token,
     required String name,
     required String privacy,
     File? avatar,
     String? bio,
+  });
+
+  Future<GroupModel> getGroup({required String token, required int groupId});
+
+  Future<PaginatedGroupsModel> getOwnedGroups({
+    required String token,
+    required int page,
+  });
+  Future<PaginatedGroupsModel> getFollowedGroups({
+    required String token,
+    required int page,
+  });
+
+  Future<void> updateGroup({
+    required String token,
+    required int groupId,
+    String? name,
+    String? privacy,
+    File? avatar,
+    String? bio,
+  });
+
+  Future<void> deleteGroup({required String token, required int groupId});
+
+  Future<JoinStatus> updateGroupMembershipStatus({
+    required String token,
+    required int groupId,
+    required bool join,
+  });
+
+  Future<PaginatedGroupsModel> exploreGroups({
+    required String token,
+    required int page,
+  });
+
+  Future<List<SimplifiedAccountModel>> getGroupMembers({
+    required String token,
+    required int groupId,
   });
 }
 
@@ -788,7 +827,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   }
 
   @override
-  Future<GroupAccountModel> createGroup({
+  Future<GroupModel> createGroup({
     required String token,
     required String name,
     required String privacy,
@@ -816,11 +855,215 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     final response = await http.Response.fromStream(streamedResponse);
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      return GroupAccountModel.fromJson(data['group']);
+      return GroupModel.fromJson(data['group']);
     } else {
       throw ServerException(
         'Failed to create group /n  details: ${response.body}',
       );
+    }
+  }
+
+  @override
+  Future<GroupModel> getGroup({
+    required String token,
+    required int groupId,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '${ApiEndpoints.groups}/$groupId',
+        headers: _authHeaders(token),
+      );
+      return GroupModel.fromJson(response['group']);
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<PaginatedGroupsModel> getOwnedGroups({
+    required String token,
+    required int page,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '${ApiEndpoints.myOwnedGroups}?page=$page',
+        headers: _authHeaders(token),
+      );
+      return PaginatedGroupsModel.fromJson(response);
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<PaginatedGroupsModel> getFollowedGroups({
+    required String token,
+    required int page,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '${ApiEndpoints.myFollowedGroups}?page=$page',
+        headers: _authHeaders(token),
+      );
+      return PaginatedGroupsModel.fromJson(response);
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<void> updateGroup({
+    required String token,
+    required int groupId,
+    String? name,
+    String? privacy,
+    File? avatar,
+    String? bio,
+  }) async {
+    try {
+      var uri = Uri.parse(
+        '${ApiEndpoints.baseUrl}${ApiEndpoints.groups}/$groupId',
+      );
+      var request = http.MultipartRequest('POST', uri);
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      if (name != null && name.isNotEmpty) request.fields['name'] = name;
+      if (privacy != null && privacy.isNotEmpty) {
+        request.fields['privacy'] = privacy;
+      }
+      if (bio != null && bio.isNotEmpty) request.fields['bio'] = bio;
+
+      if (avatar != null && await avatar.exists()) {
+        final imageFile = await http.MultipartFile.fromPath(
+          'avatar',
+          avatar.path,
+          filename: path.basename(avatar.path),
+        );
+        request.files.add(imageFile);
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return;
+      } else if (response.statusCode == 403) {
+        throw AccountException('You are not authorized to update this group.');
+      } else {
+        throw ServerException('Failed to update group: ${response.body}');
+      }
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    } catch (e) {
+      throw AccountException('Failed to update group: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteGroup({
+    required String token,
+    required int groupId,
+  }) async {
+    try {
+      await apiClient.delete(
+        '${ApiEndpoints.groups}/$groupId',
+        headers: _authHeaders(token),
+      );
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<JoinStatus> updateGroupMembershipStatus({
+    required String token,
+    required int groupId,
+    required bool join,
+  }) async {
+    try {
+      if (join) {
+        final response = await apiClient.post(
+          '${ApiEndpoints.groups}/$groupId/join',
+          {},
+          headers: _authHeaders(token),
+        );
+        if (response['message'] == 'sent a follow request') {
+          return JoinStatus.pending;
+        }
+        return JoinStatus.joined;
+      } else {
+        await apiClient.post(
+          '${ApiEndpoints.groups}/$groupId/leave',
+          {},
+          headers: _authHeaders(token),
+        );
+        return JoinStatus.notJoined;
+      }
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    } catch (e) {
+      throw AccountException("Failed to update group membership status");
+    }
+  }
+
+  @override
+  Future<PaginatedGroupsModel> exploreGroups({
+    required String token,
+    required int page,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '${ApiEndpoints.exploreGroups}?page=$page',
+        headers: _authHeaders(token),
+      );
+      return PaginatedGroupsModel.fromJson(response);
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
+    }
+  }
+
+  @override
+  Future<List<SimplifiedAccountModel>> getGroupMembers({
+    required String token,
+    required int groupId,
+  }) async {
+    try {
+      final response = await apiClient.get(
+        '${ApiEndpoints.groups}/$groupId/members',
+        headers: _authHeaders(token),
+      );
+
+      final membersList = response['members'] as List;
+      final accounts =
+          membersList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
+      return accounts;
+    } on ServerException catch (e) {
+      throw AccountException(e.message);
+    } on NetworkException catch (e) {
+      throw AccountException(e.message);
     }
   }
 }
