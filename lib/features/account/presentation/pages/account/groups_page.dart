@@ -68,25 +68,15 @@ class _GroupsPageState extends State<GroupsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<GroupsBloc, GroupsState>(
-            listener: (context, state) {
-              if (state is GroupsLoaded) {
-                setState(() {
-                  _isLoadingMore = false;
-                });
-              }
-            },
-          ),
-          BlocListener<JoinGroupBloc, JoinGroupState>(
-            listener: (context, state) {
-              if (state is JoinGroupSuccess) {
-                // Do nothing to prevent rebuild
-              }
-            },
-          ),
-        ],
+      body: BlocListener<GroupsBloc, GroupsState>(
+        listener: (context, state) {
+          if (state is GroupsLoaded) {
+            setState(() {
+              _isLoadingMore = false;
+            });
+          }
+        },
+
         child: BlocBuilder<GroupsBloc, GroupsState>(
           builder: (context, state) {
             if (state is GroupsLoading && _currentPage == 1) {
@@ -116,7 +106,7 @@ class _GroupsPageState extends State<GroupsPage> {
                         arguments: {'groupId': group.id},
                       );
                     },
-                    child: BlocProvider(
+                    child: BlocProvider<JoinGroupBloc>(
                       create: (context) => sl<JoinGroupBloc>(),
                       child: SimplifiedGroupWidget(
                         group: group,

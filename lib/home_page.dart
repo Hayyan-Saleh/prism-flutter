@@ -8,7 +8,6 @@ import 'package:prism/core/util/sevices/assets.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
-import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/explore_groups_page.dart';
 import 'package:prism/features/account/presentation/pages/account/personal_account_page.dart';
@@ -346,13 +345,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
         Expanded(
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider<GroupsBloc>(create: (context) => sl<GroupsBloc>()),
-              BlocProvider<JoinGroupBloc>(
-                create: (context) => sl<JoinGroupBloc>(),
-              ),
-            ],
+          child: BlocProvider<GroupsBloc>(
+            create: (context) => sl<GroupsBloc>(),
             child: TabBarView(
               controller: _tabController,
               children: [const ExploreGroupsPage(), Text('all')],

@@ -93,9 +93,9 @@
     "following": "يتابع",
     "highlights": "الأحداث البارزة",
     "postsSection": "المنشورات",
-   "hiddenUserPrivacy": "هذا الحساب خاص",
+    "hiddenUserPrivacy": "هذا الحساب خاص",
     "hiddenUserBlock": "لقد قمت بحظر هذا الحساب",
-     "somethingWentWrong": "حدث خطأ ما",
+    "somethingWentWrong": "حدث خطأ ما",
     "noStatusesAvailable": "لا توجد حالات متاحة",
     "delete": "حذف",
     "justNow": "الآن",
@@ -216,7 +216,7 @@
     "groupBio": "نبذة عن المجموعة",
     "privateGroup": "مجموعة خاصة",
     "gallery": "المعرض",
-    "groupUpdatedSuccessfully":"تم تحديث المجموعة بنجاح",
+    "groupUpdatedSuccessfully": "تم تحديث المجموعة بنجاح",
     "deleteGroupTitle": "حذف المجموعة",
     "deleteGroupConfirmation": "هل أنت متأكد أنك تريد حذف هذه المجموعة؟ هذا الإجراء لا يمكن التراجع عنه.",
     "deleteGroupName": "حذف {groupName}",
@@ -264,7 +264,18 @@
             }
         }
     },
-    "requestJoin":"طلب الانضمام",
-    "groupRequests":"طلبات الانضمام",
-    "approve":"قبول"
+    "requestJoin": "طلب الانضمام",
+    "groupRequests": "طلبات الانضمام",
+    "approve": "قبول",
+    "requestedToJoinGroup": "طلب الانضمام إلى {groupName}",
+    "@requestedToJoinGroup": {
+        "placeholders": {
+            "groupName": {
+                "type": "String"
+            }
+        }
+    },
+    "hiddenGroupPrivacy": "هذه المجموعة خاصة. انضم لعرض المحتوى.",
+    "promoteToAdmin": "ترقية إلى مدير",
+    "demoteToMember": "تخفيض إلى عضو"
 }

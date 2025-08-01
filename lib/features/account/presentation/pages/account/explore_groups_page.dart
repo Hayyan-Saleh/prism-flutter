@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/simplified_group_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -109,12 +111,17 @@ class _ExploreGroupsPageState extends State<ExploreGroupsPage> {
   }
 
   Widget _buildGroupItem(BuildContext context, dynamic group) {
-    return SimplifiedGroupWidget(
-      group: group,
-      applyJoin: true,
-      trigger: (context) {
-        context.read<GroupsBloc>().add(ExploreGroupsEvent(page: _currentPage));
-      },
+    return BlocProvider(
+      create: (context) => sl<JoinGroupBloc>(),
+      child: SimplifiedGroupWidget(
+        group: group,
+        applyJoin: true,
+        trigger: (context) {
+          context.read<GroupsBloc>().add(
+            ExploreGroupsEvent(page: _currentPage),
+          );
+        },
+      ),
     );
   }
 

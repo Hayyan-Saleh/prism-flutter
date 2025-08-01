@@ -1,24 +1,20 @@
 import 'package:equatable/equatable.dart';
+import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
+import 'package:prism/features/account/domain/enitities/account/simplified/simplified_group_entity.dart';
 
 class JoinRequestEntity extends Equatable {
   final int id;
-  final int userId;
-  final int groupId;
-  final String name;
-  final String username;
-  final String? avatar;
   final DateTime requestedAt;
+  final SimplifiedAccountEntity creator;
+  final SimplifiedGroupEntity? group;
 
   const JoinRequestEntity({
     required this.id,
-    required this.userId,
-    required this.groupId,
-    required this.name,
-    required this.username,
-    this.avatar,
     required this.requestedAt,
+    required this.creator,
+    required this.group,
   });
 
   @override
-  List<Object?> get props => [id, userId, groupId, name, username, avatar, requestedAt];
+  List<Object?> get props => [id, requestedAt, creator, group];
 }

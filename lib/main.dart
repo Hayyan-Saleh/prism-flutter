@@ -15,8 +15,10 @@ import 'package:prism/features/account/presentation/bloc/account/other_account_b
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/account_name_bloc/account_name_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/account/update_group_member_role_bloc/update_group_member_role_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/account_middle_point_page.dart';
 import 'package:prism/features/account/presentation/pages/account/account_settings_page.dart';
 import 'package:prism/features/account/presentation/pages/account/accounts_page.dart';
@@ -27,6 +29,7 @@ import 'package:prism/features/account/presentation/pages/account/create_group_p
 import 'package:prism/features/account/presentation/pages/account/delete_account_page.dart';
 import 'package:prism/features/account/presentation/pages/account/delete_group_page.dart';
 import 'package:prism/features/account/presentation/pages/account/following_statuses_page.dart';
+import 'package:prism/features/account/presentation/pages/account/group_join_requests_page.dart';
 import 'package:prism/features/account/presentation/pages/account/group_page.dart';
 import 'package:prism/features/account/presentation/pages/account/other_account_page.dart';
 import 'package:prism/features/account/presentation/pages/account/groups_page.dart';
@@ -189,12 +192,23 @@ class _MyAppState extends State<MyApp> {
             ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
         final appBarTitle = args?['appBarTitle'] as String;
         final triggerEvent = args?['triggerEvent'] as Function(BuildContext);
-
-        return BlocProvider<AccountsBloc>(
-          create: (context) => sl<AccountsBloc>(),
+        final isGroupMembersPage =
+            args?['isGroupMembersPage'] as bool? ?? false;
+        final updateGroupRole = args?['updateGroupRole'] as bool? ?? false;
+        final groupId = args?['groupId'] as int? ?? 0;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<AccountsBloc>(create: (context) => sl<AccountsBloc>()),
+            BlocProvider<UpdateGroupMemberRoleBloc>(
+              create: (context) => sl<UpdateGroupMemberRoleBloc>(),
+            ),
+          ],
           child: AccountsPage(
             appBarTitle: appBarTitle,
             triggerEvent: triggerEvent,
+            isGroupMembersPage: isGroupMembersPage,
+            updateGroupRole: updateGroupRole,
+            groupId: groupId,
           ),
         );
       },
@@ -346,6 +360,18 @@ class _MyAppState extends State<MyApp> {
         return BlocProvider<GroupBloc>(
           create: (context) => sl<GroupBloc>(),
           child: DeleteGroupPage(groupName: groupName, groupId: groupId),
+        );
+      },
+      AppRoutes.groupJoinRequests: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final groupId = args?['groupId'] as int? ?? 0;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<GroupBloc>(create: (context) => sl<GroupBloc>()),
+            BlocProvider(create: (context) => sl<NotificationBloc>()),
+          ],
+          child: GroupJoinRequestsPage(groupId: groupId),
         );
       },
       AppRoutes.myApp: (context) => MyApp(),

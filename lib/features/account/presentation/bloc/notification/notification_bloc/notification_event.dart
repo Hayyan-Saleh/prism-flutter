@@ -28,13 +28,15 @@ class RespondToJoinRequestEvent extends NotificationEvent {
   final int groupId;
   final int requestId;
   final String response;
+  final bool fromGroup;
 
   const RespondToJoinRequestEvent({
     required this.groupId,
     required this.requestId,
     required this.response,
+    required this.fromGroup,
   });
 
   @override
-  List<Object> get props => [groupId, requestId, response];
+  List<Object> get props => [groupId, requestId, response, fromGroup];
 }

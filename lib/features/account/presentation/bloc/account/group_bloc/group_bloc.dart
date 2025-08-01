@@ -1,9 +1,12 @@
 import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
+import 'package:prism/features/account/domain/enitities/notification/join_request_entity.dart';
 import 'package:prism/features/account/domain/use-cases/account/create_group_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/delete_group_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/account/get_group_join_requests_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/get_group_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/update_group_usecase.dart';
 
@@ -15,12 +18,14 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
   final GetGroupUseCase getGroupUseCase;
   final UpdateGroupUseCase updateGroupUseCase;
   final DeleteGroupUseCase deleteGroupUseCase;
+  final GetGroupJoinRequestsUseCase getGroupJoinRequestsUseCase;
 
   GroupBloc({
     required this.createGroupUseCase,
     required this.getGroupUseCase,
     required this.updateGroupUseCase,
     required this.deleteGroupUseCase,
+    required this.getGroupJoinRequestsUseCase,
   }) : super(GroupInitial()) {
     on<CreateGroupEvent>((event, emit) async {
       emit(GroupCreateLoading());
@@ -66,6 +71,15 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
       result.fold(
         (failure) => emit(GroupDeleteFailure(failure.message)),
         (_) => emit(GroupDeleteSuccess()),
+      );
+    });
+
+    on<GetGroupJoinRequestsEvent>((event, emit) async {
+      emit(GroupJoinRequestsLoading());
+      final result = await getGroupJoinRequestsUseCase(groupId: event.groupId);
+      result.fold(
+        (failure) => emit(GroupJoinRequestsFailure(failure.message)),
+        (requests) => emit(GroupJoinRequestsLoaded(requests)),
       );
     });
   }

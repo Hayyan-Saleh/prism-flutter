@@ -68,6 +68,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     required int groupId,
     required int requestId,
     required String response,
+    required bool fromGroup,
   }) async {
     try {
       final tokenResult = await tokenService.getToken();
@@ -77,6 +78,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
           groupId: groupId,
           requestId: requestId,
           response: response,
+          fromGroup: fromGroup,
         );
         return const Right(unit);
       });

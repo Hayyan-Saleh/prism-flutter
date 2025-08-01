@@ -82,6 +82,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         groupId: event.groupId,
         requestId: event.requestId,
         response: event.response,
+        fromGroup: event.fromGroup,
       ),
     );
     result.fold(

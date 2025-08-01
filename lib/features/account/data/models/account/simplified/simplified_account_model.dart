@@ -1,3 +1,4 @@
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
 
@@ -9,7 +10,7 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
     required super.avatar,
     required super.followingStatus,
     required super.isPrivate,
-    required super.isOwner,
+    required super.role,
   });
 
   factory SimplifiedAccountModel.fromEntity(SimplifiedAccountEntity entity) =>
@@ -20,7 +21,7 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
         avatar: entity.avatar,
         followingStatus: entity.followingStatus,
         isPrivate: entity.isPrivate,
-        isOwner: entity.isOwner,
+        role: entity.role,
       );
 
   factory SimplifiedAccountModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +38,20 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
     } else {
       status = FollowStatus.notFollowing;
     }
+
+    AccountRole role;
+    switch (json['role']) {
+      case 'owner':
+        role = AccountRole.owner;
+        break;
+      case 'admin':
+        role = AccountRole.admin;
+        break;
+      case 'member':
+      default:
+        role = AccountRole.member;
+    }
+
     return SimplifiedAccountModel(
       id: json['id'] as int,
       fullName: json['name'] as String,
@@ -46,14 +61,9 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
       isPrivate:
           (json['is_private'] is int?
               ? json['is_private']
-              : int.parse(json['is_private'] ?? 0)) ==
+              : int.parse(json['is_private'] ?? "0")) ==
           1,
-      isOwner:
-          json['role'] != null
-              ? json['role'] == 'owner'
-                  ? true
-                  : false
-              : false,
+      role: role,
     );
   }
 
@@ -64,6 +74,6 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
     'avatar': avatar,
     'is_following': followingStatus.toString(),
     'is_private': isPrivate,
-    'is_owner': isOwner,
+    'role': role.name,
   };
 }

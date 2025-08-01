@@ -7,18 +7,23 @@ import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SimplifiedAccountWidget extends StatefulWidget {
   final int personalAccId;
   final SimplifiedAccountEntity account;
-  final bool isPrivate;
+  final bool isGroupMembersPage;
+  final bool updateGroupRole;
+  final VoidCallback? onLongPress;
 
   const SimplifiedAccountWidget({
     super.key,
     required this.account,
     required this.personalAccId,
-    required this.isPrivate,
+    this.isGroupMembersPage = false,
+    this.updateGroupRole = false,
+    this.onLongPress,
   });
 
   @override
@@ -85,7 +90,7 @@ class _SimplifiedAccountWidgetState extends State<SimplifiedAccountWidget> {
         } else {
           // FollowStatus.notFollowing
           btnTxt =
-              widget.isPrivate
+              widget.account.isPrivate
                   ? AppLocalizations.of(context)!.requestToFollow
                   : AppLocalizations.of(context)!.follow;
           onPressed = () => _onFollowPressed();
@@ -114,9 +119,25 @@ class _SimplifiedAccountWidgetState extends State<SimplifiedAccountWidget> {
     );
   }
 
+  Color _getColorByRole() {
+    switch (widget.account.role) {
+      case AccountRole.owner:
+        return Colors.blueGrey.withAlpha(50);
+      case AccountRole.admin:
+        return Colors.deepOrangeAccent.withAlpha(50);
+      case AccountRole.member:
+        return Colors.transparent;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: _getColorByRole(),
+        borderRadius: BorderRadius.circular(16),
+      ),
       height: 0.1 * getHeight(context),
       child: GestureDetector(
         onTap:
@@ -132,16 +153,17 @@ class _SimplifiedAccountWidgetState extends State<SimplifiedAccountWidget> {
                     },
                   );
                 },
+        onLongPress: widget.onLongPress,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16.0),
           child: Row(
-            spacing: 16,
             children: [
               ProfilePicture(
                 link: widget.account.avatar,
-                owner: widget.account.isOwner,
+                role: widget.account.role,
                 radius: 30,
               ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,14 +171,17 @@ class _SimplifiedAccountWidgetState extends State<SimplifiedAccountWidget> {
                   children: [
                     Text(
                       widget.account.fullName,
-                      style: TextStyle(fontSize: 20),
+                      style: const TextStyle(fontSize: 20),
                     ),
                     Text(widget.account.accountName),
                   ],
                 ),
               ),
-              if (widget.personalAccId != widget.account.id)
-                _buildFollowButton(),
+              widget.isGroupMembersPage
+                  ? Text(widget.account.role.name)
+                  : (widget.personalAccId != widget.account.id)
+                  ? _buildFollowButton()
+                  : SizedBox(),
             ],
           ),
         ),

@@ -48,17 +48,18 @@
 // 5- join a group : Route::post('/{group_id}/join', [GroupController::class, 'join']);
 // 6- leave a group : Route::post('/{group_id}/leave', [GroupController::class, 'leave']);
 // 7- list group members : Route::get('/{group}/members', [GroupController::class, 'members']);
-//* 8- list join requests : Route::get('/{group}/requests', [GroupController::class, 'pendingRequests']);
-//* 9- respond to request : Route::post('/{group}/requests/respond', [GroupController::class, 'respondToRequest']);
+// 8- list join requests : Route::get('/{group}/requests', [GroupController::class, 'pendingRequests']);
+// 9- respond to request : Route::post('/{group}/requests/respond', [GroupController::class, 'respondToRequest']);
 // 10- get owned groups: Route::get('/my-owned-groups',[GroupController::class,'myOwnedGroups']);
 // 11- get followed groups: Route::get('/my-groups',[GroupController::class,'myGroups']);
 // 12- search groups: Route::get('/explore-groups',[GroupController::class,'exploreGroups']);
-//* 13- fix the simplified group entity to accept the owner id and resolve the isOwner respectively in the simplified group widget to show members count or the join btn (note: you must update the groups_widget and groups_page to handle the applyJoin internally without explicitly passing it to the constructor)
-
+// 13- fix the simplified group entity & the group entity to accept the role attribute and resolve the isOwner respectively in the simplified group widget to show members count or the join btn (note: you must update the groups_widget and groups_page to handle the applyJoin internally without explicitly passing it to the constructor)
+// 14- allow owner to change a group member's role: Route::post('/{group_id}/role', [GroupController::class, 'changeRole']); controller function: public function changeRole(Request $request, $groupId)
 
 //! notifications section 
 // 1- create the notification section in home page for (requests)
 // 2- handle (accept/reject) the follow request
+// 3- handle (accept/reject) the join request
 
 // ?Feature TODO: in account feature in account section: 
 // 1- block a user

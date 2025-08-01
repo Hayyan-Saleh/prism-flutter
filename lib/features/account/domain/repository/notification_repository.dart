@@ -14,5 +14,6 @@ abstract class NotificationRepository {
     required int groupId,
     required int requestId,
     required String response,
+    required bool fromGroup,
   });
 }

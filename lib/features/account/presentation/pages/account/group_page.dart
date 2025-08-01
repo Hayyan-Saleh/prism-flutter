@@ -1,16 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
+import 'package:prism/core/util/sevices/assets.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/join_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/group_bloc/group_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
-import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -53,16 +55,32 @@ class _GroupPageState extends State<GroupPage> {
   }
 
   Widget _buildBody() {
-    return BlocListener<GroupBloc, GroupState>(
-      listener: (context, state) {
-        if (state is GroupDeleteSuccess) {
-          Navigator.of(context).pop();
-        } else if (state is GroupDeleteFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<GroupBloc, GroupState>(
+          listener: (context, state) {
+            if (state is GroupDeleteSuccess) {
+              Navigator.of(context).pop();
+            } else if (state is GroupDeleteFailure) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
+            }
+          },
+        ),
+        BlocListener<JoinGroupBloc, JoinGroupState>(
+          listener: (context, state) {
+            if (state is JoinGroupFailure) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.failure.message)));
+            }
+            if (state is JoinGroupSuccess) {
+              _fetchGroupData();
+            }
+          },
+        ),
+      ],
       child: BlocBuilder<GroupBloc, GroupState>(builder: _buildBodyContent),
     );
   }
@@ -83,26 +101,41 @@ class _GroupPageState extends State<GroupPage> {
   }
 
   Widget _buildGroupContent(GroupEntity group) {
-    final pAccount = context.read<PAccountBloc>().pAccount;
-    final bool isOwner = pAccount != null && pAccount.id == group.owner.id;
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 24,
-          children: [
-            _buildGroupHeader(group),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildGroupOwner(group.owner, isOwner, pAccount?.id ?? 0),
-                isOwner ? _buildModifyWidget(group) : _buildJoinBloc(group),
-              ],
-            ),
-            const Divider(),
-            _buildPostsSection(),
-          ],
+    final bool isOwner = group.role == AccountRole.owner;
+    final bool isAdmin = group.role == AccountRole.admin;
+    final bool isPrivateAndNotJoined =
+        group.privacy == 'private' && group.joinStatus != JoinStatus.joined;
+
+    return RefreshIndicator(
+      color: Theme.of(context).colorScheme.onPrimary,
+      onRefresh: () async {
+        _fetchGroupData();
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16,
+            children: [
+              _buildGroupHeader(group),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildGroupOwner(group.owner, isOwner),
+                  isOwner || isAdmin
+                      ? _buildModifyWidget(group)
+                      : _buildJoinBloc(group),
+                ],
+              ),
+              const Divider(),
+              if (isPrivateAndNotJoined)
+                _buildHiddenDataWidget()
+              else
+                _buildPostsSection(),
+            ],
+          ),
         ),
       ),
     );
@@ -110,7 +143,6 @@ class _GroupPageState extends State<GroupPage> {
 
   Widget _buildGroupHeader(GroupEntity group) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildGroupImage(group.avatar ?? ''),
@@ -122,11 +154,7 @@ class _GroupPageState extends State<GroupPage> {
     );
   }
 
-  Widget _buildGroupOwner(
-    SimplifiedAccountEntity owner,
-    bool isOwner,
-    int pAccountId,
-  ) {
+  Widget _buildGroupOwner(SimplifiedAccountEntity owner, bool isOwner) {
     return GestureDetector(
       onTap:
           isOwner
@@ -135,15 +163,16 @@ class _GroupPageState extends State<GroupPage> {
                 Navigator.pushNamed(
                   context,
                   AppRoutes.otherAccPage,
-                  arguments: {
-                    'personalAccountId': pAccountId,
-                    'otherAccountId': owner.id,
-                  },
+                  arguments: {'otherAccountId': owner.id},
                 );
               },
       child: Row(
         children: [
-          ProfilePicture(link: owner.avatar, radius: 32, owner: true),
+          ProfilePicture(
+            link: owner.avatar,
+            radius: 32,
+            role: AccountRole.owner,
+          ),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,6 +209,10 @@ class _GroupPageState extends State<GroupPage> {
                     GetGroupMembersEvent(groupId: group.id),
                   );
                 },
+                'isGroupMembersPage': true,
+                'updateGroupRole':
+                    group.role != null && group.role == AccountRole.owner,
+                'groupId': group.id,
               },
             );
           },
@@ -213,58 +246,91 @@ class _GroupPageState extends State<GroupPage> {
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
-        return Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: Text(AppLocalizations.of(context)!.updateGroup),
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.updateGroup,
-                  arguments: {'group': group},
-                ).then((updated) {
-                  if (updated is bool && updated) {
-                    _fetchGroupData();
-                  }
-                });
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete),
-              title: Text(AppLocalizations.of(context)!.deleteGroup),
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.deleteGroup,
-                  arguments: {'groupId': group.id, 'groupName': group.name},
-                ).then((deleted) {
-                  if (deleted is bool && deleted) {
-                    Navigator.of(context).pop();
-                  }
-                });
-              },
-            ),
-          ],
-        );
+        if (group.role == AccountRole.owner) {
+          return Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.person_add),
+                title: Text(AppLocalizations.of(context)!.groupRequests),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.groupJoinRequests,
+                    arguments: {'groupId': group.id},
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: Text(AppLocalizations.of(context)!.updateGroup),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.updateGroup,
+                    arguments: {'group': group},
+                  ).then((updated) {
+                    if (updated is bool && updated) {
+                      _fetchGroupData();
+                    }
+                  });
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: Text(AppLocalizations.of(context)!.deleteGroup),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.deleteGroup,
+                    arguments: {'groupId': group.id, 'groupName': group.name},
+                  ).then((deleted) {
+                    if (deleted is bool && deleted) {
+                      // ignore: use_build_context_synchronously
+                      Navigator.of(context).pop();
+                    }
+                  });
+                },
+              ),
+            ],
+          );
+        } else {
+          // Admin
+          return Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.person_add),
+                title: Text(AppLocalizations.of(context)!.groupRequests),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.groupJoinRequests,
+                    arguments: {'groupId': group.id},
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.exit_to_app),
+                title: Text(AppLocalizations.of(context)!.leave),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.read<JoinGroupBloc>().add(
+                    ToggleJoinGroupEvent(groupId: group.id, join: false),
+                  );
+                },
+              ),
+            ],
+          );
+        }
       },
     );
   }
 
   Widget _buildJoinBloc(GroupEntity group) {
-    return BlocConsumer<JoinGroupBloc, JoinGroupState>(
-      listener: (context, state) {
-        if (state is JoinGroupFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.failure.message)));
-        }
-        if (state is JoinGroupSuccess) {
-          _fetchGroupData();
-        }
-      },
+    return BlocBuilder<JoinGroupBloc, JoinGroupState>(
       builder: (context, state) {
         final secondaryColor = Theme.of(context).colorScheme.secondary;
         String btnTxt = "";
@@ -278,11 +344,10 @@ class _GroupPageState extends State<GroupPage> {
         } else if (group.joinStatus == JoinStatus.joined) {
           btnTxt = AppLocalizations.of(context)!.leave;
         } else {
-          if (group.privacy == 'private') {
-            btnTxt = AppLocalizations.of(context)!.requestJoin;
-          } else {
-            btnTxt = AppLocalizations.of(context)!.join;
-          }
+          btnTxt =
+              group.privacy == 'private'
+                  ? AppLocalizations.of(context)!.requestJoin
+                  : AppLocalizations.of(context)!.join;
         }
 
         if (state is JoinGroupFailure) {
@@ -305,6 +370,7 @@ class _GroupPageState extends State<GroupPage> {
                         GetGroupMembersEvent(groupId: group.id),
                       );
                     },
+                    'isGroupMembersPage': true,
                   },
                 );
               },
@@ -370,6 +436,21 @@ class _GroupPageState extends State<GroupPage> {
         padding: const EdgeInsets.all(16.0),
         child: Text(AppLocalizations.of(context)!.noPostsYet),
       ),
+    );
+  }
+
+  Widget _buildHiddenDataWidget() {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        SvgPicture.asset(Assets.locked2, height: 0.25 * getHeight(context)),
+        Text(
+          AppLocalizations.of(context)!.hiddenGroupPrivacy,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ],
     );
   }
 

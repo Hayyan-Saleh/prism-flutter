@@ -57,3 +57,23 @@ class GroupDeleteFailure extends GroupState {
   @override
   List<Object> get props => [message];
 }
+
+class GroupJoinRequestsLoading extends GroupState {}
+
+class GroupJoinRequestsLoaded extends GroupState {
+  final List<JoinRequestEntity> requests;
+
+  const GroupJoinRequestsLoaded(this.requests);
+
+  @override
+  List<Object> get props => [requests];
+}
+
+class GroupJoinRequestsFailure extends GroupState {
+  final String message;
+
+  const GroupJoinRequestsFailure(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

@@ -14,6 +14,7 @@ class RespondToJoinRequestUseCase {
       groupId: params.groupId,
       requestId: params.requestId,
       response: params.response,
+      fromGroup: params.fromGroup,
     );
   }
 }
@@ -22,10 +23,12 @@ class RespondToJoinRequestParams {
   final int groupId;
   final int requestId;
   final String response;
+  final bool fromGroup;
 
   RespondToJoinRequestParams({
     required this.groupId,
     required this.requestId,
     required this.response,
+    required this.fromGroup,
   });
 }

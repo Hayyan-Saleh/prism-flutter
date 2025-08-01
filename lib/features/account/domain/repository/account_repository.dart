@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:prism/core/errors/failures/account_failure.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
 import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/join_status_enum.dart';
@@ -12,6 +13,7 @@ import 'package:prism/features/account/domain/enitities/account/simplified/pagin
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
+import 'package:prism/features/account/domain/enitities/notification/join_request_entity.dart';
 
 import '../enitities/account/highlight/detailed_highlight_entity.dart';
 import '../enitities/account/highlight/highlight_entity.dart';
@@ -162,5 +164,15 @@ abstract class AccountRepository {
 
   Future<Either<AccountFailure, List<SimplifiedAccountModel>>> getGroupMembers({
     required int groupId,
+  });
+
+  Future<Either<AccountFailure, List<JoinRequestEntity>>> getGroupJoinRequests({
+    required int groupId,
+  });
+
+  Future<Either<AccountFailure, void>> updateGroupMemberRole({
+    required int groupId,
+    required int userId,
+    required AccountRole role,
   });
 }

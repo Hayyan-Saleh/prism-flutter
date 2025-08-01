@@ -12,12 +12,14 @@ import 'package:prism/features/account/data/models/account/main/group_model.dart
 import 'package:prism/features/account/data/models/account/main/personal_account_model.dart';
 import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
 import 'package:prism/features/account/data/models/account/status/status_model.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/join_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/other_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/paginated_simplified_account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
+import 'package:prism/features/account/domain/enitities/notification/join_request_entity.dart';
 import 'package:prism/features/account/domain/repository/account_repository.dart';
 import 'package:prism/features/auth/data/datasources/user_local_data_source.dart';
 import 'package:prism/features/auth/domain/usecases/load_user_use_case.dart';
@@ -694,6 +696,48 @@ class AccountRepositoryImpl implements AccountRepository {
           groupId: groupId,
         );
         return Right(members);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, List<JoinRequestEntity>>> getGroupJoinRequests({
+    required int groupId,
+  }) {
+    return _withToken((token) async {
+      try {
+        final requests = await remoteDataSource.getGroupJoinRequests(
+          token: token,
+          groupId: groupId,
+        );
+        return Right(requests);
+      } on AccountException catch (e) {
+        return Left(AccountFailure(e.message));
+      } catch (e) {
+        return Left(AccountFailure(e.toString()));
+      }
+    });
+  }
+
+  @override
+  Future<Either<AccountFailure, void>> updateGroupMemberRole({
+    required int groupId,
+    required int userId,
+    required AccountRole role,
+  }) async {
+    return _withToken((token) async {
+      try {
+        final result = await remoteDataSource.updateGroupMemberRole(
+          token: token,
+          groupId: groupId,
+          userId: userId,
+          role: role,
+        );
+        return Right(result);
       } on AccountException catch (e) {
         return Left(AccountFailure(e.message));
       } catch (e) {

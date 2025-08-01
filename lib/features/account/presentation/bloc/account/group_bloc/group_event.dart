@@ -51,3 +51,12 @@ class DeleteGroup extends GroupEvent {
   @override
   List<Object> get props => [groupId];
 }
+
+class GetGroupJoinRequestsEvent extends GroupEvent {
+  final int groupId;
+
+  const GetGroupJoinRequestsEvent({required this.groupId});
+
+  @override
+  List<Object> get props => [groupId];
+}

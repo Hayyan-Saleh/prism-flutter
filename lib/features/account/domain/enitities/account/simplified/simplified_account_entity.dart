@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 
 class SimplifiedAccountEntity extends Equatable {
@@ -8,7 +9,7 @@ class SimplifiedAccountEntity extends Equatable {
   final String avatar;
   final FollowStatus followingStatus;
   final bool isPrivate;
-  final bool isOwner;
+  final AccountRole role;
 
   const SimplifiedAccountEntity({
     required this.id,
@@ -17,17 +18,18 @@ class SimplifiedAccountEntity extends Equatable {
     required this.avatar,
     required this.followingStatus,
     required this.isPrivate,
-    required this.isOwner,
+    required this.role,
   });
 
   @override
   List<Object?> get props => [
-    id,
-    fullName,
-    accountName,
-    avatar,
-    followingStatus,
-    isPrivate,
-    isOwner,
-  ];
+        id,
+        fullName,
+        accountName,
+        avatar,
+        followingStatus,
+        isPrivate,
+        role,
+      ];
 }
+

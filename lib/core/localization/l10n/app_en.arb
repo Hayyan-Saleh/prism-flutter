@@ -252,7 +252,6 @@
         }
     },
     "noGroupsFound": "You don't have any groups here.",
-    "groupMembers": "Group Members",
     "explore": "Explore",
     "groups": "Groups",
     "exploreGroups": "Explore Groups",
@@ -266,5 +265,16 @@
     },
     "requestJoin":"Request Join",
     "groupRequests":"Group Requests",
-    "approve":"Approvet"
+    "approve":"Approve",
+    "requestedToJoinGroup": "requested to join {groupName}",
+    "@requestedToJoinGroup": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      }
+    }
+  },
+  "hiddenGroupPrivacy": "This group is private. Join to view content.",
+  "promoteToAdmin": "Promote to Admin",
+  "demoteToMember": "Demote to Member"
 }

@@ -24,6 +24,7 @@ class AppRoutes {
   static String myFollowedGroups = "/my-groups";
   static String updateGroup = "/update-group-page";
   static String deleteGroup = "/delete-group";
+  static String groupJoinRequests = "/group-join-requests";
 
   // ? sub acount   ! status
   static String addStatusPage = "/add-status-page";

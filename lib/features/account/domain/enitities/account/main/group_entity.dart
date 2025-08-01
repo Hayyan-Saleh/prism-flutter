@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 import 'package:prism/features/account/domain/enitities/account/main/join_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
 
@@ -8,6 +9,7 @@ class GroupEntity extends Equatable {
   final String privacy;
   final SimplifiedAccountEntity owner;
   final JoinStatus joinStatus;
+  final AccountRole? role;
   final String? avatar;
   final String? bio;
   final int? membersCount;
@@ -18,6 +20,7 @@ class GroupEntity extends Equatable {
     required this.privacy,
     required this.owner,
     required this.joinStatus,
+    this.role,
     this.avatar,
     this.bio,
     this.membersCount,
@@ -25,14 +28,15 @@ class GroupEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    name,
-    privacy,
-    owner,
-    avatar,
-    joinStatus,
-    bio,
-    membersCount,
-    joinStatus,
-  ];
+        id,
+        name,
+        privacy,
+        owner,
+        avatar,
+        joinStatus,
+        bio,
+        membersCount,
+        joinStatus,
+        role,
+      ];
 }

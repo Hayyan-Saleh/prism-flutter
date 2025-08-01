@@ -1,4 +1,5 @@
 import 'package:prism/features/account/data/models/account/simplified/simplified_account_model.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/join_status_enum.dart';
 
@@ -9,6 +10,7 @@ class GroupModel extends GroupEntity {
     required super.privacy,
     required SimplifiedAccountModel super.owner,
     required super.joinStatus,
+    super.role,
     super.avatar,
     super.bio,
     super.membersCount,
@@ -24,6 +26,20 @@ class GroupModel extends GroupEntity {
       default: //'not_joined'
         joinStatus = JoinStatus.notJoined;
     }
+    AccountRole? role;
+    if (json['role'] != null) {
+      switch (json['role']) {
+        case 'owner':
+          role = AccountRole.owner;
+          break;
+        case 'admin':
+          role = AccountRole.admin;
+          break;
+        case 'member':
+          role = AccountRole.member;
+          break;
+      }
+    }
     return GroupModel(
       id: json['id'],
       name: json['name'],
@@ -33,6 +49,7 @@ class GroupModel extends GroupEntity {
       bio: json['bio'],
       joinStatus: joinStatus,
       membersCount: json['members_count'],
+      role: role,
     );
   }
 
@@ -46,6 +63,7 @@ class GroupModel extends GroupEntity {
       'bio': bio,
       'members_count': membersCount,
       'join_status': joinStatus.name,
+      'role': role?.name,
     };
   }
 
@@ -59,6 +77,7 @@ class GroupModel extends GroupEntity {
       avatar: avatar,
       bio: bio,
       membersCount: membersCount,
+      role: role,
     );
   }
 }

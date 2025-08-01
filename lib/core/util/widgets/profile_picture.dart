@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:prism/core/util/widgets/custom_cached_network_image.dart';
+import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
 
 class ProfilePicture extends StatelessWidget {
   final String? link;
   final double? radius;
   final bool hasStatus;
-  final bool owner;
+  final AccountRole? role;
 
   const ProfilePicture({
     super.key,
     required this.link,
     this.radius,
     this.hasStatus = false,
-    this.owner = false,
+    this.role,
   });
 
   @override
@@ -20,29 +21,23 @@ class ProfilePicture extends StatelessWidget {
     final exists = link != null && link != '';
     final secondaryColor = Theme.of(context).colorScheme.secondary;
     final effectiveRadius = radius ?? 48;
+    final isMember = role != null && role == AccountRole.member;
+    List<Color> ringColors =
+        hasStatus
+            ? [Colors.lightGreenAccent, secondaryColor, Colors.green]
+            : _getColorByRole();
 
     return Stack(
       alignment: Alignment.center,
       children: [
-        if (hasStatus || owner) ...[
+        if (hasStatus || !isMember) ...[
           Container(
-            width: effectiveRadius * 2 + (hasStatus || owner ? 12 : 0),
-            height: effectiveRadius * 2 + (hasStatus || owner ? 12 : 0),
+            width: effectiveRadius * 2 + (hasStatus || !isMember ? 12 : 0),
+            height: effectiveRadius * 2 + (hasStatus || !isMember ? 12 : 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors:
-                    hasStatus
-                        ? [
-                          Colors.lightGreenAccent,
-                          secondaryColor,
-                          Colors.green,
-                        ]
-                        : [
-                          Colors.lightBlueAccent,
-                          Colors.blueGrey,
-                          Colors.lightBlueAccent,
-                        ],
+                colors: ringColors,
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -77,5 +72,23 @@ class ProfilePicture extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  List<Color> _getColorByRole() {
+    if (role == null) {
+      return [Colors.transparent, Colors.transparent];
+    }
+    switch (role!) {
+      case AccountRole.owner:
+        return [
+          Colors.lightBlueAccent,
+          Colors.blueGrey,
+          Colors.lightBlueAccent,
+        ];
+      case AccountRole.admin:
+        return [Colors.amber, Colors.deepOrangeAccent, Colors.amber];
+      case AccountRole.member:
+        return [Colors.transparent, Colors.transparent];
+    }
   }
 }
