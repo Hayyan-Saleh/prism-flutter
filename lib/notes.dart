@@ -56,29 +56,26 @@
 // 13- fix the simplified group entity & the group entity to accept the role attribute and resolve the isOwner respectively in the simplified group widget to show members count or the join btn (note: you must update the groups_widget and groups_page to handle the applyJoin internally without explicitly passing it to the constructor)
 // 14- allow owner to change a group member's role: Route::post('/{group_id}/role', [GroupController::class, 'changeRole']); controller function: public function changeRole(Request $request, $groupId)
 
+
+
+
 //! notifications section 
 // 1- create the notification section in home page for (requests)
 // 2- handle (accept/reject) the follow request
 // 3- handle (accept/reject) the join request
 
-// ?Feature TODO: in account feature in account section: 
-// 1- block a user
-// 2- delete an account
-// 3- get User Highlightes
-// 4- add a status to highlights
-// 5- delete a status
-// 6- handle private status logic
-// 7- handle private other account logic
-// 8- create/ delete/ update a group
+//! live-streams section
+// 1- make the gradle build command:   ./gradlew signingReport --max-workers 1
+// 2- download the docker img
+// 3- implement the http usecases [get current live streams, start a stream, end a stream]
+// 4- implement the audio streaming along with video  [ stream audio to server ]
+// 5- implement the rtmp usecase [ stream video to server ]
+// 6- update my_stream_page to end stream with EndStreamEvent from stream bloc along with rmtp call. 
+// 7- update remote data source to use the api endpoints strings instead of hard coded ones
+// 8- remove all logs from service files 
+// 9- localize hard coded strings 
 
-// ?Feature TODO: in account feature in notification section:
-// 1- handle account follow requests notifications  
-// ! 2- handle group follow requests notifications  
-
-// ? TODOS: ON END the account feature:
-// ! 1- fix all text fields which could make an overflow
-// ! 2- fix api endpoints file in auth strings so that they don't rely on the hard coded string from the rather the one from the api client
-// ! 3- see if you can fix the error in which the 'cached_video_player' is finding troubles when changing the url of a video from 10.0.2.2 to 192.168.1.xx or in the opposite way (video won't play or load) or it is because of bad connection with backend server
+ 
 
 // TODOs (End Hayyan Section): ======================================================
 
@@ -91,3 +88,6 @@
 // * 2. using the widget which shows a gallery named gallery_widget.dart
 // ! 3- for media showing we're using cached network img for the images and cached_video_player for videos => the widgets can be found in the core section 
 // ! 4- for the post/comment like we can use the 'like bloc' and provide it in the required scope respectively after adding the required usecases
+
+
+ 

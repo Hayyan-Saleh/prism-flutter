@@ -14,6 +14,7 @@ import 'package:prism/features/account/domain/enitities/account/main/account_ent
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/core/util/functions/functions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:video_player/video_player.dart';
 
 class ShowDetailedHighlight extends StatefulWidget {
   final int highlightId;
@@ -430,16 +431,19 @@ class _ShowDetailedHighlightState extends State<ShowDetailedHighlight>
     int totalStatuses,
     int currentIndex,
   ) {
-    final vidWidget = CachedNetworkVideo(
-      key: ValueKey(status.media!),
-      videoUrl: status.media!,
-      showControls: false,
-      onEnd: () => setState(() => _navigateNext(totalStatuses, currentIndex)),
-      onDurationLoaded: (duration) {
-        _videoDuration = duration;
-        _startTimer(duration, totalStatuses, currentIndex);
-      },
+    final vidWidget = VideoPlayer(
+      VideoPlayerController.networkUrl(Uri.parse(status.media!)),
     );
+    // final vidWidget = CachedNetworkVideo(
+    //   key: ValueKey(status.media!),
+    //   videoUrl: status.media!,
+    //   showControls: false,
+    //   onEnd: () => setState(() => _navigateNext(totalStatuses, currentIndex)),
+    //   onDurationLoaded: (duration) {
+    //     _videoDuration = duration;
+    //     _startTimer(duration, totalStatuses, currentIndex);
+    //   },
+    // );
     return Stack(
       children: [
         Container(

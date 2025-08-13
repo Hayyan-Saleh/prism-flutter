@@ -36,6 +36,12 @@ class AppRoutes {
   static String selectHighlight = "/select-highlight";
   static String updateHighlightCover = "/update-highlight-cover";
 
+  //! live-stream
+  static String liveStream = "/live-stream";
+  static String liveStreams = "/live-streams";
+  static String createLiveStream = "/create-live-stream";
+  static String myLiveStream = "/my-live-stream";
+
   //! core
   static String myApp = "/my-app";
   static String settings = "/settings";

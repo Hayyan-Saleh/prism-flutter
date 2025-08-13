@@ -40,6 +40,17 @@ import 'package:prism/features/account/presentation/pages/account/archived_statu
 import 'package:prism/features/account/presentation/pages/account/select_highlight_page.dart';
 import 'package:prism/features/account/presentation/pages/account/update_highlight_cover_page.dart';
 import 'package:prism/features/account/presentation/pages/account/update_group_page.dart';
+import 'package:prism/features/live-stream/domain/entities/live_stream_entity.dart';
+import 'package:prism/features/live-stream/presentation/bloc/chat_bloc/chat_bloc.dart';
+import 'package:prism/features/live-stream/presentation/bloc/live_stream_bloc/live_stream_bloc.dart';
+import 'package:prism/features/live-stream/presentation/bloc/live_stream_bloc/live_stream_event.dart';
+import 'package:prism/features/live-stream/presentation/bloc/rtmp_bloc/rtmp_bloc.dart';
+import 'package:prism/features/live-stream/presentation/pages/create_live_stream_page.dart';
+import 'package:prism/features/live-stream/presentation/pages/live_stream_page.dart';
+import 'package:prism/features/live-stream/presentation/pages/live_streams_page.dart';
+import 'package:camera/camera.dart';
+
+import 'package:prism/features/live-stream/presentation/pages/my_stream_page.dart';
 import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
 import 'package:prism/features/preferences/presentation/pages/walk_through_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -374,6 +385,58 @@ class _MyAppState extends State<MyApp> {
           child: GroupJoinRequestsPage(groupId: groupId),
         );
       },
+      AppRoutes.liveStream: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final stream = args?['stream'] as LiveStreamEntity;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<LiveStreamBloc>(
+              create: (context) => sl<LiveStreamBloc>(),
+            ),
+            BlocProvider<ChatBloc>(create: (context) => sl<ChatBloc>()),
+          ],
+          child: LiveStreamPage(stream: stream),
+        );
+      },
+      AppRoutes.liveStreams:
+          (context) => BlocProvider<LiveStreamBloc>(
+            create:
+                (context) =>
+                    sl<LiveStreamBloc>()
+                      ..add(GetActiveStreamsEvent(page: 1, limit: 10)),
+            child: LiveStreamsPage(),
+          ),
+      AppRoutes.createLiveStream:
+          (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider<LiveStreamBloc>(
+                create: (context) => sl<LiveStreamBloc>(),
+              ),
+              BlocProvider<RtmpBloc>(create: (context) => sl<RtmpBloc>()),
+            ],
+            child: const CreateLiveStreamPage(),
+          ),
+      AppRoutes.myLiveStream: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+        final stream = args['stream'] as LiveStreamEntity;
+        final cameraDescription =
+            args['cameraDescription'] as CameraDescription;
+        final enableAudio = args['enableAudio'] as bool;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<LiveStreamBloc>.value(value: sl<LiveStreamBloc>()),
+            BlocProvider<RtmpBloc>(create: (context) => sl<RtmpBloc>()),
+            BlocProvider<ChatBloc>(create: (context) => sl<ChatBloc>()),
+          ],
+          child: MyStreamPage(
+            stream: stream,
+            cameraDescription: cameraDescription,
+            enableAudio: enableAudio,
+          ),
+        );
+      },
       AppRoutes.myApp: (context) => MyApp(),
       AppRoutes.accountSettings: (context) => AccountSettingsPage(),
       AppRoutes.settings:
@@ -439,6 +502,8 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
 
+          themeAnimationCurve: Curves.fastOutSlowIn,
+          themeAnimationDuration: Duration(seconds: 2),
           themeMode: _themeMode,
           routes: _getRoutes(),
           initialRoute: AppRoutes.prefMiddlePoint,

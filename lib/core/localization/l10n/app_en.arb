@@ -276,5 +276,25 @@
   },
   "hiddenGroupPrivacy": "This group is private. Join to view content.",
   "promoteToAdmin": "Promote to Admin",
-  "demoteToMember": "Demote to Member"
+  "demoteToMember": "Demote to Member",
+  "noLiveStreamsAvailable": "No live streams available at the moment.",
+  "startLiveStream": "Start Live Stream",
+  "readyToStream": "Ready to start your live stream?",
+  "selectCamera": "Select Camera",
+  "initializing": "Initializing...",
+  "enableAudio": "Enable Audio",
+  "readyToGo": "Ready to Go!",
+  "sendMessageHint": "Send a message",
+  "myStream": "My Stream",
+  "viewers": "{count} viewers",
+  "@viewers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hideChat": "Hide Chat",
+  "showChat": "Show Chat",
+  "stopStreaming": "Stop Streaming"
 }

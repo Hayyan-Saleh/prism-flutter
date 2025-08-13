@@ -7,12 +7,14 @@ class ProfilePicture extends StatelessWidget {
   final double? radius;
   final bool hasStatus;
   final AccountRole? role;
+  final bool live;
 
   const ProfilePicture({
     super.key,
     required this.link,
     this.radius,
     this.hasStatus = false,
+    this.live = false,
     this.role,
   });
 
@@ -23,7 +25,9 @@ class ProfilePicture extends StatelessWidget {
     final effectiveRadius = radius ?? 48;
     final isMember = role != null && role == AccountRole.member;
     List<Color> ringColors =
-        hasStatus
+        live
+            ? [Colors.red, Colors.pink, Colors.red]
+            : hasStatus
             ? [Colors.lightGreenAccent, secondaryColor, Colors.green]
             : _getColorByRole();
 
@@ -32,8 +36,12 @@ class ProfilePicture extends StatelessWidget {
       children: [
         if (hasStatus || !isMember) ...[
           Container(
-            width: effectiveRadius * 2 + (hasStatus || !isMember ? 12 : 0),
-            height: effectiveRadius * 2 + (hasStatus || !isMember ? 12 : 0),
+            width:
+                effectiveRadius * 2 +
+                (hasStatus || !isMember || live ? (radius ?? 100) / 4.5 : 0),
+            height:
+                effectiveRadius * 2 +
+                (hasStatus || !isMember || live ? (radius ?? 100) / 4.5 : 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
@@ -41,14 +49,6 @@ class ProfilePicture extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-            ),
-          ),
-          Container(
-            width: effectiveRadius * 2 + 6,
-            height: effectiveRadius * 2 + 6,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              shape: BoxShape.circle,
             ),
           ),
         ],

@@ -11,6 +11,10 @@ double getWidth(BuildContext context) {
   return MediaQuery.of(context).size.width;
 }
 
+double getAR(BuildContext context) {
+  return MediaQuery.of(context).size.aspectRatio;
+}
+
 Future<File?> pickCamVideo() async {
   final ImagePicker picker = ImagePicker();
   final XFile? video = await picker.pickVideo(source: ImageSource.camera);

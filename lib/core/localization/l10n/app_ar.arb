@@ -277,5 +277,25 @@
     },
     "hiddenGroupPrivacy": "هذه المجموعة خاصة. انضم لعرض المحتوى.",
     "promoteToAdmin": "ترقية إلى مدير",
-    "demoteToMember": "تخفيض إلى عضو"
+    "demoteToMember": "تخفيض إلى عضو",
+    "noLiveStreamsAvailable": "لا توجد بثوث مباشرة متاحة في الوقت الحالي.",
+    "startLiveStream": "بدء بث مباشر",
+    "readyToStream": "هل أنت مستعد لبدء البث المباشر؟",
+    "selectCamera": "اختر الكاميرا",
+    "initializing": "جاري التهيئة...",
+    "enableAudio": "تفعيل الصوت",
+    "readyToGo": "جاهز للبدء!",
+    "sendMessageHint": "أرسل رسالة",
+    "myStream": "بثي المباشر",
+    "viewers": "{count} مشاهدين",
+    "@viewers": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "hideChat": "إخفاء الدردشة",
+    "showChat": "إظهار الدردشة",
+    "stopStreaming": "إيقاف البث"
 }

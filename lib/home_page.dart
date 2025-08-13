@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.camera_alt_outlined)),
+          IconButton(onPressed: () => Navigator.pushNamed(context, AppRoutes.createLiveStream), icon: Icon(Icons.camera_alt_outlined)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -163,8 +163,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.chat_bubble_outline),
+                onPressed:
+                    () => Navigator.pushNamed(context, AppRoutes.liveStreams),
+                icon: Icon(Icons.live_tv_rounded),
               ),
               IconButton(
                 icon: Icon(Icons.menu),

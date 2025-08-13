@@ -219,7 +219,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         var request = http.MultipartRequest(
           'POST',
           Uri.parse(
-            '${ApiEndpoints.baseUrl}${ApiEndpoints.updatePersonalAccount}',
+            '${ApiEndpoints.coreBaseUrl}${ApiEndpoints.updatePersonalAccount}',
           ),
         );
         request.headers.addAll({
@@ -227,8 +227,8 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
           'Accept': 'application/json',
         });
 
-        final fields = personalAccount
-            .toJson()
+        final fields =
+            personalAccount.toJson()
               ..removeWhere(
                 (key, value) =>
                     value == null || (value is String && value.isEmpty),
@@ -270,8 +270,8 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
 
         return ApiClient.handleResponse(responseBody);
       } else {
-        final data = personalAccount
-            .toJson()
+        final data =
+            personalAccount.toJson()
               ..removeWhere(
                 (key, value) =>
                     value == null || (value is String && value.isEmpty),
@@ -302,10 +302,11 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     required String token,
     required int id,
   }) async {
-    final response = (await apiClient.get(
-      '${ApiEndpoints.fetchUserAccount}/$id',
-      headers: _authHeaders(token),
-    ))['user'];
+    final response =
+        (await apiClient.get(
+          '${ApiEndpoints.fetchUserAccount}/$id',
+          headers: _authHeaders(token),
+        ))['user'];
     if (response['username'] == null) {
       throw AccountException(AccountErrorMessages.accountNotFound);
     }
@@ -318,10 +319,11 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     required int id,
   }) async {
     try {
-      final response = (await apiClient.get(
-        '${ApiEndpoints.fetchUserAccount}/$id',
-        headers: _authHeaders(token),
-      ))['user'];
+      final response =
+          (await apiClient.get(
+            '${ApiEndpoints.fetchUserAccount}/$id',
+            headers: _authHeaders(token),
+          ))['user'];
       return Right(OtherAccountModel.fromJson(response));
     } on ServerException catch (e) {
       return Left(AccountFailure(e.message));
@@ -380,13 +382,14 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       );
 
       final followersList = response['followers'] as List;
-      final accounts = followersList
-          .map(
-            (json) => SimplifiedAccountModel.fromJson(
-              json as Map<String, dynamic>,
-            ),
-          )
-          .toList();
+      final accounts =
+          followersList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
       return accounts;
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -407,13 +410,14 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       );
 
       final followingList = response['following'] as List;
-      final accounts = followingList
-          .map(
-            (json) => SimplifiedAccountModel.fromJson(
-              json as Map<String, dynamic>,
-            ),
-          )
-          .toList();
+      final accounts =
+          followingList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
       return accounts;
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -454,7 +458,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       if (media != null && await media.exists()) {
         var request = http.MultipartRequest(
           'POST',
-          Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.createStatus}'),
+          Uri.parse('${ApiEndpoints.coreBaseUrl}${ApiEndpoints.createStatus}'),
         );
         request.headers.addAll({
           'Authorization': 'Bearer $token',
@@ -563,9 +567,10 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         headers: _authHeaders(token),
       );
 
-      final accounts = (response['followings'] as List)
-          .map((json) => SimplifiedAccountModel.fromJson(json))
-          .toList();
+      final accounts =
+          (response['followings'] as List)
+              .map((json) => SimplifiedAccountModel.fromJson(json))
+              .toList();
       return accounts;
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -575,8 +580,8 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   }
 
   Map<String, String> _authHeaders(String token) => {
-        'Authorization': 'Bearer $token',
-      };
+    'Authorization': 'Bearer $token',
+  };
 
   @override
   Future<List<SimplifiedAccountModel>> getBlockedAccounts({
@@ -589,13 +594,14 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       );
 
       final blockedUsersList = response['blocked_users'] as List;
-      final accounts = blockedUsersList
-          .map(
-            (json) => SimplifiedAccountModel.fromJson(
-              json as Map<String, dynamic>,
-            ),
-          )
-          .toList();
+      final accounts =
+          blockedUsersList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
       return accounts;
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -631,7 +637,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.highlights}'),
+        Uri.parse('${ApiEndpoints.coreBaseUrl}${ApiEndpoints.highlights}'),
       );
       request.headers.addAll({
         'Authorization': 'Bearer $token',
@@ -702,13 +708,14 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         headers: _authHeaders(token),
       );
       final likersList = response['users'] as List;
-      final accounts = likersList
-          .map(
-            (json) => SimplifiedAccountModel.fromJson(
-              json as Map<String, dynamic>,
-            ),
-          )
-          .toList();
+      final accounts =
+          likersList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
       return accounts;
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -723,9 +730,10 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     int? accountId,
   }) async {
     try {
-      final endpoint = accountId == null
-          ? ApiEndpoints.highlights
-          : '${ApiEndpoints.highlights}?user_id=$accountId';
+      final endpoint =
+          accountId == null
+              ? ApiEndpoints.highlights
+              : '${ApiEndpoints.highlights}?user_id=$accountId';
       final response = await apiClient.get(
         endpoint,
         headers: _authHeaders(token),
@@ -787,7 +795,9 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.setHighlightCover}'),
+        Uri.parse(
+          '${ApiEndpoints.coreBaseUrl}${ApiEndpoints.setHighlightCover}',
+        ),
       );
       request.headers.addAll({
         'Authorization': 'Bearer $token',
@@ -840,7 +850,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     File? avatar,
     String? bio,
   }) async {
-    var uri = Uri.parse('${ApiEndpoints.baseUrl}${ApiEndpoints.groups}');
+    var uri = Uri.parse('${ApiEndpoints.coreBaseUrl}${ApiEndpoints.groups}');
     var request = http.MultipartRequest('POST', uri);
     request.headers.addAll({
       'Authorization': 'Bearer $token',
@@ -934,7 +944,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   }) async {
     try {
       var uri = Uri.parse(
-        '${ApiEndpoints.baseUrl}${ApiEndpoints.groups}/$groupId',
+        '${ApiEndpoints.coreBaseUrl}${ApiEndpoints.groups}/$groupId',
       );
       var request = http.MultipartRequest('POST', uri);
       request.headers.addAll({
@@ -1058,13 +1068,14 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       );
 
       final membersList = response['members'] as List;
-      final accounts = membersList
-          .map(
-            (json) => SimplifiedAccountModel.fromJson(
-              json as Map<String, dynamic>,
-            ),
-          )
-          .toList();
+      final accounts =
+          membersList
+              .map(
+                (json) => SimplifiedAccountModel.fromJson(
+                  json as Map<String, dynamic>,
+                ),
+              )
+              .toList();
       return accounts;
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -1083,9 +1094,10 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         '${ApiEndpoints.groups}/$groupId/requests',
         headers: _authHeaders(token),
       );
-      final requests = (response['requests'] as List)
-          .map((data) => JoinRequestModel.fromJson(data))
-          .toList();
+      final requests =
+          (response['requests'] as List)
+              .map((data) => JoinRequestModel.fromJson(data))
+              .toList();
       return requests;
     } on ServerException catch (e) {
       throw AccountException(e.message);
@@ -1102,14 +1114,10 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     required AccountRole role,
   }) async {
     try {
-      await apiClient.post(
-        '${ApiEndpoints.groups}/$groupId/role',
-        {
-          'user_id': userId,
-          'role': role.name,
-        },
-        headers: _authHeaders(token),
-      );
+      await apiClient.post('${ApiEndpoints.groups}/$groupId/role', {
+        'user_id': userId,
+        'role': role.name,
+      }, headers: _authHeaders(token));
     } on ServerException catch (e) {
       throw AccountException(e.message);
     } on NetworkException catch (e) {

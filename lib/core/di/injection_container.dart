@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:prism/core/network/api_client.dart';
+import 'package:prism/core/network/live_stream_api_client.dart';
 import 'package:prism/core/util/sevices/api_endpoints.dart';
 import 'package:prism/core/util/sevices/token_service.dart';
 import 'package:prism/features/account/data/data-sources/account_remote_data_source.dart';
@@ -83,6 +84,29 @@ import 'package:prism/features/auth/domain/usecases/verify_change_email_code_use
 import 'package:prism/features/auth/domain/usecases/verify_email_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/verify_reset_code_usecase.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
+import 'package:prism/features/live-stream/data/data-sources/chat_remote_data_source.dart';
+import 'package:prism/features/live-stream/data/data-sources/live_stream_local_data_source.dart';
+import 'package:prism/features/live-stream/data/data-sources/live_stream_remote_data_source.dart';
+import 'package:prism/features/live-stream/data/repository/chat_repository_impl.dart';
+import 'package:prism/features/live-stream/data/repository/live_stream_repository_impl.dart';
+import 'package:prism/features/live-stream/data/services/ffmpeg_service.dart';
+import 'package:prism/features/live-stream/data/services/socket_io_service.dart';
+import 'package:prism/features/live-stream/domain/repository/chat_repository.dart';
+import 'package:prism/features/live-stream/domain/repository/live_stream_repository.dart';
+import 'package:prism/features/live-stream/domain/use-cases/connect_to_chat_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/disconnect_from_chat_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/end_stream_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/get_active_streams_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/get_chat_messages_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/get_stream_ended_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/get_views_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/send_chat_message_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/start_stream_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/start_streaming_use_case.dart';
+import 'package:prism/features/live-stream/domain/use-cases/stop_streaming_use_case.dart';
+import 'package:prism/features/live-stream/presentation/bloc/chat_bloc/chat_bloc.dart';
+import 'package:prism/features/live-stream/presentation/bloc/live_stream_bloc/live_stream_bloc.dart';
+import 'package:prism/features/live-stream/presentation/bloc/rtmp_bloc/rtmp_bloc.dart';
 import 'package:prism/features/preferences/data/data_soucres/preferences_local_data_source.dart';
 import 'package:prism/features/preferences/data/repositories/preferences_repository_impl.dart';
 import 'package:prism/features/preferences/domain/repositories/preferences_repository.dart';
@@ -107,9 +131,19 @@ Future<void> init() async {
         TokenServiceImpl(loadToken: sl(), deleteToken: sl(), storeToken: sl()),
   );
   sl.registerSingleton<ApiClient>(
-    ApiClient(baseUrl: ApiEndpoints.baseUrl, httpClient: http.Client()),
+    ApiClient(baseUrl: ApiEndpoints.coreBaseUrl, httpClient: http.Client()),
   );
 
+  sl.registerSingleton<LiveStreamApiClient>(
+    LiveStreamApiClient(
+      baseUrl: ApiEndpoints.liveStreamBaseUrl,
+      httpClient: http.Client(),
+    ),
+  );
+
+  sl.registerLazySingleton<FfmpegService>(() => FfmpegService());
+
+  sl.registerLazySingleton<SocketIOService>(() => SocketIOService());
   // ! preferences
 
   // Bloc
@@ -358,5 +392,64 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<NotificationRemoteDataSource>(
     () => NotificationRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // ! live-stream
+
+  // Bloc
+  sl.registerFactory(
+    () => LiveStreamBloc(
+      getActiveStreamsUseCase: sl(),
+      startStreamUseCase: sl(),
+      endStreamUseCase: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => ChatBloc(
+      connectToChatUseCase: sl(),
+      disconnectFromChatUseCase: sl(),
+      getChatMessagesUseCase: sl(),
+      getViewsUseCase: sl(),
+      sendChatMessageUseCase: sl(),
+      getStreamEndedUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => RtmpBloc(startStreamingUseCase: sl(), stopStreamingUseCase: sl()),
+  );
+  // Use cases
+  sl.registerLazySingleton(() => GetActiveStreamsUseCase(sl()));
+  sl.registerLazySingleton(() => StartStreamUseCase(sl()));
+  sl.registerLazySingleton(() => EndStreamUseCase(sl()));
+
+  sl.registerLazySingleton(() => ConnectToChatUseCase(sl()));
+  sl.registerLazySingleton(() => DisconnectFromChatUseCase(sl()));
+  sl.registerLazySingleton(() => GetChatMessagesUseCase(sl()));
+  sl.registerLazySingleton(() => GetViewsUseCase(sl()));
+  sl.registerLazySingleton(() => SendChatMessageUseCase(sl()));
+  sl.registerLazySingleton(() => GetStreamEndedUseCase(sl()));
+
+  sl.registerLazySingleton(() => StartStreamingUseCase(sl()));
+  sl.registerLazySingleton(() => StopStreamingUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<LiveStreamRepository>(
+    () =>
+        LiveStreamRepositoryImpl(remoteDataSource: sl(), localDataSource: sl()),
+  );
+  sl.registerLazySingleton<ChatRepository>(
+    () => ChatRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<LiveStreamLocalDataSource>(
+    () => LiveStreamLocalDataSourceImpl(ffmpegService: sl()),
+  );
+  sl.registerLazySingleton<LiveStreamRemoteDataSource>(
+    () => LiveStreamRemoteDataSourceImpl(apiClient: sl(), tokenService: sl()),
+  );
+  sl.registerLazySingleton<ChatRemoteDataSource>(
+    () => ChatRemoteDataSourceImpl(socketIOService: sl()),
   );
 }
