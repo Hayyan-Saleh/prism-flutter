@@ -1,0 +1,32 @@
+{
+    "comments": [
+        {
+            "id": 1,
+            "text": "first  comment",
+            "likes_count": 0,
+            "user": {
+                "id": 2,
+                "name": "Hamza",
+                "avatar": "http://localhost:8000/storage/avatars/A7ll0u5HMBIBe1yhSTSkAbjqhaMZE0al8DZTJiLQ.jpg"
+            },
+            "created_at": "2025-05-26T09:57:59.000000Z"
+        },
+        {
+            "id": 2,
+            "text": "second  comment",
+            "likes_count": 0,
+            "user": {
+                "id": 2,
+                "name": "Hamza",
+                "avatar": "http://localhost:8000/storage/avatars/A7ll0u5HMBIBe1yhSTSkAbjqhaMZE0al8DZTJiLQ.jpg"
+            },
+            "created_at": "2025-05-26T09:58:06.000000Z"
+        }
+    ],
+    "pagination": {
+        "current_page": 1,
+        "per_page": 10,
+        "total": 2,
+        "last_page": 1
+    }
+}

@@ -1,0 +1,53 @@
+{
+    "posts": [
+        {
+            "id": 4,
+            "text": "second post",
+            "likes_count": 0,
+            "comments_count": 0,
+            "is_liked": false,
+            "group_id": null,
+            "media": [],
+            "privacy": "public",
+            "created_at": "2025-05-26T09:56:21.000000Z",
+            "user": {
+                "id": 2,
+                "name": "Hamza",
+                "avatar": "http://localhost:8000/storage/avatars/A7ll0u5HMBIBe1yhSTSkAbjqhaMZE0al8DZTJiLQ.jpg"
+            }
+        },
+        {
+            "id": 3,
+            "text": "First post",
+            "likes_count": 0,
+            "comments_count": 0,
+            "is_liked": false,
+            "group_id": null,
+            "media": [
+                {
+                    "id": 7,
+                    "type": "image",
+                    "url": "http://localhost:8000/storage/posts/kRNTPGkNAZzS35oFtD2VPh71yneTPPqlihuT3G77.jpg"
+                },
+                {
+                    "id": 8,
+                    "type": "image",
+                    "url": "http://localhost:8000/storage/posts/WrPscQunj8KCGtJ9bLa6eptrcCSeVp0pgo2yLtMz.jpg"
+                }
+            ],
+            "privacy": "public",
+            "created_at": "2025-05-26T09:54:09.000000Z",
+            "user": {
+                "id": 2,
+                "name": "Hamza",
+                "avatar": "http://localhost:8000/storage/avatars/A7ll0u5HMBIBe1yhSTSkAbjqhaMZE0al8DZTJiLQ.jpg"
+            }
+        }
+    ],
+    "pagination": {
+        "current_page": 1,
+        "per_page": 10,
+        "total": 2,
+        "last_page": 1
+    }
+}

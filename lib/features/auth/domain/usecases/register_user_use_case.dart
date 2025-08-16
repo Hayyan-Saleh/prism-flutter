@@ -1,0 +1,16 @@
+import 'package:dartz/dartz.dart';
+import 'package:prism/core/errors/failures/app_failure.dart';
+import '../repositories/auth_repository.dart';
+
+class RegisterUserUseCase {
+  final AuthRepository repository;
+
+  const RegisterUserUseCase({required this.repository});
+
+  Future<Either<AppFailure, Unit>> call({
+    required String email,
+    required String password,
+  }) async {
+    return repository.registerUser(email: email, password: password);
+  }
+}

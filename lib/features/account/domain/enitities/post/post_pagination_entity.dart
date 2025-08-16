@@ -1,0 +1,23 @@
+import 'package:equatable/equatable.dart';
+import 'package:prism/core/util/entities/pagination_entity.dart';
+import 'package:prism/features/account/domain/enitities/post/post_entity.dart';
+
+class PaginatedPostsEntity extends Equatable {
+  final List<PostEntity> posts;
+  final PaginationEntity pagination;
+
+  const PaginatedPostsEntity({required this.posts, required this.pagination});
+
+  PaginatedPostsEntity copyWith({
+    List<PostEntity>? posts,
+    PaginationEntity? pagination,
+  }) {
+    return PaginatedPostsEntity(
+      posts: posts ?? this.posts,
+      pagination: pagination ?? this.pagination,
+    );
+  }
+
+  @override
+  List<Object> get props => [posts, pagination];
+}
