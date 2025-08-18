@@ -79,9 +79,23 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int selectedIndex = 0;
   final PageController _pageController = PageController();
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -465,19 +479,6 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildPostsSection() {
-    return Center(child: Text(AppLocalizations.of(context)!.postsSection));
-  }
-
-  Widget _buildHomePage() {
-    return Column(
-      children: [
-        StatusesSectionWidget(),
-        Expanded(child: _buildPostsSection()),
-      ],
-    );
-  }
-
   Widget _buildSearchPage() {
     return Column(
       children: [
@@ -515,12 +516,7 @@ class HomePageState extends State<HomePage> {
         const FeedTab(),
         _buildSearchPage(),
         _buildAddPage(),
-        Center(
-          child: Text(
-            AppLocalizations.of(context)!.video,
-            style: const TextStyle(fontSize: 32),
-          ),
-        ),
+        _getNotificationsPage(),
         _getPersonalAccountPage(),
       ],
     );

@@ -4,7 +4,7 @@ import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class AccountSettingsPage extends StatelessWidget {
   const AccountSettingsPage({super.key});

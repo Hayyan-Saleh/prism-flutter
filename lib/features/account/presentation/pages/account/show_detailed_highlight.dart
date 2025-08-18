@@ -13,7 +13,7 @@ import 'package:prism/features/account/domain/enitities/account/highlight/highli
 import 'package:prism/features/account/domain/enitities/account/main/account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/core/util/functions/functions.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 import 'package:video_player/video_player.dart';
 
 class ShowDetailedHighlight extends StatefulWidget {

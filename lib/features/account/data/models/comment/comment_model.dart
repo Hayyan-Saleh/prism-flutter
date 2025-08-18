@@ -41,14 +41,16 @@ class CommentModel extends CommentEntity {
       'replies_count': repliesCount,
       'is_liked': isLiked,
       'created_at': createdAt.toIso8601String(),
-      'user': SimplifiedAccountModel(
-        id: user.id,
-        fullName: user.fullName,
-        accountName: user.accountName,
-        avatar: user.avatar,
-        followingStatus: user.followingStatus,
-        isPrivate: user.isPrivate,
-      ).toJson(),
+      'user':
+          SimplifiedAccountModel(
+            id: user.id,
+            fullName: user.fullName,
+            accountName: user.accountName,
+            avatar: user.avatar,
+            followingStatus: user.followingStatus,
+            isPrivate: user.isPrivate,
+            role: user.role,
+          ).toJson(),
     };
   }
 }

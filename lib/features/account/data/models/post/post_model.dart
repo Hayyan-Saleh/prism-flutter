@@ -71,6 +71,7 @@ class PostModel extends PostEntity {
             avatar: user.avatar,
             followingStatus: user.followingStatus,
             isPrivate: user.isPrivate,
+            role: user.role,
           ).toJson(),
     };
   }

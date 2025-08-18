@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:prism/core/util/entities/media_entity.dart';
 import 'package:prism/core/util/widgets/app_text_button.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class GalleryWidget extends StatefulWidget {
   final Function(File, MediaType) onMediaSelected;

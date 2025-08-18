@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/features/account/presentation/bloc/account/group_bloc/group_bloc.dart';
 
@@ -8,8 +8,11 @@ class DeleteGroupPage extends StatelessWidget {
   final int groupId;
   final String groupName;
 
-  const DeleteGroupPage(
-      {super.key, required this.groupId, required this.groupName});
+  const DeleteGroupPage({
+    super.key,
+    required this.groupId,
+    required this.groupName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +59,9 @@ class DeleteGroupPage extends StatelessWidget {
                   if (state is GroupDeleteSuccess) {
                     Navigator.of(context).pop(true);
                   } else if (state is GroupDeleteFailure) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.message)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(state.message)));
                   }
                 },
                 builder: (context, state) {

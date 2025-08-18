@@ -8,7 +8,7 @@ import 'package:prism/features/account/domain/enitities/account/main/follow_stat
 import 'package:prism/features/account/domain/enitities/account/simplified/simplified_account_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
 import 'package:prism/features/account/domain/enitities/account/main/account_role.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class SimplifiedAccountWidget extends StatefulWidget {
   final int personalAccId;

@@ -5,7 +5,7 @@ import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/simplified_group_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class GroupsPage extends StatefulWidget {
   final bool applyJoin;

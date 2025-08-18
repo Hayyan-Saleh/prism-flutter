@@ -129,8 +129,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verificationInfo2 => 'في';
 
   @override
-  String get verificationInfoOld =>
-      '* تم إرسال كود التحقق إلى بريدك الإلكتروني القديم';
+  String get verificationInfoOld => '* تم إرسال كود التحقق إلى بريدك الإلكتروني القديم';
 
   @override
   String get recently => 'مؤخرًا';
@@ -196,8 +195,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prismPrivacyPolicy => 'سياسة خصوصية بريزم';
 
   @override
-  String get detailedPolicy =>
-      'بريزم، منصة تواصل اجتماعي ناشئة، تجمع بيانات مستخدم محدودة (مثل الاسم والبريد الإلكتروني) لتحسين تجربتك. تتم مشاركة البيانات مع شركاء مختارين للتحليلات والتسويق، بإذنك فقط. يمكنك الوصول إلى بياناتك أو تعديلها أو حذفها عبر إعدادات حسابك في أي وقت. راجع شروط الخدمة وسياسة الخصوصية الكاملة لمزيد من المعلومات.';
+  String get detailedPolicy => 'بريزم، منصة تواصل اجتماعي ناشئة، تجمع بيانات مستخدم محدودة (مثل الاسم والبريد الإلكتروني) لتحسين تجربتك. تتم مشاركة البيانات مع شركاء مختارين للتحليلات والتسويق، بإذنك فقط. يمكنك الوصول إلى بياناتك أو تعديلها أو حذفها عبر إعدادات حسابك في أي وقت. راجع شروط الخدمة وسياسة الخصوصية الكاملة لمزيد من المعلومات.';
 
   @override
   String get settings => 'الإعدادات';
@@ -377,8 +375,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get noAlbumsFound =>
-      'لم يتم العثور على ألبومات في معرض الصور الخاص بك.';
+  String get noAlbumsFound => 'لم يتم العثور على ألبومات في معرض الصور الخاص بك.';
 
   @override
   String errorLoadingMedia(Object error) {
@@ -441,8 +438,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteAccount => 'حذف الحساب';
 
   @override
-  String get deleteAccountConfirmation =>
-      'هل أنت متأكد أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.';
+  String get deleteAccountConfirmation => 'هل أنت متأكد أنك تريد حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.';
 
   @override
   String get block => 'حظر';
@@ -451,8 +447,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get blockUser => 'حظر المستخدم';
 
   @override
-  String get blockUserConfirmation =>
-      'هل أنت متأكد أنك تريد حظر هذا المستخدم؟ لن يتمكن من رؤية ملفك الشخصي أو التفاعل معك.';
+  String get blockUserConfirmation => 'هل أنت متأكد أنك تريد حظر هذا المستخدم؟ لن يتمكن من رؤية ملفك الشخصي أو التفاعل معك.';
 
   @override
   String get userBlocked => 'تم حظر المستخدم بنجاح.';
@@ -463,9 +458,303 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get blockUserExplanation =>
-      'لن يتمكنوا من العثور على ملفك الشخصي أو منشوراتك أو قصتك على بريزم. لن يخبرهم بريزم أنك حظرتهم.';
+  String get blockUserExplanation => 'لن يتمكنوا من العثور على ملفك الشخصي أو منشوراتك أو قصتك على بريزم. لن يخبرهم بريزم أنك حظرتهم.';
 
   @override
   String get unblockUser => 'إلغاء الحظر';
+
+  @override
+  String get blockedAccounts => 'الحسابات المحظورة';
+
+  @override
+  String get noBlockedAccounts => 'ليس لديك حسابات محظورة.';
+
+  @override
+  String get all => 'الكل';
+
+  @override
+  String get requests => 'الطلبات';
+
+  @override
+  String get requestHandledSuccessfully => 'تم التعامل مع الطلب بنجاح.';
+
+  @override
+  String get noNewRequests => 'لا توجد طلبات جديدة.';
+
+  @override
+  String get requestedToFollowYou => 'طلب متابعتك';
+
+  @override
+  String get accept => 'قبول';
+
+  @override
+  String get reject => 'رفض';
+
+  @override
+  String get archived => 'المؤرشفة';
+
+  @override
+  String get likers => 'المعجبون';
+
+  @override
+  String get personalAccountNotFound => 'لم يتم العثور على الحساب الشخصي.';
+
+  @override
+  String get archivedStatuses => 'الحالات المؤرشفة';
+
+  @override
+  String statusesSelectedForHighlight(int count) {
+    return 'تم تحديد $count حالة للتمييز.';
+  }
+
+  @override
+  String get noArchivedStatuses => 'لا توجد حالات مؤرشفة.';
+
+  @override
+  String get thisWeek => 'هذا الأسبوع';
+
+  @override
+  String get thisMonth => 'هذا الشهر';
+
+  @override
+  String get thisYear => 'هذه السنة';
+
+  @override
+  String get older => 'أقدم';
+
+  @override
+  String get noStatusesMatchFilter => 'لا توجد حالات تطابق الفلتر الخاص بك.';
+
+  @override
+  String get noText => 'لا يوجد نص';
+
+  @override
+  String get today => 'اليوم';
+
+  @override
+  String get yesterday => 'البارحة';
+
+  @override
+  String get highlightCreatedSuccessfully => 'تم إنشاء الحدث البارز بنجاح';
+
+  @override
+  String get failedToCreateHighlight => 'فشل في إنشاء الحدث البارز';
+
+  @override
+  String get pickFromGallery => 'اختر من المعرض';
+
+  @override
+  String get takeAPhoto => 'التقط صورة';
+
+  @override
+  String get addCoverImage => 'إضافة صورة غلاف';
+
+  @override
+  String get highlightTitle => 'عنوان الحدث البارز';
+
+  @override
+  String get pleaseEnterAtitle => 'يرجى إدخال عنوان';
+
+  @override
+  String get createHighlight => 'إنشاء حدث بارز';
+
+  @override
+  String get editHighlight => 'تعديل الحدث البارز';
+
+  @override
+  String get updateCover => 'تحديث الغلاف';
+
+  @override
+  String get pleaseSelectAnImage => 'يرجى تحديد صورة.';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get selectAnImageFromGallery => 'اختر صورة من المعرض';
+
+  @override
+  String get addToHighlight => 'أضف إلى الحدث البارز';
+
+  @override
+  String get noHighlightsFound => 'لم يتم العثور على أي هايلايت.';
+
+  @override
+  String failedToAddToHighlight(String message) {
+    return 'فشل في الإضافة إلى الهايلايت: $message';
+  }
+
+  @override
+  String get statusAddedToHighlight => 'تمت إضافة الحالة إلى الهايلايت بنجاح!';
+
+  @override
+  String get createGroup => 'إنشاء مجموعة';
+
+  @override
+  String get groupCreatedSuccessfully => 'تم إنشاء المجموعة بنجاح';
+
+  @override
+  String get groupName => 'اسم المجموعة';
+
+  @override
+  String get pleaseEnterGroupName => 'يرجى إدخال اسم المجموعة';
+
+  @override
+  String get public => 'عام';
+
+  @override
+  String get private => 'خاص';
+
+  @override
+  String get accountSettings => 'إعدادات الحساب';
+
+  @override
+  String get myFollowedGroups => 'المجموعات التي أتابعها';
+
+  @override
+  String get myOwnedGroups => 'المجموعات التي أملكها';
+
+  @override
+  String get myGroups => 'مجموعاتي';
+
+  @override
+  String get updateGroup => 'تحديث المجموعة';
+
+  @override
+  String get groupBio => 'نبذة عن المجموعة';
+
+  @override
+  String get privateGroup => 'مجموعة خاصة';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get groupUpdatedSuccessfully => 'تم تحديث المجموعة بنجاح';
+
+  @override
+  String get deleteGroupTitle => 'حذف المجموعة';
+
+  @override
+  String get deleteGroupConfirmation => 'هل أنت متأكد أنك تريد حذف هذه المجموعة؟ هذا الإجراء لا يمكن التراجع عنه.';
+
+  @override
+  String deleteGroupName(String groupName) {
+    return 'حذف $groupName';
+  }
+
+  @override
+  String get leave => 'مغادرة';
+
+  @override
+  String get join => 'انضمام';
+
+  @override
+  String membersCount(int count) {
+    return '$count أعضاء';
+  }
+
+  @override
+  String get noGroupsHere => 'ليس لديك أي مجموعات هنا.';
+
+  @override
+  String get group => 'مجموعة';
+
+  @override
+  String get owner => 'المالك';
+
+  @override
+  String get noPostsYet => 'لا توجد منشورات حتى الآن.';
+
+  @override
+  String get groupPageTitle => 'مجموعة';
+
+  @override
+  String get deleteGroup => 'حذف المجموعة';
+
+  @override
+  String groupBioText(String bio) {
+    return 'مجموعة $bio';
+  }
+
+  @override
+  String get noGroupsFound => 'ليس لديك أي مجموعات هنا.';
+
+  @override
+  String get explore => 'استكشف';
+
+  @override
+  String get groups => 'المجموعات';
+
+  @override
+  String get exploreGroups => 'استكشف المجموعات';
+
+  @override
+  String groupMembers(String groupName) {
+    return '$groupName أعضاء';
+  }
+
+  @override
+  String get requestJoin => 'طلب الانضمام';
+
+  @override
+  String get groupRequests => 'طلبات الانضمام';
+
+  @override
+  String get approve => 'قبول';
+
+  @override
+  String requestedToJoinGroup(String groupName) {
+    return 'طلب الانضمام إلى $groupName';
+  }
+
+  @override
+  String get hiddenGroupPrivacy => 'هذه المجموعة خاصة. انضم لعرض المحتوى.';
+
+  @override
+  String get promoteToAdmin => 'ترقية إلى مدير';
+
+  @override
+  String get demoteToMember => 'تخفيض إلى عضو';
+
+  @override
+  String get noLiveStreamsAvailable => 'لا توجد بثوث مباشرة متاحة في الوقت الحالي.';
+
+  @override
+  String get startLiveStream => 'بدء بث مباشر';
+
+  @override
+  String get readyToStream => 'هل أنت مستعد لبدء البث المباشر؟';
+
+  @override
+  String get selectCamera => 'اختر الكاميرا';
+
+  @override
+  String get initializing => 'جاري التهيئة...';
+
+  @override
+  String get enableAudio => 'تفعيل الصوت';
+
+  @override
+  String get readyToGo => 'جاهز للبدء!';
+
+  @override
+  String get sendMessageHint => 'أرسل رسالة';
+
+  @override
+  String get myStream => 'بثي المباشر';
+
+  @override
+  String viewers(int count) {
+    return '$count مشاهدين';
+  }
+
+  @override
+  String get hideChat => 'إخفاء الدردشة';
+
+  @override
+  String get showChat => 'إظهار الدردشة';
+
+  @override
+  String get stopStreaming => 'إيقاف البث';
 }

@@ -11,7 +11,7 @@ import 'package:prism/core/util/validators/email_validator.dart';
 import 'package:prism/core/util/validators/password_validator.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
 import 'package:prism/features/auth/presentation/widgets/code_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/follow_request_list_tile.dart';

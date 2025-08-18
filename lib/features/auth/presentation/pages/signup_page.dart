@@ -11,7 +11,7 @@ import 'package:prism/core/util/widgets/custom_text_form_field.dart';
 import 'package:prism/core/util/validators/email_validator.dart';
 import 'package:prism/core/util/validators/password_validator.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});

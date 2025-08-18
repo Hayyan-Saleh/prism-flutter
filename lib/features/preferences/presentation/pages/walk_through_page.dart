@@ -9,7 +9,7 @@ import 'package:prism/features/preferences/domain/entities/preferences_entity.da
 import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
 import 'package:prism/features/preferences/presentation/widgets/walk_through_widget.dart';
 import 'package:prism/features/preferences/domain/entities/preferences_enums.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class WalkThroughPage extends StatefulWidget {
   final Function(ThemeMode) onThemeChanged;

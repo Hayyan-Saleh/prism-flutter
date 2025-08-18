@@ -11,7 +11,7 @@ import 'package:prism/features/account/presentation/bloc/account/personal_accoun
 import 'package:prism/features/account/presentation/widgets/account_name_tff.dart';
 import 'package:prism/features/account/presentation/widgets/unlimited_details__ttf_widget.dart';
 import 'package:prism/features/account/presentation/widgets/unlimited_keys_ttf_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class UpdateAccountPage extends StatefulWidget {
   final PersonalAccountEntity? pAccount;

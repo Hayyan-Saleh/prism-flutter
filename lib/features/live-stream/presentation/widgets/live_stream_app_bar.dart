@@ -5,7 +5,7 @@ import 'package:prism/features/live-stream/domain/entities/live_stream_entity.da
 import 'package:prism/features/live-stream/presentation/bloc/chat_bloc/chat_bloc.dart';
 import 'package:prism/features/live-stream/presentation/bloc/chat_bloc/chat_event.dart';
 import 'package:prism/features/live-stream/presentation/bloc/chat_bloc/chat_state.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class LiveStreamAppBar extends StatelessWidget implements PreferredSizeWidget {
   final LiveStreamEntity stream;

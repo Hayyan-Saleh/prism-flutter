@@ -14,7 +14,7 @@ import 'package:prism/features/account/domain/enitities/account/status/status_en
 import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/like_bloc/like_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class ShowStatusWidget extends StatefulWidget {
   final int userId;

@@ -9,7 +9,7 @@ import 'package:prism/features/account/presentation/bloc/account/status_bloc/sta
 import 'package:prism/features/account/presentation/widgets/gallery_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:better_player_plus/better_player_plus.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class AddStatusPage extends StatefulWidget {
   const AddStatusPage({super.key});

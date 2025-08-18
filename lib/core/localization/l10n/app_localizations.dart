@@ -62,8 +62,7 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,18 +82,17 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('ar'),
+    Locale('ar')
   ];
 
   /// No description provided for @welcomeToPrism.
@@ -955,10 +952,567 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unblock'**
   String get unblockUser;
+
+  /// No description provided for @blockedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked Accounts'**
+  String get blockedAccounts;
+
+  /// No description provided for @noBlockedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no blocked accounts.'**
+  String get noBlockedAccounts;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get requests;
+
+  /// No description provided for @requestHandledSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Request handled successfully.'**
+  String get requestHandledSuccessfully;
+
+  /// No description provided for @noNewRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No new requests.'**
+  String get noNewRequests;
+
+  /// No description provided for @requestedToFollowYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested to follow you'**
+  String get requestedToFollowYou;
+
+  /// No description provided for @accept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get archived;
+
+  /// No description provided for @likers.
+  ///
+  /// In en, this message translates to:
+  /// **'Likers'**
+  String get likers;
+
+  /// No description provided for @personalAccountNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal account not found.'**
+  String get personalAccountNotFound;
+
+  /// No description provided for @archivedStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived Statuses'**
+  String get archivedStatuses;
+
+  /// Message shown when statuses are selected for a highlight.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} statuses selected for highlight.'**
+  String statusesSelectedForHighlight(int count);
+
+  /// No description provided for @noArchivedStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'No archived statuses.'**
+  String get noArchivedStatuses;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get thisWeek;
+
+  /// No description provided for @thisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get thisMonth;
+
+  /// No description provided for @thisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This Year'**
+  String get thisYear;
+
+  /// No description provided for @older.
+  ///
+  /// In en, this message translates to:
+  /// **'Older'**
+  String get older;
+
+  /// No description provided for @noStatusesMatchFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No statuses match your filter.'**
+  String get noStatusesMatchFilter;
+
+  /// No description provided for @noText.
+  ///
+  /// In en, this message translates to:
+  /// **'No Text'**
+  String get noText;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @highlightCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlight created successfully'**
+  String get highlightCreatedSuccessfully;
+
+  /// No description provided for @failedToCreateHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create highlight'**
+  String get failedToCreateHighlight;
+
+  /// No description provided for @pickFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from Gallery'**
+  String get pickFromGallery;
+
+  /// No description provided for @takeAPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a Photo'**
+  String get takeAPhoto;
+
+  /// No description provided for @addCoverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Cover Image'**
+  String get addCoverImage;
+
+  /// No description provided for @highlightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlight Title'**
+  String get highlightTitle;
+
+  /// No description provided for @pleaseEnterAtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title'**
+  String get pleaseEnterAtitle;
+
+  /// No description provided for @createHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Highlight'**
+  String get createHighlight;
+
+  /// No description provided for @editHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Highlight'**
+  String get editHighlight;
+
+  /// No description provided for @updateCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Cover'**
+  String get updateCover;
+
+  /// No description provided for @pleaseSelectAnImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an image.'**
+  String get pleaseSelectAnImage;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @selectAnImageFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an image from gallery'**
+  String get selectAnImageFromGallery;
+
+  /// No description provided for @addToHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Highlight'**
+  String get addToHighlight;
+
+  /// No description provided for @noHighlightsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No highlights found.'**
+  String get noHighlightsFound;
+
+  /// No description provided for @failedToAddToHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add to highlight: {message}'**
+  String failedToAddToHighlight(String message);
+
+  /// No description provided for @statusAddedToHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Status added to highlight successfully!'**
+  String get statusAddedToHighlight;
+
+  /// No description provided for @createGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get createGroup;
+
+  /// No description provided for @groupCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Group created successfully'**
+  String get groupCreatedSuccessfully;
+
+  /// No description provided for @groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get groupName;
+
+  /// No description provided for @pleaseEnterGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a group name'**
+  String get pleaseEnterGroupName;
+
+  /// No description provided for @public.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get public;
+
+  /// No description provided for @private.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get private;
+
+  /// No description provided for @accountSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Settings'**
+  String get accountSettings;
+
+  /// No description provided for @myFollowedGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'My Followed Groups'**
+  String get myFollowedGroups;
+
+  /// No description provided for @myOwnedGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'My Owned Groups'**
+  String get myOwnedGroups;
+
+  /// No description provided for @myGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'My Groups'**
+  String get myGroups;
+
+  /// No description provided for @updateGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Group'**
+  String get updateGroup;
+
+  /// No description provided for @groupBio.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Bio'**
+  String get groupBio;
+
+  /// No description provided for @privateGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Private Group'**
+  String get privateGroup;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @groupUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Updated Successfully'**
+  String get groupUpdatedSuccessfully;
+
+  /// No description provided for @deleteGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get deleteGroupTitle;
+
+  /// No description provided for @deleteGroupConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this group? This action cannot be undone.'**
+  String get deleteGroupConfirmation;
+
+  /// No description provided for @deleteGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {groupName}'**
+  String deleteGroupName(String groupName);
+
+  /// No description provided for @leave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get leave;
+
+  /// No description provided for @join.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get join;
+
+  /// No description provided for @membersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Members'**
+  String membersCount(int count);
+
+  /// No description provided for @noGroupsHere.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any groups here.'**
+  String get noGroupsHere;
+
+  /// No description provided for @group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get group;
+
+  /// No description provided for @owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get owner;
+
+  /// No description provided for @noPostsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No posts yet.'**
+  String get noPostsYet;
+
+  /// No description provided for @groupPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get groupPageTitle;
+
+  /// No description provided for @deleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Group'**
+  String get deleteGroup;
+
+  /// No description provided for @groupBioText.
+  ///
+  /// In en, this message translates to:
+  /// **'{bio} group'**
+  String groupBioText(String bio);
+
+  /// No description provided for @noGroupsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any groups here.'**
+  String get noGroupsFound;
+
+  /// No description provided for @explore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get explore;
+
+  /// No description provided for @groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get groups;
+
+  /// No description provided for @exploreGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Groups'**
+  String get exploreGroups;
+
+  /// No description provided for @groupMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'{groupName} Members'**
+  String groupMembers(String groupName);
+
+  /// No description provided for @requestJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Join'**
+  String get requestJoin;
+
+  /// No description provided for @groupRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Requests'**
+  String get groupRequests;
+
+  /// No description provided for @approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approve;
+
+  /// No description provided for @requestedToJoinGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'requested to join {groupName}'**
+  String requestedToJoinGroup(String groupName);
+
+  /// No description provided for @hiddenGroupPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'This group is private. Join to view content.'**
+  String get hiddenGroupPrivacy;
+
+  /// No description provided for @promoteToAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Promote to Admin'**
+  String get promoteToAdmin;
+
+  /// No description provided for @demoteToMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Demote to Member'**
+  String get demoteToMember;
+
+  /// No description provided for @noLiveStreamsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No live streams available at the moment.'**
+  String get noLiveStreamsAvailable;
+
+  /// No description provided for @startLiveStream.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Live Stream'**
+  String get startLiveStream;
+
+  /// No description provided for @readyToStream.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to start your live stream?'**
+  String get readyToStream;
+
+  /// No description provided for @selectCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Camera'**
+  String get selectCamera;
+
+  /// No description provided for @initializing.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing...'**
+  String get initializing;
+
+  /// No description provided for @enableAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Audio'**
+  String get enableAudio;
+
+  /// No description provided for @readyToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Go!'**
+  String get readyToGo;
+
+  /// No description provided for @sendMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a message'**
+  String get sendMessageHint;
+
+  /// No description provided for @myStream.
+  ///
+  /// In en, this message translates to:
+  /// **'My Stream'**
+  String get myStream;
+
+  /// No description provided for @viewers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} viewers'**
+  String viewers(int count);
+
+  /// No description provided for @hideChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Chat'**
+  String get hideChat;
+
+  /// No description provided for @showChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Chat'**
+  String get showChat;
+
+  /// No description provided for @stopStreaming.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Streaming'**
+  String get stopStreaming;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -967,26 +1521,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar':
-      return AppLocalizationsAr();
-    case 'en':
-      return AppLocalizationsEn();
+    case 'ar': return AppLocalizationsAr();
+    case 'en': return AppLocalizationsEn();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

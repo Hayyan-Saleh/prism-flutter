@@ -129,8 +129,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verificationInfo2 => 'at';
 
   @override
-  String get verificationInfoOld =>
-      '* The verification code was sent to your old email';
+  String get verificationInfoOld => '* The verification code was sent to your old email';
 
   @override
   String get recently => 'recently';
@@ -196,8 +195,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prismPrivacyPolicy => 'Prism Privacry Policy';
 
   @override
-  String get detailedPolicy =>
-      'Prism, a startup social media platform, collects minimal user data (e.g., name, email) to enhance your experience. Data is shared with select partners for analytics and marketing, only with your permission. You can access, modify, or delete your data through your account settings anytime. Review our full Terms of Service and Privacy Policy for more information.';
+  String get detailedPolicy => 'Prism, a startup social media platform, collects minimal user data (e.g., name, email) to enhance your experience. Data is shared with select partners for analytics and marketing, only with your permission. You can access, modify, or delete your data through your account settings anytime. Review our full Terms of Service and Privacy Policy for more information.';
 
   @override
   String get settings => 'Settings';
@@ -440,8 +438,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccount => 'Delete Account';
 
   @override
-  String get deleteAccountConfirmation =>
-      'Are you sure you want to delete your account? This action is irreversible.';
+  String get deleteAccountConfirmation => 'Are you sure you want to delete your account? This action is irreversible.';
 
   @override
   String get block => 'Block';
@@ -450,8 +447,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get blockUser => 'Block User';
 
   @override
-  String get blockUserConfirmation =>
-      'Are you sure you want to block this user? They will not be able to see your profile or interact with you.';
+  String get blockUserConfirmation => 'Are you sure you want to block this user? They will not be able to see your profile or interact with you.';
 
   @override
   String get userBlocked => 'User blocked successfully.';
@@ -462,9 +458,303 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get blockUserExplanation =>
-      'They won\'t be able to find your profile, posts, or story on Prism. Prism won\'t let them know you blocked them.';
+  String get blockUserExplanation => 'They won\'t be able to find your profile, posts, or story on Prism. Prism won\'t let them know you blocked them.';
 
   @override
   String get unblockUser => 'Unblock';
+
+  @override
+  String get blockedAccounts => 'Blocked Accounts';
+
+  @override
+  String get noBlockedAccounts => 'You have no blocked accounts.';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get requests => 'Requests';
+
+  @override
+  String get requestHandledSuccessfully => 'Request handled successfully.';
+
+  @override
+  String get noNewRequests => 'No new requests.';
+
+  @override
+  String get requestedToFollowYou => 'Requested to follow you';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get archived => 'Archived';
+
+  @override
+  String get likers => 'Likers';
+
+  @override
+  String get personalAccountNotFound => 'Personal account not found.';
+
+  @override
+  String get archivedStatuses => 'Archived Statuses';
+
+  @override
+  String statusesSelectedForHighlight(int count) {
+    return '$count statuses selected for highlight.';
+  }
+
+  @override
+  String get noArchivedStatuses => 'No archived statuses.';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get thisYear => 'This Year';
+
+  @override
+  String get older => 'Older';
+
+  @override
+  String get noStatusesMatchFilter => 'No statuses match your filter.';
+
+  @override
+  String get noText => 'No Text';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get highlightCreatedSuccessfully => 'Highlight created successfully';
+
+  @override
+  String get failedToCreateHighlight => 'Failed to create highlight';
+
+  @override
+  String get pickFromGallery => 'Pick from Gallery';
+
+  @override
+  String get takeAPhoto => 'Take a Photo';
+
+  @override
+  String get addCoverImage => 'Add Cover Image';
+
+  @override
+  String get highlightTitle => 'Highlight Title';
+
+  @override
+  String get pleaseEnterAtitle => 'Please enter a title';
+
+  @override
+  String get createHighlight => 'Create Highlight';
+
+  @override
+  String get editHighlight => 'Edit Highlight';
+
+  @override
+  String get updateCover => 'Update Cover';
+
+  @override
+  String get pleaseSelectAnImage => 'Please select an image.';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get selectAnImageFromGallery => 'Select an image from gallery';
+
+  @override
+  String get addToHighlight => 'Add to Highlight';
+
+  @override
+  String get noHighlightsFound => 'No highlights found.';
+
+  @override
+  String failedToAddToHighlight(String message) {
+    return 'Failed to add to highlight: $message';
+  }
+
+  @override
+  String get statusAddedToHighlight => 'Status added to highlight successfully!';
+
+  @override
+  String get createGroup => 'Create Group';
+
+  @override
+  String get groupCreatedSuccessfully => 'Group created successfully';
+
+  @override
+  String get groupName => 'Group Name';
+
+  @override
+  String get pleaseEnterGroupName => 'Please enter a group name';
+
+  @override
+  String get public => 'Public';
+
+  @override
+  String get private => 'Private';
+
+  @override
+  String get accountSettings => 'Account Settings';
+
+  @override
+  String get myFollowedGroups => 'My Followed Groups';
+
+  @override
+  String get myOwnedGroups => 'My Owned Groups';
+
+  @override
+  String get myGroups => 'My Groups';
+
+  @override
+  String get updateGroup => 'Update Group';
+
+  @override
+  String get groupBio => 'Group Bio';
+
+  @override
+  String get privateGroup => 'Private Group';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Group Updated Successfully';
+
+  @override
+  String get deleteGroupTitle => 'Delete Group';
+
+  @override
+  String get deleteGroupConfirmation => 'Are you sure you want to delete this group? This action cannot be undone.';
+
+  @override
+  String deleteGroupName(String groupName) {
+    return 'Delete $groupName';
+  }
+
+  @override
+  String get leave => 'Leave';
+
+  @override
+  String get join => 'Join';
+
+  @override
+  String membersCount(int count) {
+    return '$count Members';
+  }
+
+  @override
+  String get noGroupsHere => 'You don\'t have any groups here.';
+
+  @override
+  String get group => 'Group';
+
+  @override
+  String get owner => 'Owner';
+
+  @override
+  String get noPostsYet => 'No posts yet.';
+
+  @override
+  String get groupPageTitle => 'Group';
+
+  @override
+  String get deleteGroup => 'Delete Group';
+
+  @override
+  String groupBioText(String bio) {
+    return '$bio group';
+  }
+
+  @override
+  String get noGroupsFound => 'You don\'t have any groups here.';
+
+  @override
+  String get explore => 'Explore';
+
+  @override
+  String get groups => 'Groups';
+
+  @override
+  String get exploreGroups => 'Explore Groups';
+
+  @override
+  String groupMembers(String groupName) {
+    return '$groupName Members';
+  }
+
+  @override
+  String get requestJoin => 'Request Join';
+
+  @override
+  String get groupRequests => 'Group Requests';
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String requestedToJoinGroup(String groupName) {
+    return 'requested to join $groupName';
+  }
+
+  @override
+  String get hiddenGroupPrivacy => 'This group is private. Join to view content.';
+
+  @override
+  String get promoteToAdmin => 'Promote to Admin';
+
+  @override
+  String get demoteToMember => 'Demote to Member';
+
+  @override
+  String get noLiveStreamsAvailable => 'No live streams available at the moment.';
+
+  @override
+  String get startLiveStream => 'Start Live Stream';
+
+  @override
+  String get readyToStream => 'Ready to start your live stream?';
+
+  @override
+  String get selectCamera => 'Select Camera';
+
+  @override
+  String get initializing => 'Initializing...';
+
+  @override
+  String get enableAudio => 'Enable Audio';
+
+  @override
+  String get readyToGo => 'Ready to Go!';
+
+  @override
+  String get sendMessageHint => 'Send a message';
+
+  @override
+  String get myStream => 'My Stream';
+
+  @override
+  String viewers(int count) {
+    return '$count viewers';
+  }
+
+  @override
+  String get hideChat => 'Hide Chat';
+
+  @override
+  String get showChat => 'Show Chat';
+
+  @override
+  String get stopStreaming => 'Stop Streaming';
 }

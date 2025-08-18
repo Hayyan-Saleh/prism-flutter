@@ -14,7 +14,7 @@ import 'package:prism/features/account/presentation/bloc/account/users_bloc/acco
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/highlight_widget.dart';
 import 'package:prism/features/account/presentation/widgets/personal_info_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class OtherAccountPage extends StatefulWidget {
   final int personalAccountId;
