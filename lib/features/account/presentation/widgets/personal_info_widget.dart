@@ -28,7 +28,9 @@ class _PersonalInfoWidgetState extends State<PersonalInfoWidget> {
           children: [
             Expanded(
               child: Text(
-                AppLocalizations.of(context)!.personalInfoTitle(widget.userName),
+                AppLocalizations.of(
+                  context,
+                )!.personalInfoTitle(widget.userName),
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleLarge,
               ),

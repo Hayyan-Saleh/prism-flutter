@@ -36,6 +36,13 @@ class AppRoutes {
   static String selectHighlight = "/select-highlight";
   static String updateHighlightCover = "/update-highlight-cover";
 
+  // ? sub acount   ! post
+  static String savedPostsPage = "/saved-posts-page";
+  static String createPostPage = "/create-post-page";
+
+  // ? sub acount   ! comment
+  static String commentsPage = "/comments-page";
+
   //! live-stream
   static String liveStream = "/live-stream";
   static String liveStreams = "/live-streams";

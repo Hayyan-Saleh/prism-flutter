@@ -91,3 +91,6 @@
 
 
  
+//? merge notes:
+//* 1- changed ndk version and min skd version in android\app\build.gradle.kts
+//* 2- 

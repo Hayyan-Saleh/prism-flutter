@@ -33,9 +33,11 @@ class _UnlimitedKeysTtfWidgetState extends State<UnlimitedKeysTtfWidget> {
         cursorColor: Theme.of(context).colorScheme.secondary,
         autocorrect: false,
         controller: widget.textEditingController,
-        validator: (val) => val == null || val.isEmpty
-            ? AppLocalizations.of(context)!.fieldRequired
-            : null,
+        validator:
+            (val) =>
+                val == null || val.isEmpty
+                    ? AppLocalizations.of(context)!.fieldRequired
+                    : null,
         style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
         decoration: InputDecoration(
           errorStyle: Theme.of(

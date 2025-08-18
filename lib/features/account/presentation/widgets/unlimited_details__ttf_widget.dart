@@ -34,7 +34,9 @@ class _UnlimitedDetailsTTFWidgetState extends State<UnlimitedDetailsTTFWidget> {
         controller: widget.textEditingController,
         validator:
             (val) =>
-                val == null || val.isEmpty ? AppLocalizations.of(context)!.fieldRequired : null,
+                val == null || val.isEmpty
+                    ? AppLocalizations.of(context)!.fieldRequired
+                    : null,
         style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
         decoration: InputDecoration(
           errorStyle: const TextStyle(color: Colors.red),

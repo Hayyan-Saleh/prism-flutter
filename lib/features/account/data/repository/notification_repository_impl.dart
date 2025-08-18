@@ -18,7 +18,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
 
   @override
   Future<Either<AppFailure, List<FollowRequestEntity>>>
-      getFollowRequests() async {
+  getFollowRequests() async {
     try {
       final tokenResult = await tokenService.getToken();
       return await tokenResult.fold((failure) => Left(failure), (token) async {

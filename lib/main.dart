@@ -2,11 +2,13 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prism/core/di/injection_container.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/features/account/domain/enitities/account/main/account_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
 import 'package:prism/features/account/domain/enitities/account/main/personal_account_entity.dart';
+import 'package:prism/features/account/domain/enitities/post/post_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/group_bloc/group_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
@@ -18,7 +20,9 @@ import 'package:prism/features/account/presentation/bloc/account/status_bloc/sta
 import 'package:prism/features/account/presentation/bloc/account/update_group_member_role_bloc/update_group_member_role_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/comment/comment_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/post/post_bloc/post_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/account_middle_point_page.dart';
 import 'package:prism/features/account/presentation/pages/account/account_settings_page.dart';
 import 'package:prism/features/account/presentation/pages/account/accounts_page.dart';
@@ -40,6 +44,9 @@ import 'package:prism/features/account/presentation/pages/account/archived_statu
 import 'package:prism/features/account/presentation/pages/account/select_highlight_page.dart';
 import 'package:prism/features/account/presentation/pages/account/update_highlight_cover_page.dart';
 import 'package:prism/features/account/presentation/pages/account/update_group_page.dart';
+import 'package:prism/features/account/presentation/pages/comment/comments_page.dart';
+import 'package:prism/features/account/presentation/pages/post/create_post_page.dart';
+import 'package:prism/features/account/presentation/pages/post/saved_posts_page.dart';
 import 'package:prism/features/live-stream/domain/entities/live_stream_entity.dart';
 import 'package:prism/features/live-stream/presentation/bloc/chat_bloc/chat_bloc.dart';
 import 'package:prism/features/live-stream/presentation/bloc/live_stream_bloc/live_stream_bloc.dart';
@@ -53,7 +60,6 @@ import 'package:camera/camera.dart';
 import 'package:prism/features/live-stream/presentation/pages/my_stream_page.dart';
 import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
 import 'package:prism/features/preferences/presentation/pages/walk_through_page.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/pages/settings_page.dart';
@@ -69,6 +75,9 @@ import 'package:prism/features/preferences/domain/entities/preferences_entity.da
 import 'package:prism/features/preferences/presentation/pages/preferences_middle_point_page.dart';
 import 'package:prism/home_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,8 +105,13 @@ main() async {
           create: (context) => sl<AccountNameBloc>(),
         ),
         BlocProvider<OAccountBloc>(create: (context) => sl<OAccountBloc>()),
-        BlocProvider<StatusBloc>(create: (context) => sl<StatusBloc>()),
         BlocProvider<HighlightBloc>(create: (context) => sl<HighlightBloc>()),
+        BlocProvider<StatusBloc>(create: (context) => sl<StatusBloc>()),
+        BlocProvider<NotificationBloc>(
+          create: (context) => sl<NotificationBloc>(),
+        ),
+        BlocProvider<PostBloc>(create: (context) => sl<PostBloc>()),
+        BlocProvider<CommentBloc>(create: (context) => sl<CommentBloc>()),
       ],
       child: const MyApp(),
     ),
@@ -134,6 +148,29 @@ class _MyAppState extends State<MyApp> {
 
   Map<String, WidgetBuilder> _getRoutes() {
     return {
+      AppRoutes.savedPostsPage: (context) => SavedPostsPage(),
+      AppRoutes.createPostPage: (context) => CreatePostPage(),
+
+      AppRoutes.commentsPage: (context) {
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final postId = args?['postId'] as int?;
+        final post = args?['post'] as PostEntity?;
+        final currentUserId = args?['currentUserId'] as int?;
+
+        return BlocProvider<CommentBloc>(
+          create:
+              (_) =>
+                  sl<CommentBloc>()
+                    ..add(LoadComments(pageNum: 1, postId: postId ?? 0)),
+          child: CommentsPage(
+            postId: postId ?? 0,
+            post: post,
+            currentUserId: currentUserId,
+          ),
+        );
+      },
+
       AppRoutes.prefMiddlePoint:
           (context) => PreferencesMiddlePointPage(
             onLocaleChanged: _changeLocale,
@@ -460,6 +497,7 @@ class _MyAppState extends State<MyApp> {
           _assignPreferences(state.preferences);
         }
         return MaterialApp(
+          navigatorObservers: [routeObserver],
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,

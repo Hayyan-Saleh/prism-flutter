@@ -64,4 +64,12 @@ class ApiEndpoints {
   static const String stream = '/stream';
   static const String startStream = '$stream/start';
   static String endStream(String streamKey) => '$stream/end/$streamKey';
+
+  //! Posts
+  static const String posts = '/posts';
+  static const String savedPosts = '/saved-posts';
+  static const String unsavedPosts = savedPosts;
+
+  //! Comments
+  static const String comments = '/comments';
 }

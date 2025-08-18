@@ -504,17 +504,19 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
                         state.highlights[state.highlights.length - 1 - index];
                     return GestureDetector(
                       onTap: () {
-                        final oAccountState = context.read<OAccountBloc>().state;
+                        final oAccountState =
+                            context.read<OAccountBloc>().state;
                         if (oAccountState is LoadedOAccountState) {
                           Navigator.of(context).pushNamed(
                             AppRoutes.showHighlights,
                             arguments: {
                               'initialHighlightIndex': index,
-                              'highlightIds': state.highlights
-                                  .map((h) => h.id)
-                                  .toList()
-                                  .reversed
-                                  .toList(),
+                              'highlightIds':
+                                  state.highlights
+                                      .map((h) => h.id)
+                                      .toList()
+                                      .reversed
+                                      .toList(),
                               'isMyHighlight': false,
                               'account': oAccountState.otherAccount,
                             },
