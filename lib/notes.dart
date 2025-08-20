@@ -75,6 +75,15 @@
 // 8- remove all logs from service files 
 // 9- localize hard coded strings 
 
+//! firebase 
+//* 1- change the way we request a notification fcm token in presentation layer to be as a single page with always mounted context
+//* 2- change the way we show an 'inside app' notification to be from the top instead of a dialog
+//* 3- update current routes keys and values to fetch correctly
+//* 4- add new routes 
+//* 5- create a usecase for fetching all notifications in notification section in account feature
+ 
+
+
  
 
 // TODOs (End Hayyan Section): ======================================================

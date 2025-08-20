@@ -58,4 +58,6 @@ abstract class AuthRepository {
     required String code,
     required String newEmail,
   });
+
+  Future<Either<AppFailure, Unit>> storeFcmToken(String token);
 }

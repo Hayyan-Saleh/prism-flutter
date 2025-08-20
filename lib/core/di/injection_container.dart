@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:prism/core/network/api_client.dart';
 import 'package:prism/core/network/live_stream_api_client.dart';
 import 'package:prism/core/util/sevices/api_endpoints.dart';
+import 'package:prism/core/util/sevices/notification_service.dart';
 import 'package:prism/core/util/sevices/token_service.dart';
 import 'package:prism/features/account/data/data-sources/account_remote_data_source.dart';
 import 'package:prism/features/account/data/data-sources/comment/comment_remote_data_source.dart';
@@ -93,6 +94,7 @@ import 'package:prism/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/register_user_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/request_change_email_code_usecase.dart';
 import 'package:prism/features/auth/domain/usecases/send_email_code_use_case.dart';
+import 'package:prism/features/auth/domain/usecases/store_fcm_token_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/store_token_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/verify_change_email_code_usecase.dart';
 import 'package:prism/features/auth/domain/usecases/verify_email_use_case.dart';
@@ -166,6 +168,8 @@ Future<void> init() async {
   sl.registerLazySingleton<FfmpegService>(() => FfmpegService());
 
   sl.registerLazySingleton<SocketIOService>(() => SocketIOService());
+
+  sl.registerLazySingleton<NotificationService>(() => NotificationService(), dispose: (service) => service.dispose());
   // ! preferences
 
   // Bloc
@@ -206,6 +210,7 @@ Future<void> init() async {
       verifyChangeEmailCode: sl(),
       verifyEmail: sl(),
       verifyResetCode: sl(),
+      storeFcmToken: sl(),
     ),
   );
 
@@ -227,6 +232,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => VerifyResetCodeUseCase(repository: sl()));
   sl.registerLazySingleton(() => LoadToken(sl()));
   sl.registerLazySingleton(() => DeleteToken(sl()));
+
+  sl.registerLazySingleton(() => StoreFcmTokenUseCase(sl()));
   sl.registerLazySingleton(() => StoreToken(sl()));
 
   // Repository

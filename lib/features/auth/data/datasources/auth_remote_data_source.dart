@@ -46,6 +46,8 @@ abstract class AuthRemoteDataSource {
   });
 
   Future<void> sendEmailCode(String email, bool isReset);
+
+  Future<void> storeFcmToken(String fcmToken, String authToken);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -233,5 +235,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'email': email,
       isReset ? 'reset_password' : 'verify_email': true,
     });
+  }
+
+  @override
+  Future<void> storeFcmToken(String fcmToken, String authToken) async {
+    await _post(
+      ApiEndpoints.assignFcm,
+      {'device_token': fcmToken},
+      headers: {'Authorization': 'Bearer $authToken'},
+    );
   }
 }

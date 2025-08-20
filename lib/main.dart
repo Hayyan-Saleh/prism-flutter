@@ -75,12 +75,15 @@ import 'package:prism/features/preferences/domain/entities/preferences_entity.da
 import 'package:prism/features/preferences/presentation/pages/preferences_middle_point_page.dart';
 import 'package:prism/home_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:prism/firebase_options.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await dotenv.load(fileName: ".env");
   await init();
   runApp(

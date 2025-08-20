@@ -18,6 +18,7 @@ import 'package:prism/features/account/presentation/widgets/post/posts_list_widg
 import 'package:prism/features/account/presentation/widgets/statuses_section_widget.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
 import 'package:prism/main.dart' show routeObserver;
+import 'package:prism/core/util/sevices/notification_service.dart';
 
 class FeedTab extends StatefulWidget {
   const FeedTab({super.key});
@@ -88,6 +89,10 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    sl<NotificationService>().handleNotifications(context);
+    sl<NotificationService>().tabStream.listen((index) {
+      _updatePage(index);
+    });
   }
 
   @override

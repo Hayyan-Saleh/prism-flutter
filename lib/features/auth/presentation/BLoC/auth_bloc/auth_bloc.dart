@@ -11,6 +11,7 @@ import 'package:prism/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/register_user_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/request_change_email_code_usecase.dart';
 import 'package:prism/features/auth/domain/usecases/send_email_code_use_case.dart';
+import 'package:prism/features/auth/domain/usecases/store_fcm_token_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/verify_change_email_code_usecase.dart';
 import 'package:prism/features/auth/domain/usecases/verify_email_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/verify_reset_code_usecase.dart';
@@ -30,6 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyChangeEmailCodeUseCase verifyChangeEmailCode;
   final VerifyResetCodeUseCase verifyResetCode;
   final SendEmailCodeUseCase sendEmailCode;
+  final StoreFcmTokenUseCase storeFcmToken;
 
   User? user;
   AuthBloc({
@@ -44,6 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.verifyChangeEmailCode,
     required this.sendEmailCode,
     required this.verifyResetCode,
+    required this.storeFcmToken,
   }) : super(AuthInitial()) {
     on<AuthEvent>((event, emit) async {
       if (event is DefineAuthCurrentStateEvent) {
@@ -160,6 +163,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         either.fold((failure) => emit(FailedAuthState(failure: failure)), (_) {
           emit(DoneAuthState());
         });
+      } else if (event is StoreFcmTokenEvent) {
+        final either = await storeFcmToken(event.token);
+        either.fold(
+          (failure) => emit(FailedAuthState(failure: failure)),
+          (_) => emit(DoneAddFCMAuthState()),
+        );
       }
     });
   }

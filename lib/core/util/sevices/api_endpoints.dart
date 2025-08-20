@@ -21,6 +21,7 @@ class ApiEndpoints {
       "$coreBaseUrl/user/request-change-email-code";
   static const String verifyChangeEmailCode =
       "$coreBaseUrl/user/verify-change-email-code";
+  static const String assignFcm = '$coreBaseUrl/assign-fcm';
 
   //! account
   static const String usersPrefix = "/users";
