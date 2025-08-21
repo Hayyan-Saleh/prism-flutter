@@ -275,6 +275,26 @@ class AuthRepositoryImpl implements AuthRepository {
     });
   }
 
+  @override
+  Future<Either<AppFailure, Unit>> storeFcmToken(String token) async {
+    final tokenResult = await localDataSource.loadToken();
+
+    return await tokenResult.fold((failure) async => Left(failure), (
+      authToken,
+    ) async {
+      if (authToken == null) {
+        return Left(CacheFailure("No token found"));
+      }
+
+      return await _handleErrors<Unit>(() async {
+        await remoteDataSource.storeFcmToken(token, authToken);
+        await localDataSource.storeFCM(token);
+
+        return unit;
+      });
+    });
+  }
+
   Future<Either<AppFailure, T>> _handleErrors<T>(
     Future<T> Function() action,
   ) async {
@@ -314,6 +334,7 @@ extension UserModelMapper on UserModel {
       email: email,
       authType: authType,
       isEmailVerified: isEmailVerified,
+      fcmToken: fcmToken,
     );
   }
 }

@@ -14,7 +14,7 @@ import 'package:prism/features/account/domain/enitities/account/simplified/simpl
 import 'package:prism/features/account/presentation/bloc/account/group_bloc/group_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class GroupPage extends StatefulWidget {
   final int groupId;

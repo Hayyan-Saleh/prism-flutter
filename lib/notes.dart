@@ -75,9 +75,46 @@
 // 8- remove all logs from service files 
 // 9- localize hard coded strings 
 
+//! firebase 
+// 1- change the way we request a notification fcm token in presentation layer to be as a single page with always mounted context
+// 2- change the way we show an 'inside app' notification to be from the top instead of a dialog
+// 3- update current routes keys and values to fetch correctly
+// 4- implement routing for:
+    // 1. the followed user is public (instant public follow)
+    // 2. the followed user is private (follow request sent) 
+    // 3. Like a post
+    // 4. like a comment
+    // 5. like a status
+    // 6. comment on post
+    // 7. comment on comment
+    // 8.Request to Join Group (Topic)
+// 5- implement fetching all notifications in notification section in account feature
+  
+
  
 
 // TODOs (End Hayyan Section): ======================================================
+
+// TODOS (Rafat Section): ======================================================
+
+//* 1. fix the card widget in the post_item_widget.dart to have the following attributes: 
+// - margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+// - shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+// - elevation: 2,
+// + color: Colors.transparent,
+// + shadowColor: Colors.transparent,
+
+//* 2. refine the seperator builder in posts_list_widget.dart to be as follows: 
+// separatorBuilder:
+//     (_, __) => Container(
+//       height: 4,
+//       color: Theme.of(
+//         context,
+//       ).colorScheme.onPrimary.withAlpha(20),
+//     ),
+
+// TODOs (End Rafat Section): ======================================================
+
 
 //? Adiveces for friends:
 
@@ -90,4 +127,3 @@
 // ! 4- for the post/comment like we can use the 'like bloc' and provide it in the required scope respectively after adding the required usecases
 
 
- 

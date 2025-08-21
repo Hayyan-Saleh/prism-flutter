@@ -16,6 +16,7 @@ abstract class UserLocalDataSource {
   Future<Either<AppFailure, String?>> loadToken();
   Future<Either<AppFailure, Unit>> deleteToken();
   Future<Either<AppFailure, Unit>> clearSession();
+  Future<Either<AppFailure, Unit>> storeFCM(String fcm);
 }
 
 class UserLocalDataSourceImpl implements UserLocalDataSource {
@@ -121,6 +122,27 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       return const Right(unit);
     } catch (e) {
       return Left(CacheFailure('Failed to delete token: $e'));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, Unit>> storeFCM(String fcm) async {
+    try {
+      final rjsonString = await secureStorage.read(key: USER_LOCAL_KEY);
+      if (rjsonString == null) return const Right(unit);
+      final Map<String, dynamic> map = jsonDecode(rjsonString);
+      final user = UserModel.fromJson(
+        map,
+        authType: map['authType'] as String,
+        isEmailVerified: map['is_email_verified'] as bool,
+        fcmToken: fcm,
+      );
+      final wjsonString = jsonEncode(user.toJson());
+      await secureStorage.write(key: USER_LOCAL_KEY, value: wjsonString);
+
+      return Right(unit);
+    } catch (e) {
+      return Left(CacheFailure('Failed to fetch user data: $e'));
     }
   }
 }

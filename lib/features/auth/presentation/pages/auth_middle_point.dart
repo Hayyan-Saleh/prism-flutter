@@ -15,13 +15,16 @@ class AuthMiddlePointPage extends StatelessWidget {
         if (state is LoggedoutAuthState) {
           Navigator.pushReplacementNamed(context, AppRoutes.signin);
         } else if (state is LoggedInAuthState) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            AppRoutes.accMiddlePoint,
-            ModalRoute.withName(AppRoutes.myApp),
-          );
+          state.user.fcmToken == null
+              ? Navigator.pushReplacementNamed(
+                context,
+                AppRoutes.requestNotification,
+              )
+              : _navigateToAccountMiddlePoint(context);
         } else if (state is NotVerifiedAuthState) {
           Navigator.pushReplacementNamed(context, AppRoutes.verification);
+        } else if (state is DoneAddFCMAuthState) {
+          _navigateToAccountMiddlePoint(context);
         } else if (state is FailedAuthState) {
           showCustomAboutDialog(
             context,
@@ -33,6 +36,15 @@ class AuthMiddlePointPage extends StatelessWidget {
         }
       },
       child: LoadingPage(),
+    );
+  }
+
+  void _navigateToAccountMiddlePoint(BuildContext context) {
+    if (!context.mounted) return;
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.accMiddlePoint,
+      ModalRoute.withName(AppRoutes.myApp),
     );
   }
 }

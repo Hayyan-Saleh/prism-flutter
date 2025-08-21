@@ -11,28 +11,37 @@ class AccountMiddlePointPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<PAccountBloc, PAccountState>(
-      listener: (context, state) {
-        if (state is LoggedoutAuthState) {
-          Navigator.pushReplacementNamed(context, AppRoutes.signin);
-        } else if (state is LoadedPAccountState) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            AppRoutes.home,
-            ModalRoute.withName(AppRoutes.myApp),
-          );
-        } else if (state is PAccountNotCreatedState) {
-          Navigator.pushReplacementNamed(context, AppRoutes.updateAccount);
-        } else if (state is FailedPAccountState) {
-          showCustomAboutDialog(
-            context,
-            "Error",
-            state.failure.message,
-            null,
-            true,
-          );
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<PAccountBloc, PAccountState>(
+          listener: (context, state) {
+            if (state is LoadedPAccountState) {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                AppRoutes.home,
+                ModalRoute.withName(AppRoutes.myApp),
+              );
+            } else if (state is PAccountNotCreatedState) {
+              Navigator.pushReplacementNamed(context, AppRoutes.updateAccount);
+            } else if (state is FailedPAccountState) {
+              showCustomAboutDialog(
+                context,
+                "Error",
+                state.failure.message,
+                null,
+                true,
+              );
+            }
+          },
+        ),
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is LoggedoutAuthState) {
+              Navigator.pushReplacementNamed(context, AppRoutes.signin);
+            }
+          },
+        ),
+      ],
       child: LoadingPage(),
     );
   }

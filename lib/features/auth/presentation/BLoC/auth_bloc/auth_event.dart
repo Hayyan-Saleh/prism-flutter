@@ -102,3 +102,5 @@ final class ResetPasswordAuthEvent extends AuthEvent {
   @override
   List<Object> get props => [email, code, newPassword];
 }
+
+final class StoreFcmTokenEvent extends AuthEvent {}

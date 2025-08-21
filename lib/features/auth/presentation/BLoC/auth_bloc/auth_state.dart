@@ -52,6 +52,8 @@ final class DoneResetPasswordAuthState extends AuthState {}
 
 final class DoneChangePasswordAuthState extends AuthState {}
 
+final class DoneAddFCMAuthState extends AuthState {}
+
 final class FailedAuthState extends AuthState {
   final AppFailure failure;
 

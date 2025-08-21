@@ -9,23 +9,44 @@ import 'package:prism/features/account/domain/enitities/account/main/personal_ac
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/post/post_bloc/post_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/personal_info_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 import 'package:prism/features/account/presentation/widgets/highlight_widget.dart';
+import 'package:prism/features/account/presentation/widgets/post/posts_list_widget.dart';
 
 class PersonalAccountPage extends StatefulWidget {
   const PersonalAccountPage({super.key});
 
   @override
-  State<PersonalAccountPage> createState() => _PersonalAccountPageState();
+  State<PersonalAccountPage> createState() => PersonalAccountPageState();
 }
 
-class _PersonalAccountPageState extends State<PersonalAccountPage> {
+class PersonalAccountPageState extends State<PersonalAccountPage> {
+  bool _isLoaded = false;
+
   @override
   void initState() {
-    context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
-    context.read<HighlightBloc>().add(GetHighlights());
     super.initState();
+    context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isLoaded) {
+      _loadPersonalPosts();
+      _isLoaded = true;
+    }
+  }
+
+  void _loadPersonalPosts({int pageNum = 1}) {
+    final pAccount = context.read<PAccountBloc>().pAccount;
+    if (pAccount != null) {
+      context.read<PostBloc>().add(
+        LoadPersonalPosts(userId: pAccount.id, pageNum: pageNum),
+      );
+    }
   }
 
   Widget _buildFollowersWidget(
@@ -122,7 +143,7 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
                           AppLocalizations.of(context)?.followers ??
                               'followers',
                         ),
-                        Text(''),
+                        const SizedBox(height: 16),
                       ],
                     ),
                     Column(
@@ -131,7 +152,7 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
                           AppLocalizations.of(context)?.following ??
                               'following',
                         ),
-                        Text(''),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ],
@@ -199,7 +220,6 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
             state is LoadedPAccountState
                 ? state.personalAccount
                 : context.read<PAccountBloc>().pAccount;
-
         if (account != null) {
           return SingleChildScrollView(
             child: Column(
@@ -350,8 +370,27 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
   }
 
   Widget _buildPostsSection() {
-    // TODO: RAFAT POSTS ADDED HERE as widget (if wanted to add a list view or single child scroll view then make no scroll physics)
-    return Text(AppLocalizations.of(context)!.postsSection);
+    return BlocListener<PostBloc, PostState>(
+      listener: (context, state) {
+        if (state is PostError) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.failure.message)));
+        }
+      },
+      child: BlocBuilder<PostBloc, PostState>(
+        builder: (context, state) {
+          if (state is PostLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is PersonalPostsLoadedSuccess) {
+            return PostsListWidget(posts: state.paginatedPosts.posts);
+          } else if (state is PostError) {
+            return Center(child: Text('Error: ${state.failure.message}'));
+          }
+          return const Center(child: Text('No posts available'));
+        },
+      ),
+    );
   }
 
   Widget _wrapWithRefreshIndicator({
@@ -363,6 +402,7 @@ class _PersonalAccountPageState extends State<PersonalAccountPage> {
       onRefresh: () async {
         context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
         context.read<HighlightBloc>().add(GetHighlights());
+        _loadPersonalPosts();
       },
       child: child,
     );

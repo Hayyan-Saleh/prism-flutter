@@ -38,10 +38,10 @@ class ProfilePicture extends StatelessWidget {
           Container(
             width:
                 effectiveRadius * 2 +
-                (hasStatus || !isMember || live ? (radius ?? 100) / 4.5 : 0),
+                (hasStatus || !isMember || live ? (radius ?? 100) / 6 : 0),
             height:
                 effectiveRadius * 2 +
-                (hasStatus || !isMember || live ? (radius ?? 100) / 4.5 : 0),
+                (hasStatus || !isMember || live ? (radius ?? 100) / 6 : 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
@@ -56,18 +56,28 @@ class ProfilePicture extends StatelessWidget {
           child: Container(
             width: effectiveRadius * 2,
             height: effectiveRadius * 2,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary.withAlpha(100),
-              shape: BoxShape.circle,
+            color: Theme.of(context).primaryColor,
+            child: Container(
+              margin: EdgeInsets.all(hasStatus ? 4 : 0),
+              child: ClipOval(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onPrimary.withAlpha(100),
+                    shape: BoxShape.circle,
+                  ),
+                  child:
+                      exists
+                          ? CustomCachedNetworkImage(
+                            imageUrl: link!,
+                            isRounded: true,
+                            radius: effectiveRadius - 4,
+                          )
+                          : Icon(Icons.person, size: effectiveRadius - 4),
+                ),
+              ),
             ),
-            child:
-                exists
-                    ? CustomCachedNetworkImage(
-                      imageUrl: link!,
-                      isRounded: true,
-                      radius: effectiveRadius,
-                    )
-                    : Icon(Icons.person, size: effectiveRadius),
           ),
         ),
       ],

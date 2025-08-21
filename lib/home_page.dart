@@ -1,36 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:prism/core/di/injection_container.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/sevices/assets.dart';
+import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/post/post_bloc/post_bloc.dart';
 import 'package:prism/features/account/presentation/pages/account/explore_groups_page.dart';
 import 'package:prism/features/account/presentation/pages/account/personal_account_page.dart';
 import 'package:prism/features/account/presentation/pages/notification/notifications_page.dart';
+import 'package:prism/features/account/presentation/widgets/post/posts_list_widget.dart';
 import 'package:prism/features/account/presentation/widgets/statuses_section_widget.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
+import 'package:prism/main.dart' show routeObserver;
+import 'package:prism/core/util/sevices/notification_service.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class FeedTab extends StatefulWidget {
+  const FeedTab({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<FeedTab> createState() => _FeedTabState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  int _selectedIndex = 0;
+class _FeedTabState extends State<FeedTab> with RouteAware {
+  ModalRoute? _modalRoute;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _modalRoute = ModalRoute.of(context);
+    routeObserver.subscribe(this, _modalRoute!);
+    context.read<PostBloc>().add(const LoadFeedPosts(pageNum: 1));
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    context.read<PostBloc>().add(const LoadFeedPosts(pageNum: 1));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        StatusesSectionWidget(),
+        Expanded(
+          child: BlocBuilder<PostBloc, PostState>(
+            builder: (context, state) {
+              if (state is PostLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is FeedPostsLoadedSuccess) {
+                return PostsListWidget(posts: state.paginatedPosts.posts);
+              } else if (state is PostError) {
+                return Center(child: Text('Error: ${state.failure.message}'));
+              }
+              return const Center(child: Text('No posts available'));
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// الصفحة الرئيسية
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+  @override
+  State<HomePage> createState() => HomePageState();
+}
+
+class HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  int selectedIndex = 0;
   final PageController _pageController = PageController();
-  late TabController _tabController;
+  late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    sl<NotificationService>().handleNotifications(context);
+    sl<NotificationService>().homeTabStream.listen((index) {
+      _updatePage(index);
+    });
   }
 
   @override
@@ -38,6 +100,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _pageController.dispose();
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _wrapWithListener(
+      Scaffold(
+        appBar: _buildAppBar(),
+        backgroundColor: Theme.of(context).primaryColor,
+        body: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [Expanded(child: _buildPageView()), _buildCustomNavBar()],
+        ),
+      ),
+    );
   }
 
   Widget _wrapWithListener(Widget child) {
@@ -87,7 +163,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   AppBar _buildAppBar() {
-    switch (_selectedIndex) {
+    switch (selectedIndex) {
       case 4:
         return _profileAppBar();
       default:
@@ -113,7 +189,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               style: Theme.of(context).textTheme.titleLarge,
             );
           }
-          return SizedBox();
+          return const SizedBox();
         },
       ),
       actions: [
@@ -147,7 +223,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(onPressed: () => Navigator.pushNamed(context, AppRoutes.createLiveStream), icon: Icon(Icons.camera_alt_outlined)),
+          IconButton(
+            onPressed:
+                () => Navigator.pushNamed(context, AppRoutes.createLiveStream),
+            icon: Icon(Icons.camera_alt_outlined),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -185,66 +265,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text(AppLocalizations.of(context)!.settings),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, AppRoutes.settings);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.co_present_rounded),
-              title: Text(AppLocalizations.of(context)!.accountSettings),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, AppRoutes.accountSettings);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.group),
-              title: Text(
-                AppLocalizations.of(context)?.myOwnedGroups ?? 'Owned Groups',
+        return Container(
+          height: 150,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: Text(AppLocalizations.of(context)!.settings),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.settings);
+                },
               ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.myFollowedGroups,
-                  arguments: {
-                    'trigger': (BuildContext context) {
-                      context.read<GroupsBloc>().add(GetOwnedGroupsEvent());
-                    },
-                    'title': AppLocalizations.of(context)?.myOwnedGroups,
-                  },
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.groups_2),
-              title: Text(
-                AppLocalizations.of(context)?.myFollowedGroups ??
-                    'Followed Groups',
+              ListTile(
+                leading: const Icon(Icons.co_present_rounded),
+                title: Text(AppLocalizations.of(context)!.accountSettings),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, AppRoutes.accountSettings);
+                },
               ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.myFollowedGroups,
-                  arguments: {
-                    'trigger': (BuildContext context) {
-                      context.read<GroupsBloc>().add(GetFollowedGroupsEvent());
-                    },
-                    'title': AppLocalizations.of(context)?.myFollowedGroups,
-                    'applyJoin': true,
-                  },
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -271,7 +315,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(5, (index) {
             if (index == 4 && hasPic) {
-              final addCircle = _selectedIndex == index;
+              final addCircle = selectedIndex == index;
               return GestureDetector(
                 child: ProfilePicture(
                   link: picUrl,
@@ -285,10 +329,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               icon: Icon(
                 icons[index],
                 color:
-                    _selectedIndex == index
+                    selectedIndex == index
                         ? Theme.of(context).colorScheme.secondary
                         : null,
-                size: _selectedIndex == index ? 40 : 32,
+                size: selectedIndex == index ? 40 : 32,
               ),
               onPressed: () => _updatePage(index),
             );
@@ -300,34 +344,84 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _updatePage(int index) {
     setState(() {
-      _selectedIndex = index;
+      selectedIndex = index;
       _pageController.animateToPage(
         index,
-        duration: Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 100),
         curve: Curves.easeInOut,
       );
     });
   }
 
   Widget _getPersonalAccountPage() {
-    return PersonalAccountPage();
+    return const PersonalAccountPage();
   }
 
   Widget _getNotificationsPage() {
     return NotificationsPage();
   }
 
-  Widget _buildPostsSection() {
-    // TODO: RAFAT POSTS ADDED HERE as widget (if wanted to add a list view or single child scroll view then make no scroll physics and wrap parent widget 'column' with a 'single child scroll view')
-    return Center(child: Text(AppLocalizations.of(context)!.postsSection));
-  }
-
-  Widget _buildHomePage() {
-    return Column(
-      children: [
-        StatusesSectionWidget(),
-        Expanded(child: _buildPostsSection()),
-      ],
+  Widget _buildAddPage() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AppButton(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.post_add, size: 28),
+                const SizedBox(width: 12),
+                Text(
+                  AppLocalizations.of(context)!.createPost,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.createPostPage);
+            },
+          ),
+          const SizedBox(height: 24),
+          AppButton(
+            bgColor: Theme.of(context).colorScheme.secondary,
+            fgColor: Theme.of(context).colorScheme.onSecondary,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.video_library, size: 28),
+                const SizedBox(width: 12),
+                const Text(
+                  "Create Reels",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            onPressed: () {},
+          ),
+          const SizedBox(height: 24),
+          AppButton(
+            bgColor: Colors.redAccent,
+            fgColor: Colors.white,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.videocam, size: 28),
+                const SizedBox(width: 12),
+                const Text(
+                  "Start Live",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            onPressed: () {},
+          ),
+        ],
+      ),
     );
   }
 
@@ -361,32 +455,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _buildPageView() {
     return PageView(
       controller: _pageController,
+      onPageChanged: (index) {
+        setState(() => selectedIndex = index);
+      },
       children: [
-        _buildHomePage(),
+        const FeedTab(),
         _buildSearchPage(),
-        Center(
-          child: Text(
-            AppLocalizations.of(context)!.add,
-            style: TextStyle(fontSize: 32),
-          ),
-        ),
+        _buildAddPage(),
         _getNotificationsPage(),
         _getPersonalAccountPage(),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _wrapWithListener(
-      Scaffold(
-        appBar: _buildAppBar(),
-        backgroundColor: Theme.of(context).primaryColor,
-        body: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [Expanded(child: _buildPageView()), _buildCustomNavBar()],
-        ),
-      ),
     );
   }
 }

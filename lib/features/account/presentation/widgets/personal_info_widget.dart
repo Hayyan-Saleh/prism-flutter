@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class PersonalInfoWidget extends StatefulWidget {
   final String userName;
@@ -28,7 +28,9 @@ class _PersonalInfoWidgetState extends State<PersonalInfoWidget> {
           children: [
             Expanded(
               child: Text(
-                AppLocalizations.of(context)!.personalInfoTitle(widget.userName),
+                AppLocalizations.of(
+                  context,
+                )!.personalInfoTitle(widget.userName),
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleLarge,
               ),

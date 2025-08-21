@@ -7,7 +7,7 @@ import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/custom_text_form_field.dart';
 import 'package:prism/features/account/domain/enitities/account/main/group_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/group_bloc/group_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class UpdateGroupPage extends StatefulWidget {
   final GroupEntity? group;

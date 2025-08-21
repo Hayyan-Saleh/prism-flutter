@@ -8,6 +8,16 @@ class PaginatedPostsEntity extends Equatable {
 
   const PaginatedPostsEntity({required this.posts, required this.pagination});
 
+  PaginatedPostsEntity copyWith({
+    List<PostEntity>? posts,
+    PaginationEntity? pagination,
+  }) {
+    return PaginatedPostsEntity(
+      posts: posts ?? this.posts,
+      pagination: pagination ?? this.pagination,
+    );
+  }
+
   @override
   List<Object> get props => [posts, pagination];
 }

@@ -55,7 +55,7 @@ class SimplifiedAccountModel extends SimplifiedAccountEntity {
     return SimplifiedAccountModel(
       id: json['id'] as int,
       fullName: json['name'] as String,
-      accountName: json['username'] as String,
+      accountName: json['username'] as String? ?? '',
       avatar: json['avatar'] as String? ?? '',
       followingStatus: status,
       isPrivate:

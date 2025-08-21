@@ -3,14 +3,21 @@ import 'package:get_it/get_it.dart';
 import 'package:prism/core/network/api_client.dart';
 import 'package:prism/core/network/live_stream_api_client.dart';
 import 'package:prism/core/util/sevices/api_endpoints.dart';
+import 'package:prism/core/util/sevices/notification_service.dart';
 import 'package:prism/core/util/sevices/token_service.dart';
 import 'package:prism/features/account/data/data-sources/account_remote_data_source.dart';
+import 'package:prism/features/account/data/data-sources/comment/comment_remote_data_source.dart';
 import 'package:prism/features/account/data/data-sources/notification_remote_data_source.dart';
 import 'package:prism/features/account/data/data-sources/personal_account_local_data_source.dart';
+import 'package:prism/features/account/data/data-sources/post/post_remote_data_source.dart';
 import 'package:prism/features/account/data/repository/account_repository_impl.dart';
+import 'package:prism/features/account/data/repository/comment_repository_impl.dart';
 import 'package:prism/features/account/data/repository/notification_repository_impl.dart';
+import 'package:prism/features/account/data/repository/post_repository_impl.dart';
 import 'package:prism/features/account/domain/repository/account_repository.dart';
+import 'package:prism/features/account/domain/repository/comment_repository.dart';
 import 'package:prism/features/account/domain/repository/notification_repository.dart';
+import 'package:prism/features/account/domain/repository/post_repository.dart';
 import 'package:prism/features/account/domain/use-cases/account/add_to_highlight_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/block_user_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/check_account_name_usecase.dart';
@@ -45,10 +52,17 @@ import 'package:prism/features/account/domain/use-cases/account/update_group_mem
 import 'package:prism/features/account/domain/use-cases/account/update_group_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/update_highlight_cover_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/account/update_personal_account_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/comment/add_comment_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/comment/delete_comment_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/comment/get_comments_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/comment/toggle_like_comment_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/comment/update_comment_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/notification/get_follow_requests_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/notification/get_join_requests_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/notification/respond_to_follow_request_usecase.dart';
 import 'package:prism/features/account/domain/use-cases/notification/respond_to_join_request_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/post/get_feed_posts_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/post/unsave_post_usecase.dart';
 import 'package:prism/features/account/presentation/bloc/account/follow_bloc/follow_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/groups_bloc/groups_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/join_group_bloc/join_group_bloc.dart';
@@ -59,6 +73,7 @@ import 'package:prism/features/account/presentation/bloc/account/status_bloc/sta
 import 'package:prism/features/account/presentation/bloc/account/update_group_member_role_bloc/update_group_member_role_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
+import 'package:prism/features/account/presentation/bloc/comment/comment_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/like_bloc/like_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/account/group_bloc/group_bloc.dart';
@@ -79,6 +94,7 @@ import 'package:prism/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/register_user_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/request_change_email_code_usecase.dart';
 import 'package:prism/features/auth/domain/usecases/send_email_code_use_case.dart';
+import 'package:prism/features/auth/domain/usecases/store_fcm_token_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/store_token_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/verify_change_email_code_usecase.dart';
 import 'package:prism/features/auth/domain/usecases/verify_email_use_case.dart';
@@ -114,6 +130,14 @@ import 'package:prism/features/preferences/domain/use_cases/load_preferences_use
 import 'package:prism/features/preferences/domain/use_cases/store_preferences_use_case.dart';
 import 'package:prism/features/preferences/presentation/bloc/preferences_bloc/preferences_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:prism/features/account/domain/use-cases/post/add_post_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/post/delete_post_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/post/get_personal_posts_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/post/get_saved_posts_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/post/toggle_like_post_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/post/save_post_usecase.dart';
+import 'package:prism/features/account/domain/use-cases/post/update_post_usecase.dart';
+import 'package:prism/features/account/presentation/bloc/post/post_bloc/post_bloc.dart';
 import 'package:http/http.dart' as http;
 
 final sl = GetIt.instance;
@@ -144,6 +168,8 @@ Future<void> init() async {
   sl.registerLazySingleton<FfmpegService>(() => FfmpegService());
 
   sl.registerLazySingleton<SocketIOService>(() => SocketIOService());
+
+  sl.registerLazySingleton<NotificationService>(() => NotificationService(), dispose: (service) => service.dispose());
   // ! preferences
 
   // Bloc
@@ -184,6 +210,7 @@ Future<void> init() async {
       verifyChangeEmailCode: sl(),
       verifyEmail: sl(),
       verifyResetCode: sl(),
+      storeFcmToken: sl(),
     ),
   );
 
@@ -205,6 +232,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => VerifyResetCodeUseCase(repository: sl()));
   sl.registerLazySingleton(() => LoadToken(sl()));
   sl.registerLazySingleton(() => DeleteToken(sl()));
+
+  sl.registerLazySingleton(() => StoreFcmTokenUseCase(sl()));
   sl.registerLazySingleton(() => StoreToken(sl()));
 
   // Repository
@@ -324,7 +353,6 @@ Future<void> init() async {
     () => UpdatePersonalAccountUsecase(repository: sl()),
   );
   sl.registerLazySingleton(() => DeleteAccountUsecase(repository: sl()));
-
   sl.registerLazySingleton(() => CreateStatusUseCase(repository: sl()));
   sl.registerLazySingleton(() => DeleteStatusUsecase(repository: sl()));
   sl.registerLazySingleton(() => GetStatusesUsecase(repository: sl()));
@@ -392,6 +420,74 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<NotificationRemoteDataSource>(
     () => NotificationRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // ! Post
+
+  // Data sources
+  sl.registerLazySingleton<PostRemoteDataSource>(
+    () => PostRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<PostRepository>(
+    () => PostRepositoryImpl(remoteDataSource: sl(), tokenService: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetFeedPostsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetPersonalPostsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetSavedPostsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => AddPostUseCase(repository: sl()));
+  sl.registerLazySingleton(() => UpdatePostUseCase(repository: sl()));
+  sl.registerLazySingleton(() => SavePostUseCase(repository: sl()));
+  sl.registerLazySingleton(() => UnsavePostUseCase(repository: sl()));
+
+  sl.registerLazySingleton(() => DeletePostUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ToggleLikePostUseCase(repository: sl()));
+
+  // BloC
+  sl.registerFactory(
+    () => PostBloc(
+      getFeedPostsUseCase: sl(),
+      getPersonalPostsUseCase: sl(),
+      getSavedPostsUseCase: sl(),
+      addPostUseCase: sl(),
+      updatePostUseCase: sl(),
+      toggleLikePostUseCase: sl(),
+      savePostUseCase: sl(),
+      unsavePostUseCase: sl(),
+      deletePostUseCase: sl(),
+    ),
+  );
+  // ! Comments
+
+  // Data sources
+  sl.registerLazySingleton<CommentRemoteDataSource>(
+    () => CommentRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<CommentRepository>(
+    () => CommentRepositoryImpl(remoteDataSource: sl(), tokenService: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetCommentsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => AddCommentUseCase(repository: sl()));
+  sl.registerLazySingleton(() => UpdateCommentUseCase(repository: sl()));
+  sl.registerLazySingleton(() => DeleteCommentUseCase(repository: sl()));
+  sl.registerLazySingleton(() => ToggleLikeCommentUseCase(repository: sl()));
+
+  // BLoC
+  sl.registerFactory(
+    () => CommentBloc(
+      getComments: sl(),
+      addComment: sl(),
+      updateCommentUC: sl(),
+      deleteCommentUC: sl(),
+      toggleLikeCommentUC: sl(),
+    ),
   );
 
   // ! live-stream

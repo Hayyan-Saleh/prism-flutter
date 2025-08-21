@@ -26,7 +26,6 @@ class ApiClient {
         },
         body: jsonEncode(body),
       );
-
       return handleResponse(response);
     } on SocketException {
       throw NetworkException('No internet connection');
@@ -74,7 +73,6 @@ class ApiClient {
           ...?headers,
         },
       );
-
       return handleResponse(response);
     } on SocketException {
       throw NetworkException('No internet connection');

@@ -14,7 +14,7 @@ import 'package:prism/features/account/presentation/bloc/account/users_bloc/acco
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/highlight_widget.dart';
 import 'package:prism/features/account/presentation/widgets/personal_info_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class OtherAccountPage extends StatefulWidget {
   final int personalAccountId;
@@ -257,7 +257,7 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
         children: [
           Text(
             AppLocalizations.of(context)!.followers,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
 
           Text(
@@ -296,7 +296,7 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
         children: [
           Text(
             AppLocalizations.of(context)!.following,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           Text(
             account.followingCount.toString(),
@@ -439,7 +439,7 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
                   spacing: 8,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildFollowersWidget(otherAccount, context),
                         _buildFollowingWidget(otherAccount, context),
@@ -504,17 +504,19 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
                         state.highlights[state.highlights.length - 1 - index];
                     return GestureDetector(
                       onTap: () {
-                        final oAccountState = context.read<OAccountBloc>().state;
+                        final oAccountState =
+                            context.read<OAccountBloc>().state;
                         if (oAccountState is LoadedOAccountState) {
                           Navigator.of(context).pushNamed(
                             AppRoutes.showHighlights,
                             arguments: {
                               'initialHighlightIndex': index,
-                              'highlightIds': state.highlights
-                                  .map((h) => h.id)
-                                  .toList()
-                                  .reversed
-                                  .toList(),
+                              'highlightIds':
+                                  state.highlights
+                                      .map((h) => h.id)
+                                      .toList()
+                                      .reversed
+                                      .toList(),
                               'isMyHighlight': false,
                               'account': oAccountState.otherAccount,
                             },

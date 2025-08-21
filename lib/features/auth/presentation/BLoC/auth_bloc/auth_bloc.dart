@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
 import 'package:prism/core/errors/failures/auth_failure.dart';
+import 'package:prism/core/util/sevices/notification_service.dart';
 import 'package:prism/features/auth/domain/entities/user_entity.dart';
 import 'package:prism/features/auth/domain/usecases/change_password_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/google_sign_in_use_case.dart';
@@ -11,6 +13,7 @@ import 'package:prism/features/auth/domain/usecases/logout_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/register_user_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/request_change_email_code_usecase.dart';
 import 'package:prism/features/auth/domain/usecases/send_email_code_use_case.dart';
+import 'package:prism/features/auth/domain/usecases/store_fcm_token_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/verify_change_email_code_usecase.dart';
 import 'package:prism/features/auth/domain/usecases/verify_email_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/verify_reset_code_usecase.dart';
@@ -30,6 +33,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyChangeEmailCodeUseCase verifyChangeEmailCode;
   final VerifyResetCodeUseCase verifyResetCode;
   final SendEmailCodeUseCase sendEmailCode;
+  final StoreFcmTokenUseCase storeFcmToken;
 
   User? user;
   AuthBloc({
@@ -44,6 +48,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.verifyChangeEmailCode,
     required this.sendEmailCode,
     required this.verifyResetCode,
+    required this.storeFcmToken,
   }) : super(AuthInitial()) {
     on<AuthEvent>((event, emit) async {
       if (event is DefineAuthCurrentStateEvent) {
@@ -160,6 +165,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         either.fold((failure) => emit(FailedAuthState(failure: failure)), (_) {
           emit(DoneAuthState());
         });
+      } else if (event is StoreFcmTokenEvent) {
+        emit(LoadingAuthState());
+        final notificationService = sl<NotificationService>();
+        final fcmToken = await notificationService.getFCMToken();
+        if (fcmToken != null) {
+          final either = await storeFcmToken(fcmToken);
+          either.fold(
+            (failure) => emit(FailedAuthState(failure: failure)),
+            (_) => emit(DoneAddFCMAuthState()),
+          );
+        }
       }
     });
   }

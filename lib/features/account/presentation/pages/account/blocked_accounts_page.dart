@@ -6,7 +6,7 @@ import 'package:prism/features/account/presentation/bloc/account/personal_accoun
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/blocked_account_list_tile.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class BlockedAccountsPage extends StatefulWidget {
   const BlockedAccountsPage({super.key});

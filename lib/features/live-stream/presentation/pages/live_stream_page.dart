@@ -13,7 +13,7 @@ import 'package:prism/features/live-stream/presentation/bloc/chat_bloc/chat_even
 import 'package:prism/features/live-stream/presentation/bloc/chat_bloc/chat_state.dart';
 import 'package:prism/features/live-stream/presentation/widgets/chat_message_widget.dart';
 import 'package:prism/features/live-stream/presentation/widgets/live_stream_app_bar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class LiveStreamPage extends StatefulWidget {
   final LiveStreamEntity stream;

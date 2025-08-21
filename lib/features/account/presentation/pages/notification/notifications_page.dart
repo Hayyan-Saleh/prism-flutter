@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 import 'package:prism/core/di/injection_container.dart';
+import 'package:prism/features/account/domain/enitities/notification/follow_request_entity.dart';
+import 'package:prism/features/account/domain/enitities/notification/join_request_entity.dart';
 import 'package:prism/features/account/presentation/bloc/notification/notification_bloc/notification_bloc.dart';
 import 'package:prism/features/account/presentation/widgets/follow_request_list_tile.dart';
 import 'package:prism/features/account/presentation/widgets/join_request_list_tile.dart';
 
-class NotificationsPage extends StatelessWidget {
+class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
 
   @override
+  State<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  @override
   Widget build(BuildContext context) {
+    return BlocProvider<NotificationBloc>(
+      create: (context) => sl<NotificationBloc>()..add(GetAllNotificationsEvent()),
+      child: _buildContent(),
+    );
+  }
+
+  Widget _buildContent() {
     final local = AppLocalizations.of(context)!;
     return DefaultTabController(
       length: 3,
@@ -30,20 +44,9 @@ class NotificationsPage extends StatelessWidget {
           Expanded(
             child: TabBarView(
               children: [
-                Center(child: Text(local.all)),
-                BlocProvider<NotificationBloc>(
-                  create:
-                      (context) =>
-                          sl<NotificationBloc>()..add(GetFollowRequestsEvent()),
-                  child: _buildFollowRequestsView(),
-                ),
-
-                BlocProvider<NotificationBloc>(
-                  create:
-                      (context) =>
-                          sl<NotificationBloc>()..add(GetJoinRequestsEvent()),
-                  child: _buildGroupRequestsView(),
-                ),
+                _buildAllNotificationsView(),
+                _buildFollowRequestsView(),
+                _buildGroupRequestsView(),
               ],
             ),
           ),
@@ -52,23 +55,49 @@ class NotificationsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFollowRequestsView() {
-    return BlocConsumer<NotificationBloc, NotificationState>(
-      listener: (context, state) {
+  Widget _buildAllNotificationsView() {
+    return BlocBuilder<NotificationBloc, NotificationState>(
+      builder: (context, state) {
         final local = AppLocalizations.of(context)!;
-        if (state is NotificationError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
-        } else if (state is FollowRequestResponseSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(local.requestHandledSuccessfully),
-              backgroundColor: Colors.green,
+        if (state is NotificationLoaded) {
+          final allNotifications = [
+            ...state.followRequests,
+            ...state.joinRequests
+          ];
+          if (allNotifications.isEmpty) {
+            return Center(child: Text(local.noNewRequests));
+          }
+          // Ideally, sort by date if available
+          return RefreshIndicator(
+            onRefresh: () async {
+              context.read<NotificationBloc>().add(GetAllNotificationsEvent());
+            },
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: allNotifications.length,
+              itemBuilder: (context, index) {
+                final item = allNotifications[index];
+                if (item is FollowRequestEntity) {
+                  return FollowRequestListTile(followRequest: item);
+                }
+                if (item is JoinRequestEntity) {
+                  return JoinRequestListTile(joinRequest: item);
+                }
+                return const SizedBox.shrink();
+              },
             ),
           );
         }
+        if (state is NotificationError) {
+          return Center(child: Text('${local.error}: ${state.message}'));
+        }
+        return const Center(child: CircularProgressIndicator());
       },
+    );
+  }
+
+  Widget _buildFollowRequestsView() {
+    return BlocBuilder<NotificationBloc, NotificationState>(
       builder: (context, state) {
         final local = AppLocalizations.of(context)!;
         if (state is NotificationLoaded) {
@@ -98,25 +127,10 @@ class NotificationsPage extends StatelessWidget {
   }
 
   Widget _buildGroupRequestsView() {
-    return BlocConsumer<NotificationBloc, NotificationState>(
-      listener: (context, state) {
-        final local = AppLocalizations.of(context)!;
-        if (state is NotificationError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
-        } else if (state is JoinRequestResponseSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(local.requestHandledSuccessfully),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      },
+    return BlocBuilder<NotificationBloc, NotificationState>(
       builder: (context, state) {
         final local = AppLocalizations.of(context)!;
-        if (state is JoinRequestsLoaded) {
+        if (state is NotificationLoaded) {
           if (state.joinRequests.isEmpty) {
             return Center(child: Text(local.noNewRequests));
           }

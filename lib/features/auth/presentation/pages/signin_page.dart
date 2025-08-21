@@ -7,11 +7,10 @@ import 'package:prism/core/util/sevices/assets.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/app_text_button.dart';
 import 'package:prism/core/util/widgets/custom_text_form_field.dart';
-import 'package:prism/features/account/presentation/bloc/account/personal_account_bloc/personal_account_bloc.dart';
 import 'package:prism/core/util/validators/email_validator.dart';
 import 'package:prism/core/util/validators/password_validator.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -220,11 +219,9 @@ class _SignInPageState extends State<SignInPage> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is LoggedInAuthState) {
-          context.read<PAccountBloc>().add(LoadRemotePAccountEvent());
-          Navigator.pushNamedAndRemoveUntil(
+          Navigator.pushReplacementNamed(
             context,
-            AppRoutes.accMiddlePoint,
-            ModalRoute.withName(AppRoutes.myApp),
+            AppRoutes.requestNotification,
           );
         } else if (state is FailedAuthState) {
           showCustomAboutDialog(

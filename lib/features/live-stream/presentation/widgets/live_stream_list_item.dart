@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/live-stream/domain/entities/live_stream_entity.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class LiveStreamListItem extends StatelessWidget {
   final LiveStreamEntity stream;

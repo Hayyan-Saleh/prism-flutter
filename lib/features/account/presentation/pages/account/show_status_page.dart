@@ -13,7 +13,7 @@ import 'package:prism/core/util/widgets/profile_picture.dart';
 import 'package:prism/features/account/domain/enitities/account/main/follow_status_enum.dart';
 import 'package:prism/features/account/domain/enitities/account/status/status_entity.dart';
 import 'package:prism/features/account/presentation/bloc/account/status_bloc/status_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 import 'package:prism/features/account/presentation/bloc/account/users_bloc/accounts_bloc.dart';
 import 'package:prism/features/account/presentation/bloc/like_bloc/like_bloc.dart';
 

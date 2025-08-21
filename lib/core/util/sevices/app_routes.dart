@@ -1,49 +1,57 @@
 class AppRoutes {
   //! preferences
-  static String prefMiddlePoint = "/preferences-middle-point";
-  static String walkthrough = "/walkthrough";
+  static const String prefMiddlePoint = "/preferences-middle-point";
+  static const String walkthrough = "/walkthrough";
   //! auth
-  static String authMiddlePoint = "/auth-middle-point";
-  static String signin = "/signin";
-  static String signup = "/signup";
-  static String verification = "/verification";
-  static String reset = "/reset-password";
-  static String changeEmail = "/change-email";
-  static String changePassword = "/change-password";
+  static const String authMiddlePoint = "/auth-middle-point";
+  static const String signin = "/signin";
+  static const String signup = "/signup";
+  static const String verification = "/verification";
+  static const String reset = "/reset-password";
+  static const String changeEmail = "/change-email";
+  static const String changePassword = "/change-password";
   //! account
-  static String accMiddlePoint = "/account-middle-point";
-  static String updateAccount = "/update-account";
-  static String home = "/home";
-  static String accounts = "/accounts";
-  static String otherAccPage = "/other-account-page";
-  static String blocAccPage = "/block-account-page";
-  static String deleteAccount = "/delete-account";
-  static String blockedAccounts = "/blocked-accounts";
-  static String createGroup = "/create-group";
-  static String groupPage = "/group-page";
-  static String myFollowedGroups = "/my-groups";
-  static String updateGroup = "/update-group-page";
-  static String deleteGroup = "/delete-group";
-  static String groupJoinRequests = "/group-join-requests";
+  static const String accMiddlePoint = "/account-middle-point";
+  static const String updateAccount = "/update-account";
+  static const String home = "/home";
+  static const String accounts = "/accounts";
+  static const String otherAccPage = "/other-account-page";
+  static const String blocAccPage = "/block-account-page";
+  static const String deleteAccount = "/delete-account";
+  static const String blockedAccounts = "/blocked-accounts";
+  static const String createGroup = "/create-group";
+  static const String groupPage = "/group-page";
+  static const String myFollowedGroups = "/my-groups";
+  static const String updateGroup = "/update-group-page";
+  static const String deleteGroup = "/delete-group";
+  static const String groupJoinRequests = "/group-join-requests";
 
   // ? sub acount   ! status
-  static String addStatusPage = "/add-status-page";
-  static String showStatusPage = "/show-status-page";
-  static String followingStatusesPage = "/following-statuses-page";
-  static String archivedStatuses = "/archived-statuses";
+  static const String addStatusPage = "/add-status-page";
+  static const String showStatusPage = "/show-status-page";
+  static const String followingStatusesPage = "/following-statuses-page";
+  static const String archivedStatuses = "/archived-statuses";
   // ? sub acount   ! higlight
-  static String showHighlights = "/show-highlights";
-  static String selectHighlight = "/select-highlight";
-  static String updateHighlightCover = "/update-highlight-cover";
+  static const String showHighlights = "/show-highlights";
+  static const String selectHighlight = "/select-highlight";
+  static const String updateHighlightCover = "/update-highlight-cover";
+
+  // ? sub acount   ! post
+  static const String savedPostsPage = "/saved-posts-page";
+  static const String createPostPage = "/create-post-page";
+
+  // ? sub acount   ! comment
+  static const String commentsPage = "/comments-page";
 
   //! live-stream
-  static String liveStream = "/live-stream";
-  static String liveStreams = "/live-streams";
-  static String createLiveStream = "/create-live-stream";
-  static String myLiveStream = "/my-live-stream";
+  static const String liveStream = "/live-stream";
+  static const String liveStreams = "/live-streams";
+  static const String createLiveStream = "/create-live-stream";
+  static const String myLiveStream = "/my-live-stream";
 
   //! core
-  static String myApp = "/my-app";
-  static String settings = "/settings";
-  static String accountSettings = "/account-settings";
+  static const String myApp = "/my-app";
+  static const String settings = "/settings";
+  static const String accountSettings = "/account-settings";
+  static const String requestNotification = "/request-notification";
 }

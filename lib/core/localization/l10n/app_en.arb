@@ -1,3 +1,4 @@
+
 {
     "@@locale": "en",
     "welcomeToPrism": "welcome to prism",
@@ -129,6 +130,10 @@
     "editProfile": "Edit Profile",
     "search": "Search",
     "add": "Add",
+    "createPost":"Create Post",
+    "editPost":"Edit Post",
+    "savedPosts":"Saved Posts",
+    "noSavedPostsFound":"No saved posts found",
     "video": "Video",
     "deleteAccount": "Delete Account",
     "deleteAccountConfirmation": "Are you sure you want to delete your account? This action is irreversible.",
@@ -296,5 +301,12 @@
   },
   "hideChat": "Hide Chat",
   "showChat": "Show Chat",
-  "stopStreaming": "Stop Streaming"
+  "stopStreaming": "Stop Streaming",
+  "enableNotificationsTitle": "Enable Notifications?",
+  "enableNotificationsBody": "Would you like to enable notifications to stay updated?",
+  "later": "Later",
+  "enable": "Enable",
+  "accountSection": "Account",
+  "groupsSection": "Groups",
+  "contentSection": "Content"
 }

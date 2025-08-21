@@ -6,7 +6,7 @@ import 'package:prism/core/util/functions/functions.dart';
 import 'package:prism/core/util/widgets/app_button.dart';
 import 'package:prism/core/util/widgets/custom_cached_network_image.dart';
 import 'package:prism/features/account/presentation/bloc/account/highlight_bloc/highlight_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:prism/core/localization/l10n/app_localizations.dart';
 
 class UpdateHighlightCoverPage extends StatefulWidget {
   final int highlightId;

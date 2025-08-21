@@ -23,13 +23,12 @@ class SimplifiedAccountEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        fullName,
-        accountName,
-        avatar,
-        followingStatus,
-        isPrivate,
-        role,
-      ];
+    id,
+    fullName,
+    accountName,
+    avatar,
+    followingStatus,
+    isPrivate,
+    role,
+  ];
 }
-
