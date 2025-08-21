@@ -1510,6 +1510,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop Streaming'**
   String get stopStreaming;
+
+  /// No description provided for @enableNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Notifications?'**
+  String get enableNotificationsTitle;
+
+  /// No description provided for @enableNotificationsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to enable notifications to stay updated?'**
+  String get enableNotificationsBody;
+
+  /// No description provided for @later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
+
+  /// No description provided for @enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
+
+  /// No description provided for @accountSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountSection;
+
+  /// No description provided for @groupsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get groupsSection;
+
+  /// No description provided for @contentSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get contentSection;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

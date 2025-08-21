@@ -105,9 +105,8 @@ class _PostItemWidgetState extends State<PostItemWidget> {
     final isOwner = widget.post.user.id == widget.currentUserId;
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
+      color: Colors.transparent,
+      shadowColor: Colors.transparent,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         child: Column(

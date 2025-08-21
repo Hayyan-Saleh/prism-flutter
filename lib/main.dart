@@ -64,6 +64,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:prism/core/util/sevices/app_routes.dart';
 import 'package:prism/core/util/pages/settings_page.dart';
 import 'package:prism/features/auth/presentation/BLoC/auth_bloc/auth_bloc.dart';
+import 'package:prism/core/util/pages/request_notification_token_page.dart';
 import 'package:prism/features/auth/presentation/pages/auth_middle_point.dart';
 import 'package:prism/features/auth/presentation/pages/change_email_page.dart';
 import 'package:prism/features/auth/presentation/pages/change_password_page.dart';
@@ -185,6 +186,8 @@ class _MyAppState extends State<MyApp> {
             onThemeChanged: _changeThemeMode,
           ),
       AppRoutes.authMiddlePoint: (context) => AuthMiddlePointPage(),
+      AppRoutes.requestNotification:
+          (context) => const RequestNotificationTokenPage(),
       AppRoutes.signin: (context) => SignInPage(),
       AppRoutes.signup: (context) => SignUpPage(),
       AppRoutes.verification: (context) => VerificationPage(),

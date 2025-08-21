@@ -257,7 +257,7 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
         children: [
           Text(
             AppLocalizations.of(context)!.followers,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
 
           Text(
@@ -296,7 +296,7 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
         children: [
           Text(
             AppLocalizations.of(context)!.following,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           Text(
             account.followingCount.toString(),
@@ -439,7 +439,7 @@ class _OtherAccountPageState extends State<OtherAccountPage> {
                   spacing: 8,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildFollowersWidget(otherAccount, context),
                         _buildFollowingWidget(otherAccount, context),

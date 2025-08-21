@@ -22,21 +22,51 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     required this.getJoinRequestsUseCase,
     required this.respondToJoinRequestUseCase,
   }) : super(NotificationInitial()) {
+    on<GetAllNotificationsEvent>(_onGetAllNotifications);
     on<GetFollowRequestsEvent>(_onGetFollowRequests);
     on<RespondToFollowRequestEvent>(_onRespondToFollowRequest);
     on<GetJoinRequestsEvent>(_onGetJoinRequests);
     on<RespondToJoinRequestEvent>(_onRespondToJoinRequest);
   }
 
+  Future<void> _onGetAllNotifications(
+    GetAllNotificationsEvent event,
+    Emitter<NotificationState> emit,
+  ) async {
+    emit(NotificationLoading());
+    final followResult = await getFollowRequestsUseCase();
+    final joinResult = await getJoinRequestsUseCase();
+
+    followResult.fold(
+      (failure) => emit(NotificationError(message: failure.message)),
+      (followRequests) {
+        joinResult.fold(
+          (failure) => emit(NotificationError(message: failure.message)),
+          (joinRequests) {
+            emit(NotificationLoaded(
+              followRequests: followRequests,
+              joinRequests: joinRequests,
+            ));
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _onGetFollowRequests(
     GetFollowRequestsEvent event,
     Emitter<NotificationState> emit,
   ) async {
-    emit(NotificationLoading());
     final result = await getFollowRequestsUseCase();
     result.fold(
       (failure) => emit(NotificationError(message: failure.message)),
-      (requests) => emit(NotificationLoaded(followRequests: requests)),
+      (requests) {
+        if (state is NotificationLoaded) {
+          emit((state as NotificationLoaded).copyWith(followRequests: requests));
+        } else {
+          emit(NotificationLoaded(followRequests: requests));
+        }
+      },
     );
   }
 
@@ -44,7 +74,6 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     RespondToFollowRequestEvent event,
     Emitter<NotificationState> emit,
   ) async {
-    emit(NotificationLoading());
     final result = await respondToFollowRequestUseCase(
       RespondToFollowRequestParams(
         requestId: event.requestId,
@@ -55,7 +84,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       (failure) => emit(NotificationError(message: failure.message)),
       (_) {
         emit(FollowRequestResponseSuccess());
-        add(GetFollowRequestsEvent());
+        add(GetAllNotificationsEvent());
       },
     );
   }
@@ -64,11 +93,16 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     GetJoinRequestsEvent event,
     Emitter<NotificationState> emit,
   ) async {
-    emit(NotificationLoading());
     final result = await getJoinRequestsUseCase();
     result.fold(
       (failure) => emit(NotificationError(message: failure.message)),
-      (requests) => emit(JoinRequestsLoaded(joinRequests: requests)),
+      (requests) {
+        if (state is NotificationLoaded) {
+          emit((state as NotificationLoaded).copyWith(joinRequests: requests));
+        } else {
+          emit(NotificationLoaded(joinRequests: requests));
+        }
+      },
     );
   }
 
@@ -76,7 +110,6 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     RespondToJoinRequestEvent event,
     Emitter<NotificationState> emit,
   ) async {
-    emit(NotificationLoading());
     final result = await respondToJoinRequestUseCase(
       RespondToJoinRequestParams(
         groupId: event.groupId,
@@ -89,7 +122,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       (failure) => emit(NotificationError(message: failure.message)),
       (_) {
         emit(JoinRequestResponseSuccess());
-        add(GetJoinRequestsEvent());
+        add(GetAllNotificationsEvent());
       },
     );
   }

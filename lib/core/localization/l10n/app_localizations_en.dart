@@ -757,4 +757,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stopStreaming => 'Stop Streaming';
+
+  @override
+  String get enableNotificationsTitle => 'Enable Notifications?';
+
+  @override
+  String get enableNotificationsBody => 'Would you like to enable notifications to stay updated?';
+
+  @override
+  String get later => 'Later';
+
+  @override
+  String get enable => 'Enable';
+
+  @override
+  String get accountSection => 'Account';
+
+  @override
+  String get groupsSection => 'Groups';
+
+  @override
+  String get contentSection => 'Content';
 }

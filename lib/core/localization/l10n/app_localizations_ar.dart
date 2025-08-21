@@ -757,4 +757,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get stopStreaming => 'إيقاف البث';
+
+  @override
+  String get enableNotificationsTitle => 'تفعيل الإشعارات؟';
+
+  @override
+  String get enableNotificationsBody => 'هل ترغب في تفعيل الإشعارات لتبقى على اطلاع؟';
+
+  @override
+  String get later => 'لاحقًا';
+
+  @override
+  String get enable => 'تفعيل';
+
+  @override
+  String get accountSection => 'الحساب';
+
+  @override
+  String get groupsSection => 'المجموعات';
+
+  @override
+  String get contentSection => 'المحتوى';
 }

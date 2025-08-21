@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:prism/core/di/injection_container.dart';
 import 'package:prism/core/errors/failures/app_failure.dart';
 import 'package:prism/core/errors/failures/auth_failure.dart';
+import 'package:prism/core/util/sevices/notification_service.dart';
 import 'package:prism/features/auth/domain/entities/user_entity.dart';
 import 'package:prism/features/auth/domain/usecases/change_password_use_case.dart';
 import 'package:prism/features/auth/domain/usecases/google_sign_in_use_case.dart';
@@ -164,11 +166,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(DoneAuthState());
         });
       } else if (event is StoreFcmTokenEvent) {
-        final either = await storeFcmToken(event.token);
-        either.fold(
-          (failure) => emit(FailedAuthState(failure: failure)),
-          (_) => emit(DoneAddFCMAuthState()),
-        );
+        emit(LoadingAuthState());
+        final notificationService = sl<NotificationService>();
+        final fcmToken = await notificationService.getFCMToken();
+        if (fcmToken != null) {
+          final either = await storeFcmToken(fcmToken);
+          either.fold(
+            (failure) => emit(FailedAuthState(failure: failure)),
+            (_) => emit(DoneAddFCMAuthState()),
+          );
+        }
       }
     });
   }

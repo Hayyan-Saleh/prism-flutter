@@ -52,16 +52,21 @@ class _PostsListWidgetState extends State<PostsListWidget> {
           : const SizedBox.shrink();
 
   Widget _buildError(String message) => Center(
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.red),
-        ),
-      );
+    child: Text(
+      message,
+      textAlign: TextAlign.center,
+      style: const TextStyle(color: Colors.red),
+    ),
+  );
 
   Widget _buildEmpty(String message) => Center(child: Text(message));
 
-  void _maybeLoadMorePosts(BuildContext context, PostState postState, dynamic paginatedPosts, int currentUserId) {
+  void _maybeLoadMorePosts(
+    BuildContext context,
+    PostState postState,
+    dynamic paginatedPosts,
+    int currentUserId,
+  ) {
     if (!isLoading && paginatedPosts != null) {
       // استخدم addPostFrameCallback لتأجيل setState بعد انتهاء البناء الحالي
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -71,19 +76,12 @@ class _PostsListWidgetState extends State<PostsListWidget> {
         final nextPage = paginatedPosts.pagination.currentPage + 1;
         if (postState is PersonalPostsLoadedSuccess) {
           context.read<PostBloc>().add(
-            LoadPersonalPosts(
-                userId: currentUserId,
-                pageNum: nextPage,
-            ),
+            LoadPersonalPosts(userId: currentUserId, pageNum: nextPage),
           );
         } else if (postState is FeedPostsLoadedSuccess) {
-          context.read<PostBloc>().add(
-            LoadFeedPosts(pageNum: nextPage),
-          );
+          context.read<PostBloc>().add(LoadFeedPosts(pageNum: nextPage));
         } else if (postState is SavedPostsLoadedSuccess) {
-          context.read<PostBloc>().add(
-            LoadSavedPosts(pageNum: nextPage),
-          );
+          context.read<PostBloc>().add(LoadSavedPosts(pageNum: nextPage));
         }
       });
     }
@@ -108,16 +106,19 @@ class _PostsListWidgetState extends State<PostsListWidget> {
               if (postState is PersonalPostsLoadedSuccess ||
                   postState is FeedPostsLoadedSuccess ||
                   postState is SavedPostsLoadedSuccess) {
-                paginatedPosts = postState is PersonalPostsLoadedSuccess
-                    ? postState.paginatedPosts
-                    : postState is FeedPostsLoadedSuccess
+                paginatedPosts =
+                    postState is PersonalPostsLoadedSuccess
+                        ? postState.paginatedPosts
+                        : postState is FeedPostsLoadedSuccess
                         ? postState.paginatedPosts
                         : postState is SavedPostsLoadedSuccess
-                            ? postState.paginatedPosts
-                            : null;
+                        ? postState.paginatedPosts
+                        : null;
 
                 if (paginatedPosts != null) {
-                  canLoadMore = paginatedPosts.pagination.currentPage < paginatedPosts.pagination.lastPage;
+                  canLoadMore =
+                      paginatedPosts.pagination.currentPage <
+                      paginatedPosts.pagination.lastPage;
                 }
               }
 
@@ -140,10 +141,21 @@ class _PostsListWidgetState extends State<PostsListWidget> {
                 controller: _scrollController,
                 shrinkWrap: true,
                 itemCount: posts.length + (canLoadMore ? 1 : 0),
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder:
+                    (_, __) => Container(
+                      height: 4,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onPrimary.withAlpha(20),
+                    ),
                 itemBuilder: (context, index) {
                   if (index == posts.length && canLoadMore) {
-                    _maybeLoadMorePosts(context, postState, paginatedPosts, currentUserId);
+                    _maybeLoadMorePosts(
+                      context,
+                      postState,
+                      paginatedPosts,
+                      currentUserId,
+                    );
                     return _buildLoading();
                   }
 

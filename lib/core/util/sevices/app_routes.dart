@@ -37,11 +37,11 @@ class AppRoutes {
   static const String updateHighlightCover = "/update-highlight-cover";
 
   // ? sub acount   ! post
-  static String savedPostsPage = "/saved-posts-page";
-  static String createPostPage = "/create-post-page";
+  static const String savedPostsPage = "/saved-posts-page";
+  static const String createPostPage = "/create-post-page";
 
   // ? sub acount   ! comment
-  static String commentsPage = "/comments-page";
+  static const String commentsPage = "/comments-page";
 
   //! live-stream
   static const String liveStream = "/live-stream";
@@ -53,4 +53,5 @@ class AppRoutes {
   static const String myApp = "/my-app";
   static const String settings = "/settings";
   static const String accountSettings = "/account-settings";
+  static const String requestNotification = "/request-notification";
 }

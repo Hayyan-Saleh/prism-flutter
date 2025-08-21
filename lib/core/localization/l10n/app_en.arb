@@ -1,3 +1,4 @@
+
 {
     "@@locale": "en",
     "welcomeToPrism": "welcome to prism",
@@ -300,5 +301,12 @@
   },
   "hideChat": "Hide Chat",
   "showChat": "Show Chat",
-  "stopStreaming": "Stop Streaming"
+  "stopStreaming": "Stop Streaming",
+  "enableNotificationsTitle": "Enable Notifications?",
+  "enableNotificationsBody": "Would you like to enable notifications to stay updated?",
+  "later": "Later",
+  "enable": "Enable",
+  "accountSection": "Account",
+  "groupsSection": "Groups",
+  "contentSection": "Content"
 }

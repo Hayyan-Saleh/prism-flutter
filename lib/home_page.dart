@@ -90,7 +90,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     sl<NotificationService>().handleNotifications(context);
-    sl<NotificationService>().tabStream.listen((index) {
+    sl<NotificationService>().homeTabStream.listen((index) {
       _updatePage(index);
     });
   }
@@ -266,7 +266,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 300,
+          height: 150,
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -285,65 +285,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, AppRoutes.accountSettings);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.group),
-                title: Text(
-                  AppLocalizations.of(context)?.myOwnedGroups ?? 'Owned Groups',
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(
-                    context,
-                    AppRoutes.myFollowedGroups,
-                    arguments: {
-                      'trigger': (BuildContext context) {
-                        context.read<GroupsBloc>().add(GetOwnedGroupsEvent());
-                      },
-                      'title': AppLocalizations.of(context)?.myOwnedGroups,
-                    },
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.groups_2),
-                title: Text(
-                  AppLocalizations.of(context)?.myFollowedGroups ??
-                      'Followed Groups',
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(
-                    context,
-                    AppRoutes.myFollowedGroups,
-                    arguments: {
-                      'trigger': (BuildContext context) {
-                        context.read<GroupsBloc>().add(
-                          GetFollowedGroupsEvent(),
-                        );
-                      },
-                      'title': AppLocalizations.of(context)?.myFollowedGroups,
-                      'applyJoin': true,
-                    },
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.bookmark),
-                title: Text(AppLocalizations.of(context)!.savedPosts),
-                onTap: () async {
-                  final wasOnProfileTab = selectedIndex == 4;
-                  final navigator = Navigator.of(context, rootNavigator: true);
-                  final pAccount = context.read<PAccountBloc>().pAccount;
-                  final postBloc = context.read<PostBloc>();
-                  Navigator.pop(context);
-                  await navigator.pushNamed(AppRoutes.savedPostsPage);
-                  if (wasOnProfileTab && pAccount != null) {
-                    postBloc.add(
-                      LoadPersonalPosts(userId: pAccount.id, pageNum: 1),
-                    );
-                  }
                 },
               ),
             ],

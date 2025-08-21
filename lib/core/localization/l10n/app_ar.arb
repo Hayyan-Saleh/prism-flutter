@@ -1,3 +1,4 @@
+
 {
     "@@locale": "ar",
     "welcomeToPrism": "مرحبًا بك في بريزم",
@@ -301,5 +302,12 @@
     },
     "hideChat": "إخفاء الدردشة",
     "showChat": "إظهار الدردشة",
-    "stopStreaming": "إيقاف البث"
+    "stopStreaming": "إيقاف البث",
+    "enableNotificationsTitle": "تفعيل الإشعارات؟",
+    "enableNotificationsBody": "هل ترغب في تفعيل الإشعارات لتبقى على اطلاع؟",
+    "later": "لاحقًا",
+    "enable": "تفعيل",
+  "accountSection": "الحساب",
+  "groupsSection": "المجموعات",
+  "contentSection": "المحتوى"
 }
